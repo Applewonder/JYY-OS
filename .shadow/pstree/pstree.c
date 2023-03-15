@@ -102,7 +102,7 @@ void build_tree(){
 
         char* tar_sub_dir = "/proc/";
 
-        char *tmp_name = (char *) malloc(strlen(tar_sub_dir) + strlen(dent->d_name));
+        char *tmp_name = (char *) malloc(strlen(tar_sub_dir) + strlen(dent->d_name) + 10);
         strcpy(tmp_name, tar_sub_dir);
         strcat(tmp_name, dent->d_name);
         int ppid = find_fpid_and_name(tmp_name, pid);
