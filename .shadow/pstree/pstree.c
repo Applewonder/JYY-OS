@@ -96,7 +96,9 @@ void build_tree(){
       if (S_ISDIR(st.st_mode) && is_num(dent->d_name)) {
         int pid = 0;
         sscanf(dent->d_name,"%d",&pid);
-        char* tar_sub_dir = strcat("/proc/", dent->d_name);
+
+        char* tar_sub_dir = "/proc/";
+        strcat(tar_sub_dir, dent->d_name);
         int ppid = find_fpid_and_name(tar_sub_dir);
         add_edge(ppid, pid);
       }
