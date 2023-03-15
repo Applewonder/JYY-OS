@@ -1,4 +1,4 @@
-export TOKEN := ???
+export TOKEN := Cxcg92cm
 
 # ----- DO NOT MODIFY -----
 
