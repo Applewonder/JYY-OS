@@ -124,7 +124,7 @@ void tree_print(bool if_print_line_number, int pid, int count) {
   }
   printf("\n");
   while (cur_neib != NULL) {
-    tree_print(if_print_line_number, cur_neib->pid, count++);
+    tree_print(if_print_line_number, cur_neib->pid, ++count);
     cur_neib = cur_neib->next;
   }
   return;
