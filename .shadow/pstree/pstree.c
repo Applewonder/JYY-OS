@@ -116,7 +116,7 @@ void build_tree(){
 void tree_print(bool if_print_line_number, int pid, int count) {
   for (int i = 0; i < count; i++)
   {
-    printf(" ");
+    printf("  ");
   }
   Neighbour cur_neib = fa_node[pid];
   printf("%s", name[pid]);
@@ -148,7 +148,7 @@ int main(int argc, char *argv[]) {
       return 0;
     }
     if (!strcmp(argv[1], "-n") || !strcmp(argv[1], "--numeric-sort")) {
-      
+
     } else if (!strcmp(argv[1], "-p") || !strcmp(argv[1], "--show-pids")) {
       is_p = true;
     } else {
