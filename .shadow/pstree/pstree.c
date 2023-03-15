@@ -28,11 +28,11 @@ bool is_num(char* name) {
   return true;
 }
 
-int find_fpid_and_name(char* path){
+int find_fpid_and_name(char* path, int pid){
   char buffer[30];
   int ppid;
   char* token;
-  char* cur_name;
+  char cur_name[30];
   FILE* fp = fopen(strcat(path, "/status"), "r");
   bool is_find_ppid = false;
   bool is_find_name = false;
@@ -40,17 +40,19 @@ int find_fpid_and_name(char* path){
       if (strncmp(buffer, "Name:", 5) == 0) {
           token = strtok(buffer, "\t");
           token = strtok(NULL, "\t");
-          sscanf(token,"%d",&ppid);
+          strcpy(cur_name, token);
+          cur_name[strlen(cur_name)-1] = 0;
           is_find_ppid = true;
       }
       if (strncmp(buffer, "PPid:", 5) == 0) {
           token = strtok(buffer, "\t");
           token = strtok(NULL, "\t");
-          strcpy(cur_name, token);
+          token[strlen(token)-1] = 0;
+          sscanf(token,"%d",&ppid);
           is_find_name = true;
       }
       if(is_find_name && is_find_ppid) {
-        strcpy(name[ppid], cur_name);
+        strcpy(name[pid], cur_name);
         break;
       }
   }
@@ -63,6 +65,7 @@ void add_edge(int ppid, int pid){
     Neighbour new_neib = malloc(sizeof(struct neighbour));
     new_neib->next = NULL;
     new_neib->pid = pid;
+    fa_node[ppid] = new_neib;
     return;
   }
   Neighbour cur_neib = fa_node[ppid];
@@ -98,8 +101,11 @@ void build_tree(){
         sscanf(dent->d_name,"%d",&pid);
 
         char* tar_sub_dir = "/proc/";
-        strcat(tar_sub_dir, dent->d_name);
-        int ppid = find_fpid_and_name(tar_sub_dir);
+
+        char *tmp_name = (char *) malloc(strlen(tar_sub_dir) + strlen(dent->d_name));
+        strcpy(tmp_name, tar_sub_dir);
+        strcat(tmp_name, dent->d_name);
+        int ppid = find_fpid_and_name(tmp_name, pid);
         add_edge(ppid, pid);
       }
   }
