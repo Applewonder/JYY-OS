@@ -42,11 +42,15 @@ int find_fpid_and_name(char* path, int pid){
           token = strtok(buffer, "\t");
           token = strtok(NULL, "\t");
           strcpy(cur_name, token);
+          char tail[30];
+          token = strtok(NULL, "\t");
+          strcpy(tail, token);
           cur_name[strlen(cur_name)-1] = 0;
           is_find_ppid = true;
           if (pid == 492) {
             printf("%s\n", token);
             printf("%s\n", cur_name);
+            printf("%s\n", tail);
             exit(0);
           }
       }
