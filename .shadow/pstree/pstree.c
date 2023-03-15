@@ -138,7 +138,6 @@ void thread_tree_print(bool if_print_line_number) {
 
 int main(int argc, char *argv[]) {
   bool is_p = false;
-  bool is_n = false;
   for (int i = 1; i < argc; i++) {
     assert(argv[i]);
     // if (i == 0){
@@ -149,7 +148,7 @@ int main(int argc, char *argv[]) {
       return 0;
     }
     if (!strcmp(argv[1], "-n") || !strcmp(argv[1], "--numeric-sort")) {
-      is_n = true;
+      
     } else if (!strcmp(argv[1], "-p") || !strcmp(argv[1], "--show-pids")) {
       is_p = true;
     } else {
