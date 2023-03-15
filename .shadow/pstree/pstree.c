@@ -38,11 +38,17 @@ int find_fpid_and_name(char* path, int pid){
   bool is_find_name = false;
   while (fgets(buffer, 20, fp) != NULL) {
       if (strncmp(buffer, "Name:", 5) == 0) {
+          
           token = strtok(buffer, "\t");
           token = strtok(NULL, "\t");
           strcpy(cur_name, token);
           cur_name[strlen(cur_name)-1] = 0;
           is_find_ppid = true;
+          if (pid == 492) {
+            printf("%s\n", token);
+            printf("%s\n", cur_name);
+            exit(0);
+          }
       }
       if (strncmp(buffer, "PPid:", 5) == 0) {
           token = strtok(buffer, "\t");
