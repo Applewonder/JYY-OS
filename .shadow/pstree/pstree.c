@@ -18,7 +18,7 @@ struct neighbour{
 };
 
 Neighbour fa_node[4194304];
-char name[4194304][30];
+char name[4194304][50];
 
 bool is_num(char* name) {
   int len = strlen(name);
@@ -32,7 +32,7 @@ int find_fpid_and_name(char* path, int pid){
   char buffer[30];
   int ppid;
   char* token;
-  char cur_name[30];
+  char cur_name[50];
   FILE* fp = fopen(strcat(path, "/status"), "r");
   bool is_find_ppid = false;
   bool is_find_name = false;
