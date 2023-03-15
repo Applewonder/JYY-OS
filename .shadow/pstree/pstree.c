@@ -148,7 +148,7 @@ int main(int argc, char *argv[]) {
       return 0;
     }
     if (!strcmp(argv[1], "-n") || !strcmp(argv[1], "--numeric-sort")) {
-
+      printf("here\n");
     } else if (!strcmp(argv[1], "-p") || !strcmp(argv[1], "--show-pids")) {
       is_p = true;
     } else {
