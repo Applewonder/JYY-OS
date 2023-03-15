@@ -130,11 +130,11 @@ void thread_tree_print(bool if_print_line_number) {
 int main(int argc, char *argv[]) {
   bool is_p = false;
   bool is_n = false;
-  for (int i = 0; i < argc; i++) {
+  for (int i = 1; i < argc; i++) {
     assert(argv[i]);
-    if (i == 0){
-      assert(!strcmp(argv[i], "./pstree"));
-    }
+    // if (i == 0){
+    //   assert(!strcmp(argv[i], "./pstree"));
+    // }
     if (!strcmp(argv[i], "-V") || !strcmp(argv[i], "--version")) {
       printf("pstree (PSmisc) APPLETREE SPECIAL VERSION\n");
       return 0;
