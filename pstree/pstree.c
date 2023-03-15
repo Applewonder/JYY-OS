@@ -144,7 +144,7 @@ int main(int argc, char *argv[]) {
     //   assert(!strcmp(argv[i], "./pstree"));
     // }
     if (!strcmp(argv[i], "-V") || !strcmp(argv[i], "--version")) {
-      perror("pstree (PSmisc) APPLETREE SPECIAL VERSION\n");
+      fprintf(stderr,"pstree (PSmisc) APPLETREE SPECIAL VERSION\n");
       return 0;
     }
     if (!strcmp(argv[i], "-n") || !strcmp(argv[i], "--numeric-sort")) {
