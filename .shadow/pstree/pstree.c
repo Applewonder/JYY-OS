@@ -29,7 +29,7 @@ bool is_num(char* name) {
 }
 
 int find_fpid_and_name(char* path, int pid){
-  char buffer[30];
+  char buffer[50];
   int ppid;
   char* token;
   char cur_name[50];
