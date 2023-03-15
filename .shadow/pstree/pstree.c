@@ -157,7 +157,7 @@ int main(int argc, char *argv[]) {
     }
   }
   // assert(0);
-  thread_tree_print(is_p || is_n);
+  thread_tree_print(is_p);
   assert(!argv[argc]);
   return 0;
 }
