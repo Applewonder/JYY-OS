@@ -18,7 +18,7 @@ struct neighbour{
 };
 
 Neighbour fa_node[4194304];
-char name[4194304][30];
+char name[4194304][25];
 
 bool is_num(char* name) {
   int len = strlen(name);
