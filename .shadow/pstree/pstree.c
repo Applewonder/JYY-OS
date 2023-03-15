@@ -147,9 +147,9 @@ int main(int argc, char *argv[]) {
       printf("pstree (PSmisc) APPLETREE SPECIAL VERSION\n");
       return 0;
     }
-    if (!strcmp(argv[1], "-n") || !strcmp(argv[1], "--numeric-sort")) {
+    if (!strcmp(argv[i], "-n") || !strcmp(argv[i], "--numeric-sort")) {
       printf("here\n");
-    } else if (!strcmp(argv[1], "-p") || !strcmp(argv[1], "--show-pids")) {
+    } else if (!strcmp(argv[i], "-p") || !strcmp(argv[i], "--show-pids")) {
       is_p = true;
     } else {
       return 0;
