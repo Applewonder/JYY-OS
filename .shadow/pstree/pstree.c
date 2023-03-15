@@ -29,14 +29,14 @@ bool is_num(char* name) {
 }
 
 int find_fpid_and_name(char* path, int pid){
-  char buffer[50];
+  char buffer[30];
   int ppid;
   char* token;
   char cur_name[50];
   FILE* fp = fopen(strcat(path, "/status"), "r");
   bool is_find_ppid = false;
   bool is_find_name = false;
-  while (fgets(buffer, 20, fp) != NULL) {
+  while (fgets(buffer, 30, fp) != NULL) {
       if (strncmp(buffer, "Name:", 5) == 0) {
           
           // token = strtok(buffer, "\t");
