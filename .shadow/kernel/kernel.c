@@ -64,8 +64,8 @@ void splash() {
   for (int x = 0; x * SIDE <= w; x ++) {
     for (int y = 0; y * SIDE <= h; y++) {
       char low = my_array[x*w + y];
-      char middle = my_array[x*w + y + 1];
-      char high = my_array[x*w + y + 2];
+      char middle = my_array[x*w + y + 1] << 4;
+      char high = my_array[x*w + y + 2] << 8;
       // if ((x & 1) ^ (y & 1)) {
         draw_tile(x * SIDE, y * SIDE, SIDE, SIDE, 0x000000|high|middle|low); // white
       // }
