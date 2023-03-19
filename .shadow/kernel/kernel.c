@@ -63,11 +63,11 @@ void splash() {
   
   for (int x = 0; x * SIDE <= w; x ++) {
     for (int y = 0; y * SIDE <= h; y++) {
-      char low = my_array[(x*w + y)*3] ;
+      char low = my_array[(x*w + y)*3] << 16;
       char middle = my_array[(x*w + y)*3 + 1] << 8;
-      char high = my_array[(x*w + y)*3 + 2] << 16 ;
+      char high = my_array[(x*w + y)*3 + 2]  ;
       // if ((x & 1) ^ (y & 1)) {
-        draw_tile(x * SIDE, y * SIDE, SIDE, SIDE, 0x000000|high|middle|low); // white
+        draw_tile(x * SIDE, y * SIDE, SIDE, SIDE, high|middle|low); // white
       // }
     }
   }
