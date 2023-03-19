@@ -25,6 +25,20 @@ void print_key() {
   }
 }
 
+void halt_if_escape() {
+  AM_INPUT_KEYBRD_T event = { .keycode = AM_KEY_NONE };
+  ioe_read(AM_INPUT_KEYBRD, &event);
+  if (event.keycode != AM_KEY_NONE && event.keydown) {
+    if (event.keycode == 0) {
+      halt(0);
+    } else {
+      puts("Key pressed: ");
+      puts(key_names[event.keycode]);
+      puts("\n");
+    }
+  }
+}
+
 static void draw_tile(int x, int y, int w, int h, uint32_t color) {
   uint32_t pixels[w * h]; // WARNING: large stack-allocated memory
   AM_GPU_FBDRAW_T event = {
@@ -64,7 +78,7 @@ int main(const char *args) {// NOLINTNEXTLINE(clang-diagnostic-main-arg-wrong)
 
   puts("Press any key to see its key code...\n");
   while (1) {
-    print_key();
+    halt_if_escape();
   }
   return 0;
 }
