@@ -35,7 +35,7 @@ void halt_if_escape() {
     } else {
       puts("Key pressed: ");
       puts(key_names[event.keycode]);
-      printf("%d", event.keycode);
+      // printf("%d", event.keycode);
       puts("\n");
     }
   }
