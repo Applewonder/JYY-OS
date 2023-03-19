@@ -2,7 +2,7 @@
 #include <amdev.h>
 #include <klib.h>
 #include <klib-macros.h>
-// #include <stdio.h>
+#include "image_data.h"
 
 #define SIDE 16
 
@@ -54,6 +54,8 @@ static void draw_tile(int x, int y, int w, int h, uint32_t color) {
 }
 
 void splash() {
+  w = 24;
+  h = 24;
   AM_GPU_CONFIG_T info = {0};
   ioe_read(AM_GPU_CONFIG, &info);
   w = info.width;
@@ -61,8 +63,11 @@ void splash() {
   
   for (int x = 0; x * SIDE <= w; x ++) {
     for (int y = 0; y * SIDE <= h; y++) {
+      char low = my_array[x*w + y];
+      char middle = my_array[x*w + y + 1];
+      char high = my_array[x*w + y + 2];
       // if ((x & 1) ^ (y & 1)) {
-        draw_tile(x * SIDE, y * SIDE, SIDE, SIDE, 0x000000|(x<<8)|y); // white
+        draw_tile(x * SIDE, y * SIDE, SIDE, SIDE, 0x000000|high|middle|low); // white
       // }
     }
   }
