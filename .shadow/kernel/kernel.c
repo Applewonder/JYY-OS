@@ -30,7 +30,7 @@ void halt_if_escape() {
   AM_INPUT_KEYBRD_T event = { .keycode = AM_KEY_NONE };
   ioe_read(AM_INPUT_KEYBRD, &event);
   if (event.keycode != AM_KEY_NONE && event.keydown) {
-    if (event.keycode == 1) {
+    if (event.keycode == 0x1) {
       halt(0);
     } else {
       puts("Key pressed: ");
