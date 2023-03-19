@@ -58,16 +58,16 @@ void splash() {
   h = 24;
   AM_GPU_CONFIG_T info = {0};
   ioe_read(AM_GPU_CONFIG, &info);
-  w = info.width;
-  h = info.height;
+  // w = info.width;
+  // h = info.height;
   
   for (int x = 0; x * SIDE <= w; x ++) {
     for (int y = 0; y * SIDE <= h; y++) {
-      // char low = my_array[(x*w + y)*3] << 16;
-      // char middle = my_array[(x*w + y)*3 + 1] << 8;
-      // char high = my_array[(x*w + y)*3 + 2]  ;
+      int low = my_array[(x * w + y) * 3] << 16;
+      int middle = my_array[(x * w + y) * 3 + 1] << 8;
+      int high = my_array[(x * w + y) * 3 + 2];
       // if ((x & 1) ^ (y & 1)) {
-        draw_tile(x * SIDE, y * SIDE, SIDE, SIDE, 0xa8a8a8); // white
+        draw_tile(x * SIDE, y * SIDE, SIDE, SIDE, low|middle|high); // white
       // }
     }
   }
