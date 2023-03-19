@@ -54,8 +54,8 @@ static void draw_tile(int x, int y, int w, int h, uint32_t color) {
 }
 
 void splash() {
-  w = 24;
-  h = 24;
+  w = 24 * 16;
+  h = 24 * 16;
   AM_GPU_CONFIG_T info = {0};
   ioe_read(AM_GPU_CONFIG, &info);
   // w = info.width;
