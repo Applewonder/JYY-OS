@@ -1,3 +1,4 @@
+export TOKEN := Cxcg92cm
 NAME := kernel
 SRCS := kernel.c
 export MODULE  := L0

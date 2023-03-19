@@ -89,7 +89,7 @@ void add_edge(int ppid, int pid){
 }
 
 void build_tree(){
-  int dir_count = 0;
+  int dir_count = 0; // NOLINTNEXTLINE(clang-diagnostic-unused-variable)
   struct dirent* dent;
   DIR* srcdir = opendir("/proc");
   while((dent = readdir(srcdir)) != NULL)

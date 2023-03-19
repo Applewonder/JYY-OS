@@ -2,6 +2,7 @@
 #include <amdev.h>
 #include <klib.h>
 #include <klib-macros.h>
+// #include <stdio.h>
 
 #define SIDE 16
 
@@ -25,6 +26,21 @@ void print_key() {
   }
 }
 
+void halt_if_escape() {
+  AM_INPUT_KEYBRD_T event = { .keycode = AM_KEY_NONE };
+  ioe_read(AM_INPUT_KEYBRD, &event);
+  if (event.keycode != AM_KEY_NONE && event.keydown) {
+    if (event.keycode == 1) {
+      halt(0);
+    } else {
+      puts("Key pressed: ");
+      puts(key_names[event.keycode]);
+      printf("%d", event.keycode);
+      puts("\n");
+    }
+  }
+}
+
 static void draw_tile(int x, int y, int w, int h, uint32_t color) {
   uint32_t pixels[w * h]; // WARNING: large stack-allocated memory
   AM_GPU_FBDRAW_T event = {
@@ -42,18 +58,18 @@ void splash() {
   ioe_read(AM_GPU_CONFIG, &info);
   w = info.width;
   h = info.height;
-
+  
   for (int x = 0; x * SIDE <= w; x ++) {
     for (int y = 0; y * SIDE <= h; y++) {
-      if ((x & 1) ^ (y & 1)) {
-        draw_tile(x * SIDE, y * SIDE, SIDE, SIDE, 0xffffff); // white
-      }
+      // if ((x & 1) ^ (y & 1)) {
+        draw_tile(x * SIDE, y * SIDE, SIDE, SIDE, 0xff0000|(x<<8)|y); // white
+      // }
     }
   }
 }
 
 // Operating system is a C program!
-int main(const char *args) {
+int main(const char *args) {// NOLINTNEXTLINE(clang-diagnostic-main-arg-wrong)
   ioe_init();
 
   puts("mainargs = \"");
@@ -64,7 +80,7 @@ int main(const char *args) {
 
   puts("Press any key to see its key code...\n");
   while (1) {
-    print_key();
+    halt_if_escape();
   }
   return 0;
 }
