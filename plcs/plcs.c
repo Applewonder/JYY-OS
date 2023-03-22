@@ -34,6 +34,7 @@ void Tworker(int id) {
   result = dp[N - 1][M - 1];
 }
 
+
 int main(int argc, char *argv[]) {
   // No need to change
   assert(scanf("%s%s", A, B) == 2);
