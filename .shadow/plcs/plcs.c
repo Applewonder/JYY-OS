@@ -85,7 +85,7 @@ int main(int argc, char *argv[]) {
     }
     int start_row = diagonal_start_row;
     int start_col = diagonal_start_col;
-    for (int i = 0; i < T; i++) {
+    for (int i = 1; i <= T; i++) {
         int end_row = start_row + block_size - 1;
         if (end_row > diagonal_end_row) {
             end_row = diagonal_end_row;
