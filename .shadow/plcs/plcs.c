@@ -200,6 +200,6 @@ int main(int argc, char *argv[]) {
     create(Tworker_cache_para);
   }
   join();  // Wait for all workers
-  result = dp_cache[N + M - 1][N];
+  result = dp_cache[N + M - 2][N];
   printf("%d\n", result);
 }
