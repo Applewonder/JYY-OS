@@ -91,6 +91,7 @@ int main(int argc, char *argv[]) {
     int need_thread_num = T;
     if (block_size == 0) {
       need_thread_num = diagonal_size;
+      block_size = 1;
     }
     for (int i = 1; i <= need_thread_num; i++) {
         int end_row = start_row + block_size - 1;
