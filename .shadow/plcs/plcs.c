@@ -60,6 +60,13 @@ int is_cond_satisfied(int i, int j, int round) {
   return (cond_1 && cond_2 && cond_3);
 }
 
+// a a a a a
+// a a a a a
+// a a a a a
+// a a a a a
+// a a a a a
+// a a a a a
+
 void Tworker_cache_para(int id) {
   printf("I'm in thread %d\n", id);
   for (int round = 0; round < N + M - 1; round++) {
