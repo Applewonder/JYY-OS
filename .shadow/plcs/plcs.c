@@ -65,6 +65,7 @@ void Tworker_para(int id) {
     assert(start_row <= end_row);
     printf("I'm in thread %d, round %d, the start col is %d, the start row is %d, the end row is %d\n", id, round, start_col, start_row, end_row);
     if ((start_col == start_row) && (start_col == end_row) && start_col == 0 && id != 1) {
+      if (round + 2 == N + M) break;
       printf("I'm in thread %d, round %d, maybe I am stuck here\n", id, round); 
       continue; BARRIER;
     }
