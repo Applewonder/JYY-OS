@@ -51,6 +51,7 @@ int is_cond_satisfied(int i, int j) {
   int cond_2 = (j > 0) ? is_dp_filled[i][j - 1] : 1; BARRIER;
   int cond_3 = (i > 0 && j > 0) ? is_dp_filled[i - 1][j - 1] : 1; BARRIER;
   // UNLOCK;
+  printf("cond_1 is %d, cond_2 is %d, cond_3 is %d\n", cond_1, cond_2, cond_3);
   return (cond_1 && cond_2 && cond_3);
 }
 
