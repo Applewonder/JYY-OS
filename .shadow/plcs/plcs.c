@@ -102,6 +102,6 @@ int main(int argc, char *argv[]) {
     create(Tworker_para);
   }
   join();  // Wait for all workers
-
+  result = dp[N - 1][M - 1];
   printf("%d\n", result);
 }
