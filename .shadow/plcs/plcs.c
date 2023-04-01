@@ -11,8 +11,10 @@
 #define START_COL 0
 #define START_ROW 1
 #define END_ROW 2
-#define LOCK mutex_lock(&lk)
-#define UNLOCK mutex_unlock(&lk)
+#define LOCK mutex_lock(&lock)
+#define UNLOCK mutex_unlock(&lock)
+#define CON_LOCK mutex_lock(&lk)
+#define CON_UNLOCK mutex_unlock(&lk)
 int T, N, M;
 char A[MAXN + 1], B[MAXN + 1];
 int dp[MAXN][MAXN];
@@ -21,6 +23,7 @@ int thread_todo_list[MAXN + MAXN][MAX_THREAD][3];
 int result;
 mutex_t lk = MUTEX_INIT();
 cond_t cv = COND_INIT();
+mutex_t lock = MUTEX_INIT();
 #define DP(x, y) (((x) >= 0 && (y) >= 0) ? dp[x][y] : 0)
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
 #define MAX3(x, y, z) MAX(MAX(x, y), z)
@@ -77,9 +80,11 @@ void Tworker_para(int id) {
       int need_filled_x = start_row + cur_pos; BARRIER;
       int need_filled_y = start_col - cur_pos; BARRIER;
       printf("I'm in thread %d, round %d, fill the diaganol %d, wating for right condition\n", id, round, cur_pos);
+      CON_LOCK;
       while (!is_cond_satisfied(need_filled_x, need_filled_y)) {
         cond_wait(&cv, &lk);
       }
+      CON_UNLOCK;
       printf("I'm in thread %d, round %d, fill the diaganol %d, condition is satisfied\n", id, round, cur_pos);
       int skip_a = DP(need_filled_x - 1, need_filled_y); BARRIER;
       int skip_b = DP(need_filled_x, need_filled_y - 1); BARRIER;
@@ -88,7 +93,7 @@ void Tworker_para(int id) {
       dp[need_filled_x][need_filled_y] = MAX3(skip_a, skip_b, take_both); BARRIER;
       is_dp_filled[need_filled_x][need_filled_y] = 1; BARRIER;
       UNLOCK;
-      
+      cond_broadcast(&cv);
       cur_pos ++; BARRIER;
     }
   }
