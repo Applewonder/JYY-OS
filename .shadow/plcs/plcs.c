@@ -54,28 +54,28 @@ int is_cond_satisfied(int i, int j) {
 
 void Tworker_para(int id) {
   for (int round = 0; round < N + M - 1; round++) {
-    int start_col = thread_todo_list[round][id][START_COL];
-    int start_row = thread_todo_list[round][id][START_ROW];
-    int end_row = thread_todo_list[round][id][END_ROW];
+    int start_col = thread_todo_list[round][id][START_COL]; BARRIER;
+    int start_row = thread_todo_list[round][id][START_ROW]; BARRIER;
+    int end_row = thread_todo_list[round][id][END_ROW]; BARRIER;
     assert(start_row <= end_row);
     if ((start_col == start_row) && (start_col == end_row) && start_col == 0 && id != 1) continue;
-    int cur_pos = 0;
+    int cur_pos = 0; BARRIER;
     while (cur_pos + start_row <= end_row) {
-      int need_filled_x = start_row + cur_pos;
-      int need_filled_y = start_col - cur_pos;
+      int need_filled_x = start_row + cur_pos; BARRIER;
+      int need_filled_y = start_col - cur_pos; BARRIER;
       while (!is_cond_satisfied(need_filled_x, need_filled_y)) {
         cond_wait(&cv, &lk);
       }
       
-      int skip_a = DP(need_filled_x - 1, need_filled_y);
-      int skip_b = DP(need_filled_x, need_filled_y - 1);
-      int take_both = DP(need_filled_x - 1, need_filled_y - 1) + (A[need_filled_x] == B[need_filled_y]);
+      int skip_a = DP(need_filled_x - 1, need_filled_y); BARRIER;
+      int skip_b = DP(need_filled_x, need_filled_y - 1); BARRIER;
+      int take_both = DP(need_filled_x - 1, need_filled_y - 1) + (A[need_filled_x] == B[need_filled_y]); BARRIER;
       // LOCK;
       dp[need_filled_x][need_filled_y] = MAX3(skip_a, skip_b, take_both); BARRIER;
       is_dp_filled[need_filled_x][need_filled_y] = 1; BARRIER;
       // UNLOCK;
       
-      cur_pos ++;
+      cur_pos ++; BARRIER;
     }
   }
 }
