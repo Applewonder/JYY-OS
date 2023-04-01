@@ -70,10 +70,10 @@ void Tworker_para(int id) {
       int skip_a = DP(need_filled_x - 1, need_filled_y); BARRIER;
       int skip_b = DP(need_filled_x, need_filled_y - 1); BARRIER;
       int take_both = DP(need_filled_x - 1, need_filled_y - 1) + (A[need_filled_x] == B[need_filled_y]); BARRIER;
-      // LOCK;
+      LOCK;
       dp[need_filled_x][need_filled_y] = MAX3(skip_a, skip_b, take_both); BARRIER;
       is_dp_filled[need_filled_x][need_filled_y] = 1; BARRIER;
-      // UNLOCK;
+      UNLOCK;
       
       cur_pos ++; BARRIER;
     }
