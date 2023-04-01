@@ -64,10 +64,11 @@ void Tworker_para(int id) {
       while (!is_cond_satisfied(need_filled_x, need_filled_y)) {
         cond_wait(&cv, &lk);
       }
-      LOCK;
+      
       int skip_a = DP(need_filled_x - 1, need_filled_y);
       int skip_b = DP(need_filled_x, need_filled_y - 1);
       int take_both = DP(need_filled_x - 1, need_filled_y - 1) + (A[need_filled_x] == B[need_filled_y]);
+      LOCK;
       dp[need_filled_x][need_filled_y] = MAX3(skip_a, skip_b, take_both);
       is_dp_filled[need_filled_x][need_filled_y] = 1;
       UNLOCK;
