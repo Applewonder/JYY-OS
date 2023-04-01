@@ -83,6 +83,7 @@ void Tworker_para(int id) {
 }
 
 int main(int argc, char *argv[]) {
+  printf("a");
   // No need to change
   assert(scanf("%s%s", A, B) == 2);
   N = strlen(A);
