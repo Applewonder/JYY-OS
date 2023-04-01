@@ -82,7 +82,7 @@ void Tworker_cache_para(int id) {
       int need_filled_y = start_row - cur_pos; BARRIER;
       printf("I'm in thread %d, round %d, fill the diaganol %d, wating for right condition\n", id, round, cur_pos);
       CON_LOCK;
-      while (!is_cond_satisfied(start_row + cur_pos, need_filled_y, round)) {
+      while (!is_cond_satisfied(start_row + cur_pos, start_col - cur_pos, round)) {
         cond_wait(&cv, &lk);
       }
       printf("I'm in thread %d, round %d, fill the diaganol %d, condition is satisfied\n", id, round, cur_pos);
