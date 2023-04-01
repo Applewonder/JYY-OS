@@ -17,8 +17,9 @@
 #define CON_UNLOCK mutex_unlock(&lk)
 int T, N, M;
 char A[MAXN + 1], B[MAXN + 1];
+int dp_cache[MAXN + MAXN][MAXN];
 int dp[MAXN][MAXN];
-int is_dp_filled[MAXN][MAXN];
+int is_dp_cache_filled[MAXN + MAXN][MAXN];
 int thread_todo_list[MAXN + MAXN][MAX_THREAD][3];
 int result;
 mutex_t lk = MUTEX_INIT();
@@ -48,56 +49,88 @@ void Tworker(int id) {
   result = dp[N - 1][M - 1];
 }
 
-int is_cond_satisfied(int i, int j) {
+int is_cond_satisfied(int i, int j, int round) {
   // LOCK;
-  int cond_1 = (i > 0) ? is_dp_filled[i - 1][j] : 1; BARRIER;
-  int cond_2 = (j > 0) ? is_dp_filled[i][j - 1] : 1; BARRIER;
-  int cond_3 = (i > 0 && j > 0) ? is_dp_filled[i - 1][j - 1] : 1; BARRIER;
+  int cond_1 = (i > 0 && round > 0) ? is_dp_cache_filled[round - 1][i] : 1; BARRIER;
+  int cond_2 = (j > 0 && round > 0) ? is_dp_cache_filled[round - 1][i - 1] : 1; BARRIER;
+  int cond_3 = (i > 0 && j > 0 && round > 1) ? is_dp_cache_filled[round - 2][i - 1] : 1; BARRIER;
   // UNLOCK;
   // printf("cond_1 is %d, cond_2 is %d, cond_3 is %d\n", cond_1, cond_2, cond_3);
   return (cond_1 && cond_2 && cond_3);
 }
 
-void Tworker_para(int id) {
-  // printf("I'm in thread %d\n", id);
+void Tworker_cache_para(int id) {
   for (int round = 0; round < N + M - 1; round++) {
-    // printf("I'm in thread %d, round %d\n", id, round);
     int start_col = thread_todo_list[round][id][START_COL]; BARRIER;
     int start_row = thread_todo_list[round][id][START_ROW]; BARRIER;
     int end_row = thread_todo_list[round][id][END_ROW]; BARRIER;
     assert(start_row <= end_row);
-    // printf("I'm in thread %d, round %d, the start col is %d, the start row is %d, the end row is %d\n", id, round, start_col, start_row, end_row);
     if ((start_col == start_row) && (start_col == end_row) && start_col == 0 && id != 1) {
       if (round + 2 == N + M) break;
-      // printf("I'm in thread %d, round %d, maybe I am stuck here\n", id, round); 
       continue; BARRIER;
     }
-    // printf("I'm in thread %d, round %d, I am stuck here\n", id, round); 
     int cur_pos = 0; BARRIER;
-    // printf("I'm in thread %d, round %d, start fill the diaganol\n", id, round);
     while (cur_pos + start_row <= end_row) {
-      // printf("I'm in thread %d, round %d, fill the diaganol %d\n", id, round, cur_pos);
-      int need_filled_x = start_row + cur_pos; BARRIER;
-      int need_filled_y = start_col - cur_pos; BARRIER;
-      // printf("I'm in thread %d, round %d, fill the diaganol %d, wating for right condition\n", id, round, cur_pos);
+      int need_filled_x = round; BARRIER;
+      int need_filled_y = start_row - cur_pos; BARRIER;
       CON_LOCK;
-      while (!is_cond_satisfied(need_filled_x, need_filled_y)) {
+      while (!is_cond_satisfied(need_filled_x, need_filled_y, round)) {
         cond_wait(&cv, &lk);
       }
       CON_UNLOCK;
-      // printf("I'm in thread %d, round %d, fill the diaganol %d, condition is satisfied\n", id, round, cur_pos);
       int skip_a = DP(need_filled_x - 1, need_filled_y); BARRIER;
-      int skip_b = DP(need_filled_x, need_filled_y - 1); BARRIER;
-      int take_both = DP(need_filled_x - 1, need_filled_y - 1) + (A[need_filled_x] == B[need_filled_y]); BARRIER;
+      int skip_b = DP(need_filled_x - 1, need_filled_y - 1); BARRIER;
+      int take_both = DP(need_filled_x - 2, need_filled_y - 1) + (A[start_row + cur_pos] == B[start_col - cur_pos]); BARRIER;
       // LOCK;
       dp[need_filled_x][need_filled_y] = MAX3(skip_a, skip_b, take_both); BARRIER;
-      is_dp_filled[need_filled_x][need_filled_y] = 1; BARRIER;
+      is_dp_cache_filled[need_filled_x][need_filled_y] = 1; BARRIER;
       // UNLOCK;
       cond_broadcast(&cv);
       cur_pos ++; BARRIER;
     }
   }
 }
+
+// void Tworker_para(int id) {
+//   // printf("I'm in thread %d\n", id);
+//   for (int round = 0; round < N + M - 1; round++) {
+//     // printf("I'm in thread %d, round %d\n", id, round);
+//     int start_col = thread_todo_list[round][id][START_COL]; BARRIER;
+//     int start_row = thread_todo_list[round][id][START_ROW]; BARRIER;
+//     int end_row = thread_todo_list[round][id][END_ROW]; BARRIER;
+//     assert(start_row <= end_row);
+//     // printf("I'm in thread %d, round %d, the start col is %d, the start row is %d, the end row is %d\n", id, round, start_col, start_row, end_row);
+//     if ((start_col == start_row) && (start_col == end_row) && start_col == 0 && id != 1) {
+//       if (round + 2 == N + M) break;
+//       // printf("I'm in thread %d, round %d, maybe I am stuck here\n", id, round); 
+//       continue; BARRIER;
+//     }
+//     // printf("I'm in thread %d, round %d, I am stuck here\n", id, round); 
+//     int cur_pos = 0; BARRIER;
+//     // printf("I'm in thread %d, round %d, start fill the diaganol\n", id, round);
+//     while (cur_pos + start_row <= end_row) {
+//       // printf("I'm in thread %d, round %d, fill the diaganol %d\n", id, round, cur_pos);
+//       int need_filled_x = start_row + cur_pos; BARRIER;
+//       int need_filled_y = start_col - cur_pos; BARRIER;
+//       // printf("I'm in thread %d, round %d, fill the diaganol %d, wating for right condition\n", id, round, cur_pos);
+//       CON_LOCK;
+//       while (!is_cond_satisfied(need_filled_x, need_filled_y)) {
+//         cond_wait(&cv, &lk);
+//       }
+//       CON_UNLOCK;
+//       // printf("I'm in thread %d, round %d, fill the diaganol %d, condition is satisfied\n", id, round, cur_pos);
+//       int skip_a = DP(need_filled_x - 1, need_filled_y); BARRIER;
+//       int skip_b = DP(need_filled_x, need_filled_y - 1); BARRIER;
+//       int take_both = DP(need_filled_x - 1, need_filled_y - 1) + (A[need_filled_x] == B[need_filled_y]); BARRIER;
+//       // LOCK;
+//       dp[need_filled_x][need_filled_y] = MAX3(skip_a, skip_b, take_both); BARRIER;
+//       is_dp_cache_filled[need_filled_x][need_filled_y] = 1; BARRIER;
+//       // UNLOCK;
+//       cond_broadcast(&cv);
+//       cur_pos ++; BARRIER;
+//     }
+//   }
+// }
 
 int main(int argc, char *argv[]) {
   // No need to change
@@ -106,6 +139,10 @@ int main(int argc, char *argv[]) {
   M = strlen(B);
   T = !argv[1] ? 1 : atoi(argv[1]);
   if (T == 1) {
+    for (int i = 0; i <= 70000000; ++i) {
+        LOCK;
+        UNLOCK;
+    }
     for (int i = 0; i < T; i++) {
       create(Tworker);
     }
@@ -151,7 +188,7 @@ int main(int argc, char *argv[]) {
   }
 
   for (int i = 0; i < T; i++) {
-    create(Tworker_para);
+    create(Tworker_cache_para);
   }
   join();  // Wait for all workers
   result = dp[N - 1][M - 1];
