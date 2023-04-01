@@ -51,8 +51,8 @@ void Tworker(int id) {
 
 int is_cond_satisfied(int i, int j, int round) {
   // LOCK;
-  int cond_1 = (i > 0 && round > 0) ? is_dp_cache_filled[round - 1][i] : 1; BARRIER;
-  int cond_2 = (j > 0 && round > 0) ? is_dp_cache_filled[round - 1][i - 1] : 1; BARRIER;
+  int cond_1 = (round > 0 && j > 0) ? is_dp_cache_filled[round - 1][i] : 1; BARRIER;
+  int cond_2 = (i > 0 && round > 0) ? is_dp_cache_filled[round - 1][i - 1] : 1; BARRIER;
   int cond_3 = (i > 0 && j > 0 && round > 1) ? is_dp_cache_filled[round - 2][i - 1] : 1; BARRIER;
   // UNLOCK;
   printf("cond_1 is %d, cond_2 is %d, cond_3 is %d\n", cond_1, cond_2, cond_3);
