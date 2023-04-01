@@ -44,7 +44,10 @@ void Tworker(int id) {
 }
 
 int is_cond_satisfied(int i, int j) {
-  return (is_dp_filled[i - 1][j] && is_dp_filled[i][j - 1] && is_dp_filled[i - 1][j - 1]);
+  int cond_1 = (i > 0) ? is_dp_filled[i - 1][j] : 0;
+  int cond_2 = (j > 0) ? is_dp_filled[i][j - 1] : 0;
+  int cond_3 = (i > 0 && j > 0) ? is_dp_filled[i - 1][j - 1] : 0;
+  return (cond_1 && cond_2 && cond_3);
 }
 
 void Tworker_para(int id) {
@@ -58,9 +61,9 @@ void Tworker_para(int id) {
     while (cur_pos + start_row <= end_row) {
       int need_filled_x = start_row + cur_pos;
       int need_filled_y = start_col - cur_pos;
-      // while (!is_cond_satisfied(need_filled_x, need_filled_y)) {
-      //   cond_wait(&cv, &lk);
-      // }
+      while (!is_cond_satisfied(need_filled_x, need_filled_y)) {
+        cond_wait(&cv, &lk);
+      }
       LOCK;
       int skip_a = DP(need_filled_x - 1, need_filled_y);
       int skip_b = DP(need_filled_x, need_filled_y - 1);
