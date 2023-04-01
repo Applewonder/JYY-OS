@@ -83,10 +83,6 @@ int main(int argc, char *argv[]) {
     if (block_size % T != 0) {
       block_size ++;
     }
-
-    int block_size = (diagonal_size + T - 1) / T;
-    int remainder = diagonal_size % T;
-
     int start_row = diagonal_start_row;
     int start_col = diagonal_start_col;
     for (int i = 0; i < T; i++) {
@@ -103,7 +99,7 @@ int main(int argc, char *argv[]) {
   }
 
   for (int i = 0; i < T; i++) {
-    create(Tworker);
+    create(Tworker_para);
   }
   join();  // Wait for all workers
 
