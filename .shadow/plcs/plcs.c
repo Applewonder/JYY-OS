@@ -92,7 +92,7 @@ int main(int argc, char *argv[]) {
     if (block_size == 0) {
       need_thread_num = diagonal_size;
     }
-    for (int i = 1; i <= diagonal_size; i++) {
+    for (int i = 1; i <= need_thread_num; i++) {
         int end_row = start_row + block_size - 1;
         if (end_row > diagonal_end_row) {
             end_row = diagonal_end_row;
