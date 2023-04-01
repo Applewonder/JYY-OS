@@ -47,6 +47,7 @@ void Tworker_para(int id) {
     int start_row = thread_todo_list[round][id][START_ROW];
     int end_row = thread_todo_list[round][id][END_ROW];
     assert(start_row <= end_row);
+    if ((start_col == start_row) && (start_col == end_row) && start_col == 0 && id != 1) continue;
     int cur_pos = 0;
     while (cur_pos + start_row <= end_row) {
       int need_filled_x = start_row + cur_pos;
@@ -83,9 +84,15 @@ int main(int argc, char *argv[]) {
     if (block_size % T != 0) {
       block_size ++;
     }
+    
     int start_row = diagonal_start_row;
     int start_col = diagonal_start_col;
-    for (int i = 1; i <= T; i++) {
+
+    int need_thread_num = T;
+    if (block_size == 0) {
+      need_thread_num = diagonal_size;
+    }
+    for (int i = 1; i <= diagonal_size; i++) {
         int end_row = start_row + block_size - 1;
         if (end_row > diagonal_end_row) {
             end_row = diagonal_end_row;
