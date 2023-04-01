@@ -105,7 +105,15 @@ int main(int argc, char *argv[]) {
   N = strlen(A);
   M = strlen(B);
   T = !argv[1] ? 1 : atoi(argv[1]);
-
+  if (T == 1) {
+    for (int i = 0; i < T; i++) {
+      create(Tworker);
+    }
+    join();  // Wait for all workers
+    result = dp[N - 1][M - 1];
+    printf("%d\n", result);
+    return 0;
+  }
   // Add preprocessing code here
   for (int round = 0; round < N + M - 1; round++) {
     int diagonal_start_col = (round < M) ? round : M - 1;
