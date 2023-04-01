@@ -56,37 +56,37 @@ int is_cond_satisfied(int i, int j, int round) {
   int cond_2 = (i > 0 && round > 0) ? is_dp_cache_filled[round - 1][i - 1] : 1; BARRIER;
   int cond_3 = (i > 0 && j > 0 && round > 1) ? is_dp_cache_filled[round - 2][i - 1] : 1; BARRIER;
   // UNLOCK;
-  printf("cond_1 is %d, cond_2 is %d, cond_3 is %d\n", cond_1, cond_2, cond_3);
+  // printf("cond_1 is %d, cond_2 is %d, cond_3 is %d\n", cond_1, cond_2, cond_3);
   return (cond_1 && cond_2 && cond_3);
 }
 
 void Tworker_cache_para(int id) {
-  printf("I'm in thread %d\n", id);
+  // printf("I'm in thread %d\n", id);
   for (int round = 0; round < N + M - 1; round++) {
-    printf("I'm in thread %d, round %d\n", id, round);
+    // printf("I'm in thread %d, round %d\n", id, round);
     int start_col = thread_todo_list[round][id][START_COL]; BARRIER;
     int start_row = thread_todo_list[round][id][START_ROW]; BARRIER;
     int end_row = thread_todo_list[round][id][END_ROW]; BARRIER;
     assert(start_row <= end_row);
-    printf("I'm in thread %d, round %d, the start col is %d, the start row is %d, the end row is %d\n", id, round, start_col, start_row, end_row);
+    // printf("I'm in thread %d, round %d, the start col is %d, the start row is %d, the end row is %d\n", id, round, start_col, start_row, end_row);
     if ((start_col == start_row) && (start_col == end_row) && start_col == 0 && id != 1) {
       if (round + 2 == N + M) break;
-      printf("I'm in thread %d, round %d, maybe I am stuck here\n", id, round); 
+      // printf("I'm in thread %d, round %d, maybe I am stuck here\n", id, round); 
       continue; BARRIER;
     }
-    printf("I'm in thread %d, round %d, I am stuck here\n", id, round); 
+    // printf("I'm in thread %d, round %d, I am stuck here\n", id, round); 
     int cur_pos = 0; BARRIER;
-    printf("I'm in thread %d, round %d, start fill the diaganol\n", id, round);
+    // printf("I'm in thread %d, round %d, start fill the diaganol\n", id, round);
     while (cur_pos + start_row <= end_row) {
-      printf("I'm in thread %d, round %d, fill the diaganol %d\n", id, round, cur_pos);
+      // printf("I'm in thread %d, round %d, fill the diaganol %d\n", id, round, cur_pos);
       int need_filled_x = round; BARRIER;
       int need_filled_y = start_row - cur_pos; BARRIER;
-      printf("I'm in thread %d, round %d, fill the diaganol %d, wating for right condition\n", id, round, cur_pos);
+      // printf("I'm in thread %d, round %d, fill the diaganol %d, wating for right condition\n", id, round, cur_pos);
       CON_LOCK;
       while (!is_cond_satisfied(start_row + cur_pos, start_col - cur_pos, round)) {
         cond_wait(&cv, &lk);
       }
-      printf("I'm in thread %d, round %d, fill the diaganol %d, condition is satisfied\n", id, round, cur_pos);
+      // printf("I'm in thread %d, round %d, fill the diaganol %d, condition is satisfied\n", id, round, cur_pos);
       CON_UNLOCK;
       int skip_a = DP_CACHE(need_filled_x - 1, need_filled_y); BARRIER;
       int skip_b = DP_CACHE(need_filled_x - 1, need_filled_y - 1); BARRIER;
