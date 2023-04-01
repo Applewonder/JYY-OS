@@ -62,6 +62,7 @@ void Tworker_para(int id) {
     int start_row = thread_todo_list[round][id][START_ROW]; BARRIER;
     int end_row = thread_todo_list[round][id][END_ROW]; BARRIER;
     assert(start_row <= end_row);
+    printf("I'm in thread %d, round %d, the start col is %d, the start row is %d, the end row is %d\n", id, round, start_col, start_row, end_row);
     if ((start_col == start_row) && (start_col == end_row) && start_col == 0 && id != 1) continue;
     int cur_pos = 0; BARRIER;
     printf("I'm in thread %d, round %d, start fill the diaganol\n", id, round);
