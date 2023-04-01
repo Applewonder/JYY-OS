@@ -54,7 +54,7 @@ int is_cond_satisfied(int i, int j) {
   int cond_2 = (j > 0) ? is_dp_filled[i][j - 1] : 1; BARRIER;
   int cond_3 = (i > 0 && j > 0) ? is_dp_filled[i - 1][j - 1] : 1; BARRIER;
   UNLOCK;
-  printf("cond_1 is %d, cond_2 is %d, cond_3 is %d\n", cond_1, cond_2, cond_3);
+  // printf("cond_1 is %d, cond_2 is %d, cond_3 is %d\n", cond_1, cond_2, cond_3);
   return (cond_1 && cond_2 && cond_3);
 }
 
@@ -118,14 +118,19 @@ int main(int argc, char *argv[]) {
 
     int block_size = diagonal_size / T;
     int need_thread_num = T;
+    int remain_part = diagonal_size % T;
     if (diagonal_size < T) {
       need_thread_num = diagonal_size;
       block_size = 1;
-    } else if (diagonal_size % T != 0) {
-      block_size ++;
-    }
+      remain_part = 0;
+    } 
     for (int i = 1; i <= need_thread_num; i++) {
-        int end_row = start_row + block_size - 1;
+        int thread_block_size = block_size;
+        if (remain_part > 0) {
+          thread_block_size ++;
+          remain_part --;
+        }
+        int end_row = start_row + thread_block_size - 1;
         if (end_row > diagonal_end_row) {
             end_row = diagonal_end_row;
         }
