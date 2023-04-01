@@ -25,7 +25,7 @@ int result;
 mutex_t lk = MUTEX_INIT();
 cond_t cv = COND_INIT();
 mutex_t lock = MUTEX_INIT();
-#define DP(x, y) (((x) >= 0 && (y) >= 0) ? dp[x][y] : 0)
+#define DP(x, y) (((x) >= 0 && (y) >= 0) ? dp_cache[x][y] : 0)
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))
 #define MAX3(x, y, z) MAX(MAX(x, y), z)
 
@@ -82,7 +82,7 @@ void Tworker_cache_para(int id) {
       int skip_b = DP(need_filled_x - 1, need_filled_y - 1); BARRIER;
       int take_both = DP(need_filled_x - 2, need_filled_y - 1) + (A[start_row + cur_pos] == B[start_col - cur_pos]); BARRIER;
       // LOCK;
-      dp[need_filled_x][need_filled_y] = MAX3(skip_a, skip_b, take_both); BARRIER;
+      dp_cache[need_filled_x][need_filled_y] = MAX3(skip_a, skip_b, take_both); BARRIER;
       is_dp_cache_filled[need_filled_x][need_filled_y] = 1; BARRIER;
       // UNLOCK;
       cond_broadcast(&cv);
@@ -191,6 +191,6 @@ int main(int argc, char *argv[]) {
     create(Tworker_cache_para);
   }
   join();  // Wait for all workers
-  result = dp[N - 1][M - 1];
+  result = dp_cache[N - 1][M - 1];
   printf("%d\n", result);
 }
