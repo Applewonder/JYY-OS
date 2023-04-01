@@ -44,9 +44,9 @@ void Tworker(int id) {
 }
 
 int is_cond_satisfied(int i, int j) {
-  int cond_1 = (i > 0) ? is_dp_filled[i - 1][j] : 0;
-  int cond_2 = (j > 0) ? is_dp_filled[i][j - 1] : 0;
-  int cond_3 = (i > 0 && j > 0) ? is_dp_filled[i - 1][j - 1] : 0;
+  int cond_1 = (i > 0) ? is_dp_filled[i - 1][j] : 1;
+  int cond_2 = (j > 0) ? is_dp_filled[i][j - 1] : 1;
+  int cond_3 = (i > 0 && j > 0) ? is_dp_filled[i - 1][j - 1] : 1;
   return (cond_1 && cond_2 && cond_3);
 }
 
