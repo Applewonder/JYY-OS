@@ -4,6 +4,8 @@
 #include "thread.h"
 #include "thread-sync.h"
 
+#define BARRIER __sync_synchronize()
+
 #define MAXN 10000
 #define MAX_THREAD 20
 #define START_COL 0
