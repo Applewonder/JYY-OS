@@ -73,7 +73,7 @@ void Tworker_para(int id) {
       while (!is_cond_satisfied(need_filled_x, need_filled_y)) {
         cond_wait(&cv, &lk);
       }
-      printf("I'm in thread %d, round %d, fill the diaganol %d, condition is satisfied", id, round, cur_pos);
+      printf("I'm in thread %d, round %d, fill the diaganol %d, condition is satisfied\n", id, round, cur_pos);
       int skip_a = DP(need_filled_x - 1, need_filled_y); BARRIER;
       int skip_b = DP(need_filled_x, need_filled_y - 1); BARRIER;
       int take_both = DP(need_filled_x - 1, need_filled_y - 1) + (A[need_filled_x] == B[need_filled_y]); BARRIER;
