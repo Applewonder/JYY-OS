@@ -80,19 +80,18 @@ int main(int argc, char *argv[]) {
     int diagonal_end_row = (round < N) ? round : N - 1;
     int diagonal_size = diagonal_end_row - diagonal_start_row + 1;
 
-    int block_size = diagonal_size / T;
-    if (diagonal_size % T != 0) {
-      block_size ++;
-    }
-    
     int start_row = diagonal_start_row;
     int start_col = diagonal_start_col;
 
+    int block_size = diagonal_size / T;
     int need_thread_num = T;
-    if (block_size == 0) {
+    if (diagonal_size < T) {
       need_thread_num = diagonal_size;
       block_size = 1;
+    } else if (diagonal_size % T != 0) {
+      block_size ++;
     }
+
     for (int i = 1; i <= need_thread_num; i++) {
         int end_row = start_row + block_size - 1;
         if (end_row > diagonal_end_row) {
