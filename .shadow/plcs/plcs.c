@@ -112,7 +112,7 @@ int main(int argc, char *argv[]) {
     join();  // Wait for all workers
     result = dp[N - 1][M - 1];
     printf("%d\n", result);
-    return;
+    return 0;
   }
   // Add preprocessing code here
   for (int round = 0; round < N + M - 1; round++) {
