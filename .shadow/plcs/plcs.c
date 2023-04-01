@@ -57,7 +57,7 @@ int is_cond_satisfied(int i, int j) {
 void Tworker_para(int id) {
   printf("I'm in thread %d\n", id);
   for (int round = 0; round < N + M - 1; round++) {
-    printf("I'm in thread %d, round %d", id, round);
+    printf("I'm in thread %d, round %d\n", id, round);
     int start_col = thread_todo_list[round][id][START_COL]; BARRIER;
     int start_row = thread_todo_list[round][id][START_ROW]; BARRIER;
     int end_row = thread_todo_list[round][id][END_ROW]; BARRIER;
