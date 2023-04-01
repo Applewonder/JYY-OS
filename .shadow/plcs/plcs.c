@@ -46,11 +46,11 @@ void Tworker(int id) {
 }
 
 int is_cond_satisfied(int i, int j) {
-  LOCK;
-  int cond_1 = (i > 0) ? is_dp_filled[i - 1][j] : 1;
-  int cond_2 = (j > 0) ? is_dp_filled[i][j - 1] : 1;
-  int cond_3 = (i > 0 && j > 0) ? is_dp_filled[i - 1][j - 1] : 1;
-  UNLOCK;
+  // LOCK;
+  int cond_1 = (i > 0) ? is_dp_filled[i - 1][j] : 1; BARRIER;
+  int cond_2 = (j > 0) ? is_dp_filled[i][j - 1] : 1; BARRIER;
+  int cond_3 = (i > 0 && j > 0) ? is_dp_filled[i - 1][j - 1] : 1; BARRIER;
+  // UNLOCK;
   return (cond_1 && cond_2 && cond_3);
 }
 
@@ -72,10 +72,10 @@ void Tworker_para(int id) {
       int skip_a = DP(need_filled_x - 1, need_filled_y); BARRIER;
       int skip_b = DP(need_filled_x, need_filled_y - 1); BARRIER;
       int take_both = DP(need_filled_x - 1, need_filled_y - 1) + (A[need_filled_x] == B[need_filled_y]); BARRIER;
-      LOCK;
+      // LOCK;
       dp[need_filled_x][need_filled_y] = MAX3(skip_a, skip_b, take_both); BARRIER;
       is_dp_filled[need_filled_x][need_filled_y] = 1; BARRIER;
-      UNLOCK;
+      // UNLOCK;
       
       cur_pos ++; BARRIER;
     }
