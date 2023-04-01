@@ -81,7 +81,7 @@ int main(int argc, char *argv[]) {
     int diagonal_size = diagonal_end_row - diagonal_start_row + 1;
 
     int block_size = diagonal_size / T;
-    if (block_size % T != 0) {
+    if (diagonal_size % T != 0) {
       block_size ++;
     }
     
