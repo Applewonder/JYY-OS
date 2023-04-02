@@ -60,9 +60,9 @@ int is_cond_satisfied(int i, int j, int round) {
   return (cond_1 && cond_2 && cond_3);
 }
 
-// a a a a a
-// a a a a a
-// a a a a a
+// b a a a a
+// b a a a a
+// b a a a a
 // a a a a a
 // a a a a a
 // a a a a a
@@ -86,7 +86,7 @@ void Tworker_cache_para(int id) {
     while (cur_pos + start_row <= end_row) {
       // printf("I'm in thread %d, round %d, fill the diaganol %d\n", id, round, cur_pos);
       int need_filled_x = round; BARRIER;
-      int need_filled_y = start_row - cur_pos; BARRIER;
+      int need_filled_y = start_row + cur_pos; BARRIER;
       // printf("I'm in thread %d, round %d, fill the diaganol %d, wating for right condition\n", id, round, cur_pos);
       CON_LOCK;
       while (!is_cond_satisfied(start_row + cur_pos, start_col - cur_pos, round)) {
