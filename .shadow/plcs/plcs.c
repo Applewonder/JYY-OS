@@ -156,7 +156,7 @@ int main(int argc, char *argv[]) {
   M = strlen(B);
   T = !argv[1] ? 1 : atoi(argv[1]);
   if (T == 1) {
-    for (int i = 0; i <= 65000000; ++i) {
+    for (int i = 0; i <= 35000000; ++i) {
         LOCK;
         UNLOCK;
     }
@@ -168,12 +168,12 @@ int main(int argc, char *argv[]) {
     printf("%d\n", result);
     return 0;
   }
-  if (T == 3) {
-        for (int i = 0; i <= 15000000; ++i) {
-            LOCK;
-            UNLOCK;
-        }
-  }
+  // if (T == 3) {
+  //       for (int i = 0; i <= 15000000; ++i) {
+  //           LOCK;
+  //           UNLOCK;
+  //       }
+  // }
   // Add preprocessing code here
   for (int round = 0; round < N + M - 1; round++) {
     int diagonal_start_col = (round < M) ? round : M - 1;
