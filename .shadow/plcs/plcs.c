@@ -19,6 +19,7 @@
 #define SPIN_UNLOCK spin_unlock(&sk)
 
 atomic_int finished_thread_num = 0;
+atomic_int thread_can_run[MAX_THREAD];
 int T, N, M;
 char A[MAXN + 1], B[MAXN + 1];
 int dp_cache[MAXN + MAXN][MAXN];
@@ -139,18 +140,17 @@ void Tworker_para_round_by_round(int id) {
       dp_cache[need_filled_x][need_filled_y] = MAX3(skip_a, skip_b, take_both); BARRIER;
       cur_pos ++; BARRIER;
     }
-    int value = atomic_load(&finished_thread_num);
-    if (value == T - 1) {
-      atomic_store(&finished_thread_num, 0); 
-      continue;
-    } else {
-      atomic_fetch_add(&finished_thread_num, 1); 
-      while(1) {
-        if (atomic_load(&finished_thread_num) >= T) {
-          break;
-        }
+    atomic_store(&thread_can_run[id], 0); 
+    atomic_fetch_add(&finished_thread_num, 1); 
+    if (id == 1) {
+      while (atomic_load(&finished_thread_num) < T);
+      int value = atomic_load(&finished_thread_num);
+      for (int i = 0; i < T; i++)
+      {
+        atomic_store(&thread_can_run[i], 1); 
       }
-    }
+    } 
+    while (atomic_load(&thread_can_run[id]));
   }
 }
 // void Tworker_para(int id) {
@@ -277,6 +277,12 @@ int main(int argc, char *argv[]) {
   for (int i = 0; i < T; i++) {
     create(Tworker_para_round_by_round);
   }
+  // for (int i = 0; i < N + M - 1; i++) {
+  //   int value = atomic_load(&finished_thread_num);
+  //   if (value == T) {
+  //     atomic_store(&finished_thread_num, 0); 
+  //   }
+  // }
   join();  // Wait for all workers
   result = dp_cache[N + M - 2][N - 1];
   printf("%d\n", result);
