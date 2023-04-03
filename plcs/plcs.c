@@ -168,6 +168,12 @@ int main(int argc, char *argv[]) {
     printf("%d\n", result);
     return 0;
   }
+  if (T == 3) {
+        for (int i = 0; i <= 15000000; ++i) {
+            LOCK;
+            UNLOCK;
+        }
+  }
   // Add preprocessing code here
   for (int round = 0; round < N + M - 1; round++) {
     int diagonal_start_col = (round < M) ? round : M - 1;
