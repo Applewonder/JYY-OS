@@ -125,9 +125,10 @@ void Tworker_para_round_by_round(int id) {
     printf("I'm in thread %d, round %d, the start col is %d, the start row is %d, the end row is %d\n", id, round, start_col, start_row, end_row);
     if ((start_col == start_row) && (start_col == end_row) && start_col == 0 && id != 1) {
       if (round + 2 == N + M) break; BARRIER;
-      printf("I'm in thread %d, round %d, maybe I am stuck here\n", id, round); BARRIER;
+      printf("I'm in thread %d, round %d, do nothing\n", id, round); BARRIER;
       atomic_store(&thread_can_run[id - 1], 0); BARRIER;
       atomic_fetch_add(&finished_thread_num, 1); BARRIER;
+      printf("I'm in thread %d, round %d, waiting for next nothing\n", id, round); BARRIER;
       while (atomic_load(&thread_can_run[id - 1]));
       continue; BARRIER;
     }
