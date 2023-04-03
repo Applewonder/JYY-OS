@@ -4,7 +4,7 @@
 #include "thread.h"
 #include "thread-sync.h"
 
-#define BARRIER __sync_synchronize()
+#define BARRIER asm volatile("": : :"memory")
 
 #define MAXN 10000
 #define MAX_THREAD 20
