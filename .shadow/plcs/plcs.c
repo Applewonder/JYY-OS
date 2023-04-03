@@ -81,7 +81,7 @@ void Tworker_cache_para(int id) {
       //printf("I'm in thread %d, round %d, maybe I am stuck here\n", id, round); 
       continue; BARRIER;
     }
-    int cur_pos = 0; BARRIER;
+    int cur_pos = 0; 
     //printf("I'm in thread %d, round %d, start fill the diaganol\n", id, round);
     while (cur_pos + start_row <= end_row) {
       //printf("I'm in thread %d, round %d, fill the diaganol %d\n", id, round, cur_pos);
