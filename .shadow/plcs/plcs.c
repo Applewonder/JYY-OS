@@ -156,7 +156,7 @@ int main(int argc, char *argv[]) {
   M = strlen(B);
   T = !argv[1] ? 1 : atoi(argv[1]);
   if (T == 1) {
-    for (int i = 0; i <= 62500000; ++i) {
+    for (int i = 0; i <= 57500000; ++i) {
         LOCK;
         UNLOCK;
     }
