@@ -160,9 +160,12 @@ int main(int argc, char *argv[]) {
         perror("Error opening file");
         return EXIT_FAILURE;
     }
+    while (fgets(A, 10000, fp) != NULL) {
 
-    fgets(A, 10000, fp);
-    fgets(B, 10000, fp);
+    }
+    while (fgets(B, 10000, fp) != NULL) {
+
+    }
 
     fclose(fp);
 
