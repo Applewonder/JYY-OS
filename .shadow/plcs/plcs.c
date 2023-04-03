@@ -160,12 +160,8 @@ int main(int argc, char *argv[]) {
         perror("Error opening file");
         return EXIT_FAILURE;
     }
-    while (fgets(A, 10000, fp) != NULL) {
-
-    }
-    while (fgets(B, 10000, fp) != NULL) {
-
-    }
+    fscanf(fp,"%[^\n]", A);
+    fscanf(fp,"%[^\n]", B);
 
     fclose(fp);
 
