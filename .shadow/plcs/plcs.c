@@ -149,7 +149,7 @@ void Tworker_para_round_by_round(int id) {
     atomic_fetch_add(&finished_thread_num, 1); BARRIER;
     if (id == 1) {
       while (atomic_load(&finished_thread_num) < T); BARRIER;
-      int value = atomic_load(&finished_thread_num); BARRIER;
+      atomic_store(&finished_thread_num, 0); BARRIER;
       for (int i = 0; i < T; i++)
       {
         printf("I'm in thread %d, round %d, giving authority to thread %d\n", id, round, i);
