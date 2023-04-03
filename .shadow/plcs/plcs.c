@@ -100,7 +100,7 @@ void Tworker_cache_para(int id) {
       // LOCK;
       dp_cache[need_filled_x][need_filled_y] = MAX3(skip_a, skip_b, take_both); BARRIER;
       is_dp_cache_filled[need_filled_x][need_filled_y] = 1; BARRIER;
-      printf("The dp[%d][%d]'s value is %d\n", start_row + cur_pos, start_col - cur_pos, dp_cache[need_filled_x][need_filled_y]);
+      // printf("The dp[%d][%d]'s value is %d\n", start_row + cur_pos, start_col - cur_pos, dp_cache[need_filled_x][need_filled_y]);
       // UNLOCK;
       //printf("I'm in thread %d, round %d, fill the diaganol %d succesfully\n", id, round, cur_pos);
       cond_broadcast(&cv);
@@ -169,7 +169,8 @@ int main(int argc, char *argv[]) {
   } else {
       assert(scanf("%s%s", A, B) == 2);
   }
-
+  printf("A is %s\n", A);
+  printf("B is %s\n", B);
   N = strlen(A);
   M = strlen(B);
   T = !argv[1] ? 1 : atoi(argv[1]);
