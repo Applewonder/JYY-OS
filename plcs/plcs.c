@@ -128,7 +128,8 @@ void Tworker_para_round_by_round(int id) {
       atomic_store(&thread_can_run[id - 1], 0); BARRIER;
       atomic_fetch_add(&finished_thread_num, 1); BARRIER;
       // printf("I'm in thread %d, round %d, waiting for next nothing\n", id, round); BARRIER;
-      while (!atomic_load(&thread_can_run[id - 1])); BARRIER;
+      while (!atomic_load(&thread_can_run[id - 1])); 
+      BARRIER;
       continue; BARRIER;
     }
     int cur_pos = 0; BARRIER;
@@ -147,7 +148,8 @@ void Tworker_para_round_by_round(int id) {
     atomic_store(&thread_can_run[id - 1], 0); BARRIER;
     atomic_fetch_add(&finished_thread_num, 1); BARRIER;
     if (id == 1) {
-      while (atomic_load(&finished_thread_num) < T); BARRIER;
+      while (atomic_load(&finished_thread_num) < T); 
+      BARRIER;
       atomic_store(&finished_thread_num, 0); BARRIER;
       for (int i = 0; i < T; i++)
       {
@@ -156,7 +158,8 @@ void Tworker_para_round_by_round(int id) {
       }
     } 
     // printf("I'm in thread %d, round %d, waiting\n", id, round);
-    while (!atomic_load(&thread_can_run[id - 1])); BARRIER;
+    while (!atomic_load(&thread_can_run[id - 1])); 
+    BARRIER;
   }
 }
 // void Tworker_para(int id) {
