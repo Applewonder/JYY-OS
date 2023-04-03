@@ -15,6 +15,10 @@
 #define UNLOCK mutex_unlock(&lock)
 #define CON_LOCK mutex_lock(&lk)
 #define CON_UNLOCK mutex_unlock(&lk)
+#define SPIN_LOCK spin_lock(&sk)
+#define SPIN_UNLOCK spin_unlock(&sk)
+
+atomic_int finished_thread_num = 0;
 int T, N, M;
 char A[MAXN + 1], B[MAXN + 1];
 int dp_cache[MAXN + MAXN][MAXN];
@@ -22,6 +26,7 @@ int dp[MAXN][MAXN];
 int is_dp_cache_filled[MAXN + MAXN][MAXN];
 int thread_todo_list[MAXN + MAXN][MAX_THREAD][3];
 int result;
+spinlock_t sk = SPIN_INIT();
 mutex_t lk = MUTEX_INIT();
 cond_t cv = COND_INIT();
 mutex_t lock = MUTEX_INIT();
@@ -109,6 +114,45 @@ void Tworker_cache_para(int id) {
   }
 }
 
+void Tworker_para_round_by_round(int id) {
+  for (int round = 0; round < N + M - 1; round++) {
+    //printf("I'm in thread %d, round %d\n", id, round);
+    int start_col = thread_todo_list[round][id][START_COL]; BARRIER;
+    int start_row = thread_todo_list[round][id][START_ROW]; BARRIER;
+    int end_row = thread_todo_list[round][id][END_ROW]; BARRIER;
+    assert(start_row <= end_row);
+    //printf("I'm in thread %d, round %d, the start col is %d, the start row is %d, the end row is %d\n", id, round, start_col, start_row, end_row);
+    if ((start_col == start_row) && (start_col == end_row) && start_col == 0 && id != 1) {
+      if (round + 2 == N + M) break;
+      //printf("I'm in thread %d, round %d, maybe I am stuck here\n", id, round); 
+      continue; BARRIER;
+    }
+    int cur_pos = 0; BARRIER;
+    //printf("I'm in thread %d, round %d, start fill the diaganol\n", id, round);
+    while (cur_pos + start_row <= end_row) {
+      //printf("I'm in thread %d, round %d, fill the diaganol %d\n", id, round, cur_pos);
+      int need_filled_x = round; BARRIER;
+      int need_filled_y = start_row + cur_pos; BARRIER;
+      int skip_a = DP_CACHE(need_filled_x - 1, need_filled_y); BARRIER;
+      int skip_b = DP_CACHE(need_filled_x - 1, need_filled_y - 1); BARRIER;
+      int take_both = DP_CACHE(need_filled_x - 2, need_filled_y - 1) + (A[start_row + cur_pos] == B[start_col - cur_pos]); BARRIER;
+      dp_cache[need_filled_x][need_filled_y] = MAX3(skip_a, skip_b, take_both); BARRIER;
+      cur_pos ++; BARRIER;
+    }
+    int value = atomic_load(&finished_thread_num);
+    if (value == T - 1) {
+      atomic_store(&finished_thread_num, 0); 
+      continue;
+    } else {
+      atomic_fetch_add(&finished_thread_num, 1); 
+      while(1) {
+        if (atomic_load(&finished_thread_num) == T) {
+          break;
+        }
+      }
+    }
+  }
+}
 // void Tworker_para(int id) {
 //   // printf("I'm in thread %d\n", id);
 //   for (int round = 0; round < N + M - 1; round++) {
@@ -231,7 +275,7 @@ int main(int argc, char *argv[]) {
   }
 
   for (int i = 0; i < T; i++) {
-    create(Tworker_cache_para);
+    create(Tworker_para_round_by_round);
   }
   join();  // Wait for all workers
   result = dp_cache[N + M - 2][N - 1];
