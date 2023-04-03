@@ -220,8 +220,8 @@ int main(int argc, char *argv[]) {
   } else {
       assert(scanf("%s%s", A, B) == 2);
   }
-  printf("A is %s\n", A);
-  printf("B is %s\n", B);
+  // printf("A is %s\n", A);
+  // printf("B is %s\n", B);
   N = strlen(A);
   M = strlen(B);
   T = !argv[1] ? 1 : atoi(argv[1]);
