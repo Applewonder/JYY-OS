@@ -124,8 +124,11 @@ void Tworker_para_round_by_round(int id) {
     assert(start_row <= end_row);
     printf("I'm in thread %d, round %d, the start col is %d, the start row is %d, the end row is %d\n", id, round, start_col, start_row, end_row);
     if ((start_col == start_row) && (start_col == end_row) && start_col == 0 && id != 1) {
-      if (round + 2 == N + M) break;
-      printf("I'm in thread %d, round %d, maybe I am stuck here\n", id, round); 
+      if (round + 2 == N + M) break; BARRIER;
+      printf("I'm in thread %d, round %d, maybe I am stuck here\n", id, round); BARRIER;
+      atomic_store(&thread_can_run[id], 0); BARRIER;
+      atomic_fetch_add(&finished_thread_num, 1); BARRIER;
+      while (atomic_load(&thread_can_run[id]));
       continue; BARRIER;
     }
     int cur_pos = 0; BARRIER;
@@ -140,17 +143,17 @@ void Tworker_para_round_by_round(int id) {
       dp_cache[need_filled_x][need_filled_y] = MAX3(skip_a, skip_b, take_both); BARRIER;
       cur_pos ++; BARRIER;
     }
-    atomic_store(&thread_can_run[id], 0); 
-    atomic_fetch_add(&finished_thread_num, 1); 
+    atomic_store(&thread_can_run[id], 0); BARRIER;
+    atomic_fetch_add(&finished_thread_num, 1); BARRIER;
     if (id == 1) {
-      while (atomic_load(&finished_thread_num) < T);
-      int value = atomic_load(&finished_thread_num);
+      while (atomic_load(&finished_thread_num) < T); BARRIER;
+      int value = atomic_load(&finished_thread_num); BARRIER;
       for (int i = 0; i < T; i++)
       {
-        atomic_store(&thread_can_run[i], 1); 
+        atomic_store(&thread_can_run[i], 1); BARRIER;
       }
     } 
-    while (atomic_load(&thread_can_run[id]));
+    while (atomic_load(&thread_can_run[id])); 
   }
 }
 // void Tworker_para(int id) {
