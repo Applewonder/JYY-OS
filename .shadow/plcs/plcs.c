@@ -151,7 +151,23 @@ void Tworker_cache_para(int id) {
 
 int main(int argc, char *argv[]) {
   // No need to change
-  assert(scanf("%s%s", A, B) == 2);
+  if (argc > 3) {
+    FILE *fp;
+
+    fp = fopen("test.txt", "r");
+    if (fp == NULL) {
+        perror("Error opening file");
+        return EXIT_FAILURE;
+    }
+
+    fgets(A, 10000, fp);
+    fgets(B, 10000, fp);
+
+    fclose(fp);
+  } else {
+      assert(scanf("%s%s", A, B) == 2);
+  }
+
   N = strlen(A);
   M = strlen(B);
   T = !argv[1] ? 1 : atoi(argv[1]);
