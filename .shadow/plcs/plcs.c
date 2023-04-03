@@ -161,7 +161,9 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
     fscanf(fp,"%[^\n]", A);
-    fscanf(fp,"%[^\n]", B);
+    for (int i = 0; i < 10000; i ++) {
+      B[i] = A[i];
+    }
 
     fclose(fp);
 
