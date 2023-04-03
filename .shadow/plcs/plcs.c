@@ -280,7 +280,6 @@ int main(int argc, char *argv[]) {
         start_row = end_row + 1;
     }
   }
-  printf("aa");
   for (int i = 0; i < T; i++) {
     create(Tworker_para_round_by_round);
   }
