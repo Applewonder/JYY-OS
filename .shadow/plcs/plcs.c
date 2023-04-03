@@ -143,6 +143,7 @@ void Tworker_para_round_by_round(int id) {
       dp_cache[need_filled_x][need_filled_y] = MAX3(skip_a, skip_b, take_both); BARRIER;
       cur_pos ++; BARRIER;
     }
+    printf("I'm in thread %d, round %d, finish my part\n", id, round);
     atomic_store(&thread_can_run[id], 0); BARRIER;
     atomic_fetch_add(&finished_thread_num, 1); BARRIER;
     if (id == 1) {
@@ -150,9 +151,11 @@ void Tworker_para_round_by_round(int id) {
       int value = atomic_load(&finished_thread_num); BARRIER;
       for (int i = 0; i < T; i++)
       {
+        printf("I'm in thread %d, round %d, giving authority to thread %d\n", id, round, i);
         atomic_store(&thread_can_run[i], 1); BARRIER;
       }
     } 
+    printf("I'm in thread %d, round %d, waiting\n", id, round);
     while (atomic_load(&thread_can_run[id])); 
   }
 }
