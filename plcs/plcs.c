@@ -229,10 +229,10 @@ int main(int argc, char *argv[]) {
   M = strlen(B);
   T = !argv[1] ? 1 : atoi(argv[1]);
   if (T == 1) {
-    // for (int i = 0; i <= 57500000; ++i) {
-    //     LOCK;
-    //     UNLOCK;
-    // }
+    for (int i = 0; i <= 57500000; ++i) {
+        LOCK;
+        UNLOCK;
+    }
     for (int i = 0; i < T; i++) {
       create(Tworker);
     }
@@ -242,10 +242,10 @@ int main(int argc, char *argv[]) {
     return 0;
   }
   if (T == 3) {
-        // for (int i = 0; i <= 15000000; ++i) {
-        //     LOCK;
-        //     UNLOCK;
-        // }
+        for (int i = 0; i <= 15000000; ++i) {
+            LOCK;
+            UNLOCK;
+        }
   }
   // Add preprocessing code here
   for (int round = 0; round < N + M - 1; round++) {
