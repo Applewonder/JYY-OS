@@ -8,6 +8,8 @@
 
 #define CPU_NUM 3
 
+typedef unsigned long uintptr_t;
+
 int cpu_count();
 
 int cpu_current();
