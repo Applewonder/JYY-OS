@@ -9,7 +9,8 @@
 #include <stdbool.h>
 #include "am.h"
 typedef int spinlock_t;
-typedef unsigned long uintptr_t
+typedef unsigned long uintptr_t;
+
 #define SPIN_LOCK_INIT 0
 #define CPU_NUM 3
 
