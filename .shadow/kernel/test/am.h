@@ -2,6 +2,8 @@
 # ifndef MY_AM_
 # define MY_AM_
 
+#include <pthread.h>
+
 #define CPU_NUM 3
 
 int thread_id[CPU_NUM];
