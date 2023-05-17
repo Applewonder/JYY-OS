@@ -15,16 +15,20 @@ void spin_unlock(int *lk) {
 }
 
 long align_to(long n, unsigned int align) {
-  unsigned int align_number = 1 << align;
-  unsigned int mask = align - 1;
-  if ((align & mask) != 0) {
-    panic("align must be power of 2");
-  }
-  if ((n & mask) == 0) {
-    return n;
-  } else {
-    return (n & ~mask) + align_number;
-  }
+    
+    unsigned int align_number = 1 << align;
+    unsigned int mask = align - 1;
+    if ((align & mask) != 0) {
+        printf("align: %x\n", align);
+        printf("align_number: %x\n", align_number);
+        printf("mask: %x\n", mask);
+        panic("align must be power of 2");
+    }
+    if ((n & mask) == 0) {
+        return n;
+    } else {
+        return (n & ~mask) + align_number;
+    }
 }
 
 bool is_align_to(void *ptr, unsigned int align) {
