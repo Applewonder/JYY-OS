@@ -4,6 +4,7 @@
 
 #include <pthread.h>
 #include <stdbool.h>
+#include <stdio.h>
 
 #define CPU_NUM 3
 
