@@ -17,7 +17,7 @@ void spin_unlock(int *lk) {
 long align_to(long n, unsigned int align) {
     
     unsigned int align_number = 1 << align;
-    unsigned int mask = align - 1;
+    unsigned int mask = align_number - 1;
     if ((align & mask) != 0) {
         printf("align: %x\n", align);
         printf("align_number: %x\n", align_number);
