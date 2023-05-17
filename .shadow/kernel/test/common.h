@@ -11,6 +11,7 @@
 typedef int spinlock_t;
 typedef unsigned long uintptr_t
 #define SPIN_LOCK_INIT 0
+#define CPU_NUM 3
 
 int thread_id[CPU_NUM];
 
@@ -22,7 +23,7 @@ long align_to(long n, unsigned int align);
 
 bool is_align_to(void *ptr, unsigned int align);
 
-#define CPU_NUM 3
+
 int cpu_count() {
     return CPU_NUM;
 }
