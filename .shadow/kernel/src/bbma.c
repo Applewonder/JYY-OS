@@ -261,5 +261,6 @@ void bbma_init(void* start, void* end) {
             cur_bbma_block_stick->next = NULL;
         }
         cur_buddy_block_addr += bbma_init_block_size;
+        cur_bbma_block_stick = cur_bbma_block_stick->next;
     }
 }
