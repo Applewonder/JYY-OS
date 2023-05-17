@@ -1,10 +1,9 @@
 #include "threads.h"
 #include "common.h"
 
-int cur_cpu;
-
 static void entry(int tid) { 
-  cur_cpu = tid - 1;
+  int cur_cpu = tid - 1;
+  thread_id[cur_cpu] = pthread_self();
   pmm->alloc(128);
 }
 static void goodbye()      { printf("End.\n"); }

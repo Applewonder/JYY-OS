@@ -9,8 +9,10 @@
 #include <stdbool.h>
 #include "am.h"
 typedef int spinlock_t;
-
+typedef unsigned long uintptr_t
 #define SPIN_LOCK_INIT 0
+
+int thread_id[CPU_NUM];
 
 void spin_lock(int *lk);
 
@@ -19,6 +21,20 @@ void spin_unlock(int *lk);
 long align_to(long n, unsigned int align);
 
 bool is_align_to(void *ptr, unsigned int align);
+
+#define CPU_NUM 3
+int cpu_count() {
+    return CPU_NUM;
+}
+
+int cpu_current() {
+    for (size_t i = 0; i < CPU_NUM; i++)
+    {
+        if (thread_id[i] == pthread_self()) {
+            return i;
+        }
+    }
+}
 
 #endif
 
