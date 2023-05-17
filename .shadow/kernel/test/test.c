@@ -1,7 +1,12 @@
 #include "threads.h"
 #include "common.h"
 
-static void entry(int tid) { pmm->alloc(128); }
+int cur_cpu;
+
+static void entry(int tid) { 
+  cur_cpu = tid - 1;
+  pmm->alloc(128);
+}
 static void goodbye()      { printf("End.\n"); }
 int main() {
   pmm->init();

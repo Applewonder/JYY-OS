@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <stdbool.h>
+#include "am.h"
 typedef int spinlock_t;
 
 #define SPIN_LOCK_INIT 0
