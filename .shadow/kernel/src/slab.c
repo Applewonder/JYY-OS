@@ -99,7 +99,6 @@ void* request_a_slab_from_bbma(int cpu_num, SLAB_SIZE slab_size) {
     SLAB_STICK* free_space = slab_addr;
     free_space->next_slab_stick = cpu_own_area[cpu_num][slab_size - CPU_FIND_SLAB_OFFSET];
     cpu_own_area[cpu_num][slab_size - CPU_FIND_SLAB_OFFSET] = free_space;
-    assert(0);
     initialize_a_slab_new_page(cpu_num, slab_size, free_space);
     return find_the_free_space_in_slab(cpu_num, slab_size);
 }
