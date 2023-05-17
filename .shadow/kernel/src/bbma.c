@@ -55,6 +55,7 @@ void* bbma_alloc(size_t size, bool is_from_slab) {
     void* possible_bbma_addr = find_the_free_space_in_bbma_system(bbma_size);
     if (possible_bbma_addr == NULL) {
         possible_bbma_addr = divide_larger_bbma_block_from_bbma_system(bbma_size + 1);
+        delete_a_free_block_in_bbma_system(possible_bbma_addr - BBMA_STICK_SIZE);
     }
     return possible_bbma_addr;
 }
