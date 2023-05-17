@@ -19,7 +19,7 @@ int cpu_count();
 
 int cpu_current();
 
-inline int atomic_xchg(volatile int *addr, int newval);
+int atomic_xchg(volatile int *addr, int newval);
 void spin_lock(int *lk);
 void spin_unlock(int *lk);
 
