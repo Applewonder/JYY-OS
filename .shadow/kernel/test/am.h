@@ -11,7 +11,7 @@ int cpu_count() {
 }
 
 int cpu_current() {
-    for (size_t i = 0; i < CPU_NUM; i++)
+    for (int i = 0; i < CPU_NUM; i++)
     {
         if (thread_id[i] == pthread_self()) {
             return i;
