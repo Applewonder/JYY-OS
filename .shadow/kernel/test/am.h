@@ -1,7 +1,7 @@
 #ifdef TEST
 # ifndef MY_AM_
 # define MY_AM_
-#include "threads.h"
+
 #define CPU_NUM 3
 int cpu_count() {
     return CPU_NUM;
