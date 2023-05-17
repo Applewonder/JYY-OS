@@ -36,6 +36,23 @@ static void pmm_init() {
     bbma_init(align_begin_address + (1 << 24), heap.end);
   }
   slab_init();
+  #ifdef NTEST
+  for (size_t i = 0; i < 10000; i++)
+  {
+    void* int32_ptr = kalloc(32);
+    void* int64_ptr = kalloc(64); 
+    void* int128_ptr = kalloc(128);
+    void* int256_ptr = kalloc(256);
+    void* int512_ptr = kalloc(512);
+    void* int1024_ptr = kalloc(1024);
+    kfree(int32_ptr);
+    kfree(int64_ptr);
+    kfree(int128_ptr);
+    kfree(int256_ptr);
+    kfree(int512_ptr);
+    kfree(int1024_ptr);
+  }
+#endif
 }
 #else
 // 测试代码的 pmm_init ()
