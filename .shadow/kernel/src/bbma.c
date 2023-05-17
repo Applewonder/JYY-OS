@@ -255,7 +255,7 @@ void bbma_init(void* start, void* end) {
     while(cur_buddy_block_addr + bbma_init_block_size <= end) {
         cur_bbma_block_stick->size = S_16M;
         if (cur_buddy_block_addr + 2 * bbma_init_block_size <= end) {
-            cur_bbma_block_stick->next = cur_bbma_block_stick + bbma_init_block_size;
+            cur_bbma_block_stick->next = ((void*)cur_bbma_block_stick) + bbma_init_block_size;
             cur_bbma_block_stick->next->prev = cur_bbma_block_stick;
         } else {
             cur_bbma_block_stick->next = NULL;
