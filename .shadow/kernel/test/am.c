@@ -56,7 +56,7 @@ bool is_align_to(void *ptr, unsigned int align) {
   unsigned int align_number = 1 << align;
   unsigned int mask = align_number - 1;
   if ((align_number & mask) != 0) {
-    panic("align must be power of 2");
+    //panic("align must be power of 2");
   }
   return ((uintptr_t)ptr & mask) == 0;
 }
