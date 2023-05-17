@@ -126,7 +126,7 @@ void* divide_larger_bbma_block_from_bbma_system(BUDDY_BLOCK_SIZE bbma_size) {
         }   
     } else {
         buddy_block_list[bbma_size - FIND_BBMA_OFFSET] = the_bbma_block->next;
-        the_bbma_block_addr = the_bbma_block + BBMA_STICK_SIZE;
+        the_bbma_block_addr = ((void*)the_bbma_block) + BBMA_STICK_SIZE;
     }
     spin_unlock(&bbma_lock[bbma_size - FIND_BBMA_OFFSET]);
     BUDDY_BLOCK_STICK* left_divided_child = the_bbma_block_addr - BBMA_STICK_SIZE;
