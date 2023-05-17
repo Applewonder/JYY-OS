@@ -52,6 +52,7 @@ static void pmm_init() {
     kfree(int512_ptr);
     kfree(int1024_ptr);
   }
+  printf("Pass all test!\n");
 #endif
 }
 #else
