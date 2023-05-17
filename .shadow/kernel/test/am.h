@@ -3,6 +3,7 @@
 # define MY_AM_
 
 #include <pthread.h>
+#include <stdbool.h>
 
 #define CPU_NUM 3
 
