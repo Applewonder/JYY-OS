@@ -1,6 +1,6 @@
 #include "threads.h"
 #include "common.h"
-
+#include "am.h"
 
 
 static void entry(int tid) { 
