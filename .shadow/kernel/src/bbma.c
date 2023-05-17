@@ -71,7 +71,7 @@ void* find_the_free_space_in_bbma_system(BUDDY_BLOCK_SIZE bbma_size) {
         the_bbma_block->next->prev = NULL;
     }
     spin_unlock(&bbma_lock[bbma_size - FIND_BBMA_OFFSET]);
-    return (void*)the_bbma_block + BBMA_STICK_SIZE;
+    return ((void*)the_bbma_block) + BBMA_STICK_SIZE;
 }
 
 void insert_two_new_divided_child_into_bbma_system(BUDDY_BLOCK_STICK* left_divided_child, BUDDY_BLOCK_STICK* right_divided_child, BUDDY_BLOCK_SIZE bbma_size){
@@ -130,9 +130,9 @@ void* divide_larger_bbma_block_from_bbma_system(BUDDY_BLOCK_SIZE bbma_size) {
     }
     spin_unlock(&bbma_lock[bbma_size - FIND_BBMA_OFFSET]);
     BUDDY_BLOCK_STICK* left_divided_child = the_bbma_block_addr - BBMA_STICK_SIZE;
-    BUDDY_BLOCK_STICK* right_divided_child = left_divided_child + (1 << (bbma_size - 1));
+    BUDDY_BLOCK_STICK* right_divided_child = ((void*)left_divided_child) + (1 << (bbma_size - 1));
     insert_two_new_divided_child_into_bbma_system(left_divided_child, right_divided_child, bbma_size - 1);
-    return left_divided_child + BBMA_STICK_SIZE;
+    return ((void*)left_divided_child) + BBMA_STICK_SIZE;
 }
 
 void* bbma_align_to_larger_block(void* ptr, BUDDY_BLOCK_SIZE bbma_size) {
@@ -165,7 +165,7 @@ BUDDY_BLOCK_STICK* find_the_position_where_inserting_the_free_bbma_block(BUDDY_B
 void insert_free_bbma_block_into_bbma_system(BUDDY_BLOCK_STICK* inserted_bbma_block_stick, BUDDY_BLOCK_SIZE bbma_block_size) {
     spin_lock(&bbma_lock[bbma_block_size - FIND_BBMA_OFFSET]);
     BUDDY_BLOCK_STICK* the_cur_bbma_block = buddy_block_list[bbma_block_size - FIND_BBMA_OFFSET];
-    BUDDY_BLOCK_STICK* the_cur_bbma_neighbor_block = bbma_align_to_larger_block(inserted_bbma_block_stick + BBMA_STICK_SIZE, bbma_block_size + 1) - BBMA_STICK_SIZE;
+    BUDDY_BLOCK_STICK* the_cur_bbma_neighbor_block = bbma_align_to_larger_block((void*)inserted_bbma_block_stick + BBMA_STICK_SIZE, bbma_block_size + 1) - BBMA_STICK_SIZE;
     BUDDY_BLOCK_STICK* the_position_where_inserting_the_free_bbma_block = find_the_position_where_inserting_the_free_bbma_block(inserted_bbma_block_stick, bbma_block_size);
     bool where_is_the_neighbor = the_cur_bbma_neighbor_block < inserted_bbma_block_stick;
     if (where_is_the_neighbor) {
