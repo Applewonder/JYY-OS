@@ -43,7 +43,7 @@ long align_to(long n, unsigned int align) {
         printf("align: %x\n", align);
         printf("align_number: %x\n", align_number);
         printf("mask: %x\n", mask);
-        panic("align must be power of 2");
+        //panic("align must be power of 2");
     }
     if ((n & mask) == 0) {
         return n;
