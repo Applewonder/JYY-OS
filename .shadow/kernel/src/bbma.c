@@ -111,6 +111,21 @@ void insert_two_new_divided_child_into_bbma_system(BUDDY_BLOCK_STICK* left_divid
     spin_unlock(&bbma_lock[bbma_size - FIND_BBMA_OFFSET]);
 }
 
+void delete_a_free_block_in_bbma_system(BUDDY_BLOCK_STICK* block) {
+    if (block->prev == NULL) {
+        BUDDY_BLOCK_SIZE bbma_size = block->size;
+        buddy_block_list[bbma_size - FIND_BBMA_OFFSET] = block->next;
+        if (block->next != NULL) {
+            block->next->prev = NULL;
+        }
+    } else {
+        block->prev->next = block->next;
+        if (block->next != NULL) {
+            block->next->prev = block->prev;
+        }
+    }
+}
+
 void* divide_larger_bbma_block_from_bbma_system(BUDDY_BLOCK_SIZE bbma_size) {
     if (bbma_size == BBMA_REFUSE) {
         return NULL;
@@ -121,7 +136,8 @@ void* divide_larger_bbma_block_from_bbma_system(BUDDY_BLOCK_SIZE bbma_size) {
     if (the_bbma_block == NULL) {
         spin_unlock(&bbma_lock[bbma_size - FIND_BBMA_OFFSET]);
         the_bbma_block_addr = divide_larger_bbma_block_from_bbma_system(bbma_size + 1);
-        if (the_bbma_block_addr == NULL) {
+        the_bbma_block = ((void*)the_bbma_block_addr) - BBMA_STICK_SIZE;
+        if (the_bbma_block_addr ==  NULL) {
             return NULL;
         }   
     } else {
@@ -130,10 +146,7 @@ void* divide_larger_bbma_block_from_bbma_system(BUDDY_BLOCK_SIZE bbma_size) {
     spin_unlock(&bbma_lock[bbma_size - FIND_BBMA_OFFSET]);
     BUDDY_BLOCK_STICK* left_divided_child = the_bbma_block_addr - BBMA_STICK_SIZE;
     BUDDY_BLOCK_STICK* right_divided_child = ((void*)left_divided_child) + (1 << (bbma_size - 1));
-    buddy_block_list[bbma_size - FIND_BBMA_OFFSET] = the_bbma_block->next;
-    if (the_bbma_block->next != NULL) {
-        the_bbma_block->next->prev = NULL;
-    }
+    delete_a_free_block_in_bbma_system(the_bbma_block);
     insert_two_new_divided_child_into_bbma_system(left_divided_child, right_divided_child, bbma_size - 1);
     return ((void*)left_divided_child) + BBMA_STICK_SIZE;
 }
