@@ -1,6 +1,7 @@
 #include <common.h>
 #include <stdint.h>
-
+#include <bbma.h>
+#include <slab.h>
 
 #define HEAP_SIZE 0x100000
 
@@ -11,12 +12,16 @@ struct {
 #endif
 
 static void *kalloc(size_t size) {
-  return NULL;
-  // int cpu_num = cpu_current();
-  // return slab_alloc(cpu_num, size);
+  int cpu_num = cpu_current();
+  return slab_alloc(cpu_num, size);
 }
 
 static void kfree(void *ptr) {
+  if (is_align_to(ptr, 12)) {
+    bbma_free(ptr);
+  } else {
+    slab_free(ptr);
+  }
 }
 
 #ifndef TEST
@@ -24,6 +29,13 @@ static void kfree(void *ptr) {
 static void pmm_init() {
   uintptr_t pmsize = ((uintptr_t)heap.end - (uintptr_t)heap.start);
   printf("Got %d MiB heap: [%p, %p)\n", pmsize >> 20, heap.start, heap.end);
+  void* align_begin_address = (void*)align_to((uintptr_t)heap.start, 24);
+  if (align_begin_address - heap.start >= BBMA_STICK_SIZE) {
+    bbma_init(align_begin_address, heap.end);
+  } else {
+    bbma_init(align_begin_address + (1 << 24), heap.end);
+  }
+  slab_init();
 }
 #else
 // 测试代码的 pmm_init ()

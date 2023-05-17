@@ -3,13 +3,16 @@
 # include <common.h>
 
 #define MAX_CPU 8
+#define BBMA_NUM 14
+#define FIND_BBMA_OFFSET 11
+#define BBMA_STICK_SIZE sizeof(BUDDY_BLOCK_STICK)
 
-typedef struct buddy_block_* Buddy_block;
-typedef enum BLOCK_SIZE_ BLOCK_SIZE;
-typedef int spinlock_t;
+typedef struct buddy_block_ BUDDY_BLOCK_STICK;
+typedef enum BLOCK_SIZE_ BUDDY_BLOCK_SIZE;
 
 enum BLOCK_SIZE_{
-    S_4K=0,
+    S_2K=11,
+    S_4K,
     S_8K,
     S_16K,
     S_32K,
@@ -22,18 +25,26 @@ enum BLOCK_SIZE_{
     S_4M,
     S_8M,
     S_16M,
-    REFUSE
+    BBMA_REFUSE
 };
 
-size_t block_sizes[] = {4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384};
-size_t divide_sizes[] = {0, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192};
-spinlock_t cpu_slab_lock_list[MAX_CPU];
+BUDDY_BLOCK_STICK* buddy_block_list[BBMA_NUM];
+spinlock_t bbma_lock[BBMA_NUM];
 
 struct buddy_block_{
-    void* addr;
-    Buddy_block near_buddy;
+    size_t size;
+    BUDDY_BLOCK_STICK* next;
+    BUDDY_BLOCK_STICK* prev;
 };
 
-Buddy_block block_list[13];
-
+BUDDY_BLOCK_SIZE determine_bbma_size(size_t size);
+void* bbma_alloc(size_t size, bool is_from_slab);
+void* find_the_free_space_in_bbma_system(BUDDY_BLOCK_SIZE bbma_size);
+void* divide_larger_bbma_block_from_bbma_system(BUDDY_BLOCK_SIZE bbma_size);
+void insert_two_new_divided_child_into_bbma_system(BUDDY_BLOCK_STICK* left_divided_child, BUDDY_BLOCK_STICK* right_divided_child, BUDDY_BLOCK_SIZE bbma_size);
+void* bbma_align_to_larger_block(void* ptr, BUDDY_BLOCK_SIZE bbma_size);
+BUDDY_BLOCK_STICK* find_the_position_where_inserting_the_free_bbma_block(BUDDY_BLOCK_STICK* inserted_bbma_block_stick, BUDDY_BLOCK_SIZE bbma_block_size);
+void insert_free_bbma_block_into_bbma_system(BUDDY_BLOCK_STICK* inserted_bbma_block_stick, BUDDY_BLOCK_SIZE bbma_block_size);
+void bbma_free(void* ptr);
+void bbma_init(void* start, void* end);
 #endif
