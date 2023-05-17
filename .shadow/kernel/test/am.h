@@ -7,7 +7,7 @@ int cpu_count() {
     return CPU_NUM;
 }
 
-#define cpu_current() {
+int cpu_current() {
     return cur_cpu;
 }
 
