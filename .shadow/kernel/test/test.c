@@ -1,6 +1,8 @@
 #include "threads.h"
 #include "common.h"
 
+
+
 static void entry(int tid) { 
   int cur_cpu = tid - 1;
   thread_id[cur_cpu] = pthread_self();
