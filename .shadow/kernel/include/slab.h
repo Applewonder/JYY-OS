@@ -32,8 +32,6 @@ typedef struct SLAB_FREE_BLOCK_{
     uintptr_t next_free_slab_block;
 } SLAB_FREE_BLOCK;
 
-SLAB_STICK* cpu_own_area[MAX_CPU][SLAB_NUM];
-
 SLAB_SIZE determine_slab_size(size_t size);
 void* slab_alloc(int cpu_num, size_t size);
 void* find_the_free_space_in_slab(int cpu_num, SLAB_SIZE slab_size);

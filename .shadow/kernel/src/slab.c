@@ -1,6 +1,8 @@
 # include <slab.h>
 #include <stdint.h>
 
+SLAB_STICK* cpu_own_area[MAX_CPU][SLAB_NUM];
+
 SLAB_SIZE determine_slab_size(size_t size) {
     // give a size, return the slab size
     if (size <= 32) {

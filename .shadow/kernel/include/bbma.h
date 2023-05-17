@@ -28,9 +28,6 @@ enum BLOCK_SIZE_{
     BBMA_REFUSE
 };
 
-BUDDY_BLOCK_STICK* buddy_block_list[BBMA_NUM];
-spinlock_t bbma_lock[BBMA_NUM];
-
 struct buddy_block_{
     size_t size;
     BUDDY_BLOCK_STICK* next;

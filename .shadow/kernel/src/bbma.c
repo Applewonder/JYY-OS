@@ -2,6 +2,8 @@
 #include <assert.h>
 #include <bbma.h>
 
+BUDDY_BLOCK_STICK* buddy_block_list[BBMA_NUM];
+spinlock_t bbma_lock[BBMA_NUM];
 
 BUDDY_BLOCK_SIZE determine_bbma_size(size_t size) {
     size_t real_size = size + BBMA_STICK_SIZE;
