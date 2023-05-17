@@ -81,7 +81,7 @@ void initialize_a_slab_new_page(int cpu_num, SLAB_SIZE slab_size, SLAB_STICK* sl
         free_block->next_free_slab_block = slab_page->current_slab_free_block_list;
         slab_page->current_slab_free_block_list = (uintptr_t)free_block;
         slab_free_space -= 1;
-        slab_block_addr += 1;
+        slab_block_addr += (1 << slab_size);
     }
 }
 
