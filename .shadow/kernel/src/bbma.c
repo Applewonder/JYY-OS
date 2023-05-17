@@ -44,7 +44,7 @@ BUDDY_BLOCK_SIZE determine_bbma_size(size_t size) {
 void* bbma_alloc(size_t size, bool is_from_slab) {
     BUDDY_BLOCK_SIZE bbma_size = BBMA_REFUSE;
     if (is_from_slab) {
-        if (bbma_size != SLAB_REQUEST_SPACE) {
+        if (size != SLAB_REQUEST_SPACE) {
             panic_on(true, "slab size error");
             return NULL;
         }
