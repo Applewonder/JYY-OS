@@ -130,11 +130,11 @@ void* divide_larger_bbma_block_from_bbma_system(BUDDY_BLOCK_SIZE bbma_size) {
     spin_unlock(&bbma_lock[bbma_size - FIND_BBMA_OFFSET]);
     BUDDY_BLOCK_STICK* left_divided_child = the_bbma_block_addr - BBMA_STICK_SIZE;
     BUDDY_BLOCK_STICK* right_divided_child = ((void*)left_divided_child) + (1 << (bbma_size - 1));
-    insert_two_new_divided_child_into_bbma_system(left_divided_child, right_divided_child, bbma_size - 1);
     buddy_block_list[bbma_size - FIND_BBMA_OFFSET] = the_bbma_block->next;
     if (the_bbma_block->next != NULL) {
         the_bbma_block->next->prev = NULL;
     }
+    insert_two_new_divided_child_into_bbma_system(left_divided_child, right_divided_child, bbma_size - 1);
     return ((void*)left_divided_child) + BBMA_STICK_SIZE;
 }
 
