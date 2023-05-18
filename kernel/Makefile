@@ -23,5 +23,9 @@ test: git
 				-o build/test
 runtest: 
 		@build/test
+
+testall: test
+		@build/test 0
+
 debug: 
 	./debug.sh
