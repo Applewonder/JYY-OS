@@ -161,3 +161,7 @@ void do_test_1() {
     }
     join();
 }
+
+void do_test_2() {
+    
+}
