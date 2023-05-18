@@ -51,6 +51,7 @@ void insert_alloc_chain(void* alloc, unsigned long size) {
 }
 
 bool delete_alloc_block(void* alloc) {
+  printf("Deleting alloc block\n");
   print_chain();
   TASK* cur = head;
   TASK* pre = NULL;
