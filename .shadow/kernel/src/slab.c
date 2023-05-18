@@ -23,7 +23,7 @@ SLAB_SIZE determine_slab_size(size_t size) {
 }
 
 void* slab_alloc(int cpu_num, size_t size) {
-    printf("This is cpu %d\n, alloc %ld space\n", cpu_num, size);
+    printf("This is cpu %d, alloc %ld space\n", cpu_num, size);
     SLAB_SIZE slab_size = determine_slab_size(size);
     if (slab_size == SLAB_REFUSE) {
         return bbma_alloc(size, false);
