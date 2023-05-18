@@ -160,7 +160,7 @@ static void entry_0(int tid) {
 
 
 void do_test_0() {
-    file = fopen("/home/appletree/JYY-OS/kernel/test/testlog.txt", "a+");
+    file = fopen("/home/appletree/JYY-OS/kernel/test/testlog.txt", "w");
     pmm->init();
     for (int i = 0; i < CPU_NUM; i++){
         create(entry_0);
