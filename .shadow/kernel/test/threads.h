@@ -50,4 +50,9 @@ __attribute__((destructor)) void cleanup() {
   join();
 }
 
+typedef pthread_mutex_t mutex_t;
+#define MUTEX_INIT() PTHREAD_MUTEX_INITIALIZER
+void mutex_lock(mutex_t *lk)   { pthread_mutex_lock(lk); }
+void mutex_unlock(mutex_t *lk) { pthread_mutex_unlock(lk); }
+
 #endif
