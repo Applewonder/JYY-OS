@@ -93,9 +93,14 @@ FILE *file;
 
 extern unsigned long thread_id[];
 
-void write_in_file(void* ptr, size_t size, bool is_alloc) {
+void write_in_file(void* ptr, size_t size, bool is_alloc, int test_id) {
+    char str[20];
+    sprintf(str, "%d", test_id);
+    char origin_log[200] = "/home/appletree/JYY-OS/kernel/test/testlog";
+    strcat(origin_log, str);
+    strcat(origin_log, ".txt");
     mutex_lock(&mutex);
-    file = fopen("/home/appletree/JYY-OS/kernel/test/testlog.txt", "a");
+    file = fopen(origin_log, "a");
     if (is_alloc) {
         fprintf(file, "Alloc %p, Size %ld\n", ptr, size);
     } else {
@@ -105,6 +110,13 @@ void write_in_file(void* ptr, size_t size, bool is_alloc) {
     mutex_unlock(&mutex);
 }
 
+void test_alloc_and_free(size_t size, int test_id) {
+    void* ptr = pmm->alloc(size);
+    write_in_file(ptr, size, true, test_id);
+    pmm->free(ptr);
+    write_in_file(ptr, size, false, test_id);
+}
+
 static void entry_0(int tid) { 
   int cur_cpu = tid - 1;
   thread_id[cur_cpu] = pthread_self();
@@ -112,53 +124,20 @@ static void entry_0(int tid) {
   for (int i = 0; i < 10000; i++)
   {
     int choose_type = i % 6;
-    switch(choose_type){
-      case 0: {
-        void* int32_ptr = pmm->alloc(32);
-        write_in_file(int32_ptr, 32, true);
-        pmm->free(int32_ptr);
-        write_in_file(int32_ptr, 32, false);
-        break;
-      }
-      case 1: {
-        void* int64_ptr = pmm->alloc(64);
-        write_in_file(int64_ptr, 64, true);
-        pmm->free(int64_ptr);
-        write_in_file(int64_ptr, 64, false);
-        break;
-      }
-      case 2: {
-        void* int128_ptr = pmm->alloc(128);
-        write_in_file(int128_ptr, 128, true);
-        pmm->free(int128_ptr);
-        write_in_file(int128_ptr, 128, false);
-        break;
-      }
-      case 3: {
-        void* int256_ptr = pmm->alloc(256);
-        write_in_file(int256_ptr, 256, true);
-        pmm->free(int256_ptr);
-        write_in_file(int256_ptr, 256, false);
-        break;
-      }
-      case 4: {
-        void* int512_ptr = pmm->alloc(512);
-        write_in_file(int512_ptr, 512, true);
-        pmm->free(int512_ptr);
-        write_in_file(int512_ptr, 512, false);
-        break;
-      }
-      case 5: {
-        void* int1024_ptr = pmm->alloc(1024);
-        write_in_file(int1024_ptr, 1024, true);
-        pmm->free(int1024_ptr);
-        write_in_file(int1024_ptr, 1024, false);
-        break;
-      }
-    }
+    test_alloc_and_free(1 << (5 + choose_type), 0);
   }
 }
 
+static void entry_1(int tid) { 
+  int cur_cpu = tid - 1;
+  thread_id[cur_cpu] = pthread_self();
+  printf("thread_id[%d]: %ld\n", cur_cpu, thread_id[cur_cpu]);
+  for (int i = 0; i < 14; i++)
+  {
+    int choose_type = i % 14;
+    test_alloc_and_free(1 << (11 + choose_type), 1);
+  }
+}
 
 
 void do_test_0() {
@@ -167,6 +146,16 @@ void do_test_0() {
     pmm->init();
     for (int i = 0; i < CPU_NUM; i++){
         create(entry_0);
+    }
+    join();
+}
+
+void do_test_1() {
+    file = fopen("/home/appletree/JYY-OS/kernel/test/testlog.txt", "w");
+    fclose(file);
+    pmm->init();
+    for (int i = 0; i < CPU_NUM; i++){
+        create(entry_1);
     }
     join();
 }

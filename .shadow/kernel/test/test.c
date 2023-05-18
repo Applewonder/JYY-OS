@@ -87,9 +87,8 @@ bool judge_if_has_bad_free(unsigned long start_free) {
   return !delete_alloc_block((void*)start_free);
 }
 
-void judger_for_test_0() {
+void judger_for_alloc_and_free() {
     int line_num = 0;
-    printf("Judger for test_0\n");
     file = fopen("/home/appletree/JYY-OS/kernel/test/testlog.txt", "r");
     while (fgets(line, sizeof(line), file) != NULL) {
         if (line[0] == 'A') {
@@ -120,7 +119,6 @@ void judger_for_test_0() {
         line_num++;
     }
     fclose(file);
-    printf("Judger for test_0 end\n");
 }
 
 int main(int argc, char *argv[]) {
@@ -129,8 +127,14 @@ int main(int argc, char *argv[]) {
   switch(atoi(argv[1])) {
     case 0: {
       do_test_0();
-      judger_for_test_0();
+      judger_for_alloc_and_free();
       printf("\033[32m Test 0 passed\n\033[0m");
+      break;
+    }
+    case 1: {
+      do_test_1();
+      judger_for_alloc_and_free();
+      printf("\033[32m Test 1 passed\n\033[0m");
       break;
     }
   }
