@@ -44,6 +44,13 @@ static void pmm_init() {
   heap.start = ptr;
   heap.end   = ptr + HEAP_SIZE;
   printf("Got %d MiB heap: [%p, %p)\n", HEAP_SIZE >> 20, heap.start, heap.end);
+  void* align_begin_address = (void*)align_to((uintptr_t)heap.start, 24);
+  if (align_begin_address - heap.start >= BBMA_STICK_SIZE) {
+    bbma_init(align_begin_address, heap.end);
+  } else {
+    bbma_init(align_begin_address + (1 << 24), heap.end);
+  }
+  slab_init();
 }
 #endif
 
