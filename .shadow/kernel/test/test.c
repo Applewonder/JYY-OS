@@ -3,7 +3,7 @@
 #include "testcase.h"
 #include "string.h"
 
-#define MAX_LINE_LENGTH 30
+#define MAX_LINE_LENGTH 40
 #define MAX_LENGTH 20
 #define MAX_ALLOC_SIZE 100
 
