@@ -1,4 +1,3 @@
-#include "threads.h"
 #include "common.h"
 #include "am.h"
 #include "testcase.h"
