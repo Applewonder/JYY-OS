@@ -95,11 +95,13 @@ extern unsigned long thread_id[];
 
 void write_in_file(void* ptr, size_t size, bool is_alloc) {
     mutex_lock(&mutex);
+    file = fopen("/home/appletree/JYY-OS/kernel/test/testlog.txt", "a");
     if (is_alloc) {
         fprintf(file, "Alloc %p, Size %ld\n", ptr, size);
     } else {
         fprintf(file, "Free %p\n", ptr);
     }
+    fclose(file);
     mutex_unlock(&mutex);
 }
 
@@ -161,10 +163,10 @@ static void entry_0(int tid) {
 
 void do_test_0() {
     file = fopen("/home/appletree/JYY-OS/kernel/test/testlog.txt", "w");
+    fclose(file);
     pmm->init();
     for (int i = 0; i < CPU_NUM; i++){
         create(entry_0);
     }
-    fclose(file);
     join();
 }
