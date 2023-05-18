@@ -78,7 +78,7 @@ bool judge_if_has_bad_free(unsigned long start_free) {
 void print_chain() {
   TASK* cur = head;
   while (cur != NULL) {
-    printf("alloc: %p, size: %d\n", cur->alloc, cur->size);
+    printf("alloc: %p, size: %ld\n", cur->alloc, cur->size);
     cur = cur->next;
   }
 }
