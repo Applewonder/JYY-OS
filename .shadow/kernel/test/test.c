@@ -11,7 +11,7 @@ static void entry(int tid) {
 static void goodbye()      { printf("End.\n"); }
 int main() {
   pmm->init();
-  for (int i = 0; i < 4; i++)
+  for (int i = 0; i < CPU_NUM; i++)
     create(entry);
   join(goodbye);
 }
