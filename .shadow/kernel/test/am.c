@@ -1,6 +1,6 @@
 # include "am.h"
 
-int thread_id[CPU_NUM];
+unsigned long thread_id[CPU_NUM];
 
 int cpu_count() {
     return CPU_NUM;
