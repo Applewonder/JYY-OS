@@ -103,7 +103,7 @@ void judger_for_test_0() {
             strcpy(destinationArray, &line[size_start_index]);
             unsigned long alloc_size = strtoul(destinationArray, NULL, 10);
             if (judge_if_have_duplicate_alloc(alloc_address, alloc_address + alloc_size)) {
-              printf("Error: Duplicate alloc\n");
+              printf("\033[31m Error: Duplicate alloc\n\033[0m");
               exit(1);
             }
             insert_alloc_chain((void*)alloc_address, alloc_size);
@@ -112,7 +112,7 @@ void judger_for_test_0() {
             strcpy(destinationArray, &line[5]);
             unsigned long free_address = strtoul(destinationArray, NULL, 16);
             if (judge_if_has_bad_free(free_address)) {
-              printf("Error: Bad free in line %d\n", line_num);
+              printf("\033[31m Error: Bad free in line %d\n\033[0m", line_num);
               // print_chain();
               exit(1);
             }
@@ -130,6 +130,7 @@ int main(int argc, char *argv[]) {
     case 0: {
       do_test_0();
       judger_for_test_0();
+      printf("\033[32m Test 0 passed\n\033[0m");
       break;
     }
   }
