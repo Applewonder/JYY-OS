@@ -91,8 +91,7 @@ void judger_for_test_0() {
     int line_num = 0;
     printf("Judger for test_0\n");
     file = fopen("/home/appletree/JYY-OS/kernel/test/testlog.txt", "r");
-    while (!feof(file)) {
-        fscanf(file,"%[^\n]", line);
+    while (fgets(line, sizeof(line), file) != NULL) {
         if (line[0] == 'A') {
             int start_index = 6;
             int end_index = find_the_target_index(line);
