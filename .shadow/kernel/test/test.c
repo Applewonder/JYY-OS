@@ -14,5 +14,5 @@ int main() {
   pmm->init();
   for (int i = 0; i < CPU_NUM; i++)
     create(entry);
-  join(goodbye);
+  join();
 }
