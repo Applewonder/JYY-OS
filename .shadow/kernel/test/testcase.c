@@ -141,6 +141,7 @@ static void entry_1(int tid) {
 
 
 void do_test_0() {
+    printf("\033[32m Test 0 begin\n\033[0m");
     file = fopen("/home/appletree/JYY-OS/kernel/test/testlog.txt", "w");
     fclose(file);
     pmm->init();
@@ -151,6 +152,7 @@ void do_test_0() {
 }
 
 void do_test_1() {
+    printf("\033[32m Test 1 begin\n\033[0m");
     file = fopen("/home/appletree/JYY-OS/kernel/test/testlog.txt", "w");
     fclose(file);
     pmm->init();
