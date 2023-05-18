@@ -40,7 +40,7 @@ int find_the_target_index(char* line) {
 }
 
 void insert_alloc_chain(void* alloc, unsigned long size) {
-  printf("Inserting alloc block\n");
+  // printf("Inserting alloc block\n");
   TASK* new_task = (TASK*)malloc(sizeof(TASK));
   new_task->alloc = alloc;
   new_task->size = size;
@@ -51,7 +51,7 @@ void insert_alloc_chain(void* alloc, unsigned long size) {
 }
 
 bool delete_alloc_block(void* alloc) {
-  printf("Deleting alloc block\n");
+  // printf("Deleting alloc block\n");
   // print_chain();
   TASK* cur = head;
   TASK* pre = NULL;
