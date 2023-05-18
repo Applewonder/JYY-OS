@@ -72,7 +72,7 @@ bool judge_if_have_duplicate_alloc(unsigned long start_alloc, unsigned long end_
 }
 
 bool judge_if_has_bad_free(unsigned long start_free) {
-  return delete_alloc_block((void*)start_free);
+  return !delete_alloc_block((void*)start_free);
 }
 
 void judger_for_test_0() {
