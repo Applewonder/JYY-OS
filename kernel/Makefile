@@ -1,3 +1,4 @@
+export TOKEN := Cxcg92cm
 export MODULE  := L1
 NAME           := kernel
 SRCS           := framework/main.c $(shell find -L ./src/ -name "*.c")
@@ -15,11 +16,12 @@ include ../Makefile.lab
 image: git
 
 test: git
-		@gcc $(shell find src/ -name "*.c") \
-			$(shell find test/ -name "*.c") \
-			-Iframework -Itest -Iinclude  -DTEST -lpthread \
-			-o build/test
+		@gcc $(shell find src/ -name "*.c")  \
+				$(shell find test/ -name "*.c") \
+				-g\
+				-Iframework -Itest -Iinclude -DTEST -lpthread\
+				-o build/test
+runtest: 
 		@build/test
-
 debug: 
 	./debug.sh

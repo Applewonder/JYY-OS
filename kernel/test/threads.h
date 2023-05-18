@@ -1,3 +1,6 @@
+#ifndef THREAD_H
+#define THREAD_H
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -46,3 +49,5 @@ void join() {
 __attribute__((destructor)) void cleanup() {
   join();
 }
+
+#endif
