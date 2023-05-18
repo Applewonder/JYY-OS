@@ -77,6 +77,7 @@ bool judge_if_has_bad_free(unsigned long start_free) {
 }
 
 void print_chain() {
+  printf("Printing chain\n");
   TASK* cur = head;
   while (cur != NULL) {
     printf("alloc: %p, size: %ld\n", cur->alloc, cur->size);
@@ -104,6 +105,7 @@ void judger_for_test_0() {
               exit(1);
             }
             insert_alloc_chain((void*)alloc_address, alloc_size);
+            print_chain();
         } else {
             strcpy(destinationArray, &line[5]);
             unsigned long free_address = strtoul(destinationArray, NULL, 16);
