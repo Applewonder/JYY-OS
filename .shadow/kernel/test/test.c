@@ -75,6 +75,14 @@ bool judge_if_has_bad_free(unsigned long start_free) {
   return !delete_alloc_block((void*)start_free);
 }
 
+void print_chain() {
+  TASK* cur = head;
+  while (cur != NULL) {
+    printf("alloc: %p, size: %d\n", cur->alloc, cur->size);
+    cur = cur->next;
+  }
+}
+
 void judger_for_test_0() {
     int line_num = 0;
     printf("Judger for test_0\n");
@@ -100,6 +108,7 @@ void judger_for_test_0() {
             unsigned long free_address = strtoul(destinationArray, NULL, 16);
             if (judge_if_has_bad_free(free_address)) {
               printf("Error: Bad free in line %d\n", line_num);
+              print_chain();
               exit(1);
             }
         }
