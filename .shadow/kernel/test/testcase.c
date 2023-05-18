@@ -96,7 +96,7 @@ extern unsigned long thread_id[];
 void write_in_file(void* ptr, size_t size, bool is_alloc) {
     mutex_lock(&mutex);
     if (is_alloc) {
-        fprintf(file, "Alloc %p, Size %lx\n", ptr, size);
+        fprintf(file, "Alloc %p, Size %ld\n", ptr, size);
     } else {
         fprintf(file, "Free %p\n", ptr);
     }
