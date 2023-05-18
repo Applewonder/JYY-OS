@@ -41,8 +41,8 @@ long align_to(long n, unsigned int align) {
     long mask = align_number - 1;
     if ((align_number & mask) != 0) {
         printf("align: %x\n", align);
-        printf("align_number: %x\n", align_number);
-        printf("mask: %x\n", mask);
+        printf("align_number: %lx\n", align_number);
+        printf("mask: %lx\n", mask);
         //panic("align must be power of 2");
     }
     if ((n & mask) == 0) {
