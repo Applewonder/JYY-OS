@@ -9,10 +9,13 @@ int cpu_count() {
 int cpu_current() {
     for (int i = 0; i < CPU_NUM; i++)
     {
-        if (thread_id[i] == pthread_self()) {
+        unsigned long tid = pthread_self();
+        if (thread_id[i] == tid) {
+            printf("cpu_current: %d, tid: %ld\n", i, tid);
             return i;
         }
     }
+    printf("NOOOOOOOOO\n");
 }
 
 inline int atomic_xchg(volatile int *addr, int newval) {
