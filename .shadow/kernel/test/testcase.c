@@ -120,7 +120,7 @@ void test_alloc_and_free(size_t size, int test_id) {
 static void entry_0(int tid) { 
   int cur_cpu = tid - 1;
   thread_id[cur_cpu] = pthread_self();
-  printf("thread_id[%d]: %ld\n", cur_cpu, thread_id[cur_cpu]);
+//   printf("thread_id[%d]: %ld\n", cur_cpu, thread_id[cur_cpu]);
   for (int i = 0; i < 10000; i++)
   {
     int choose_type = i % 6;
@@ -131,7 +131,7 @@ static void entry_0(int tid) {
 static void entry_1(int tid) { 
   int cur_cpu = tid - 1;
   thread_id[cur_cpu] = pthread_self();
-  printf("thread_id[%d]: %ld\n", cur_cpu, thread_id[cur_cpu]);
+//   printf("thread_id[%d]: %ld\n", cur_cpu, thread_id[cur_cpu]);
   for (int i = 0; i < 14; i++)
   {
     int choose_type = i % 14;
