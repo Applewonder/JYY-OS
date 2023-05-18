@@ -22,6 +22,15 @@ struct Task_{
 
 TASK* head = NULL;
 
+void print_chain() {
+  printf("Printing chain\n");
+  TASK* cur = head;
+  while (cur != NULL) {
+    printf("alloc: %p, size: %ld\n", cur->alloc, cur->size);
+    cur = cur->next;
+  }
+}
+
 int find_the_target_index(char* line) {
   int index = 0;
   while (line[index] != ',') {
@@ -42,6 +51,7 @@ void insert_alloc_chain(void* alloc, unsigned long size) {
 }
 
 bool delete_alloc_block(void* alloc) {
+  print_chain();
   TASK* cur = head;
   TASK* pre = NULL;
   while (cur != NULL) {
@@ -74,15 +84,6 @@ bool judge_if_have_duplicate_alloc(unsigned long start_alloc, unsigned long end_
 
 bool judge_if_has_bad_free(unsigned long start_free) {
   return !delete_alloc_block((void*)start_free);
-}
-
-void print_chain() {
-  printf("Printing chain\n");
-  TASK* cur = head;
-  while (cur != NULL) {
-    printf("alloc: %p, size: %ld\n", cur->alloc, cur->size);
-    cur = cur->next;
-  }
 }
 
 void judger_for_test_0() {
