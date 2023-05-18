@@ -3,7 +3,7 @@
 #include <bbma.h>
 #include <slab.h>
 
-#define HEAP_SIZE 0x100000
+#define HEAP_SIZE 512 * 1024 * 1024
 
 #ifdef TEST
 struct {
