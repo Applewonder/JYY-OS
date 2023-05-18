@@ -118,6 +118,7 @@ void judger_for_test_0() {
               exit(1);
             }
         }
+        fgets(line, MAX_LINE_LENGTH, file);//read "\n"
         line_num++;
     }
     fclose(file);
