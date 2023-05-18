@@ -76,6 +76,7 @@ bool judge_if_has_bad_free(unsigned long start_free) {
 }
 
 void judger_for_test_0() {
+    int line_num = 0;
     printf("Judger for test_0\n");
     file = fopen("/home/appletree/JYY-OS/kernel/test/testlog.txt", "r");
     while (fgets(line, sizeof(line), file) != NULL) {
@@ -98,10 +99,11 @@ void judger_for_test_0() {
             strcpy(destinationArray, &line[5]);
             unsigned long free_address = strtoul(destinationArray, NULL, 16);
             if (judge_if_has_bad_free(free_address)) {
-              printf("Error: Bad free\n");
+              printf("Error: Bad free in line %d\n", line_num);
               exit(1);
             }
         }
+        line_num++;
     }
     fclose(file);
     printf("Judger for test_0 end\n");
