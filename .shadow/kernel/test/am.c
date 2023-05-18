@@ -11,7 +11,6 @@ int cpu_current() {
     {
         unsigned long tid = pthread_self();
         if (thread_id[i] == tid) {
-            printf("cpu_current: %d, tid: %ld\n", i, tid);
             return i;
         }
     }
