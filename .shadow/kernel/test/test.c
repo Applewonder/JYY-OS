@@ -31,6 +31,7 @@ int find_the_target_index(char* line) {
 }
 
 void insert_alloc_chain(void* alloc, unsigned long size) {
+  printf("Inserting alloc block\n");
   TASK* new_task = (TASK*)malloc(sizeof(TASK));
   new_task->alloc = alloc;
   new_task->size = size;
