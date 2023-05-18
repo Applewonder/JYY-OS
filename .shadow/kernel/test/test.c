@@ -52,7 +52,7 @@ void insert_alloc_chain(void* alloc, unsigned long size) {
 
 bool delete_alloc_block(void* alloc) {
   printf("Deleting alloc block\n");
-  print_chain();
+  // print_chain();
   TASK* cur = head;
   TASK* pre = NULL;
   while (cur != NULL) {
@@ -107,13 +107,13 @@ void judger_for_test_0() {
               exit(1);
             }
             insert_alloc_chain((void*)alloc_address, alloc_size);
-            print_chain();
+            // print_chain();
         } else {
             strcpy(destinationArray, &line[5]);
             unsigned long free_address = strtoul(destinationArray, NULL, 16);
             if (judge_if_has_bad_free(free_address)) {
               printf("Error: Bad free in line %d\n", line_num);
-              print_chain();
+              // print_chain();
               exit(1);
             }
         }
