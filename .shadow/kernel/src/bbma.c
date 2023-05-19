@@ -180,7 +180,11 @@ BUDDY_BLOCK_STICK* find_the_position_where_inserting_the_free_bbma_block(BUDDY_B
     return NULL;
 }
 
-bool judge_if_can_merge(bool where_is_the_neighbor, BUDDY_BLOCK_STICK* the_begin_bbma_block, BUDDY_BLOCK_STICK* the_position_where_inserting_the_free_bbma_block, BUDDY_BLOCK_STICK* the_cur_bbma_expected_neighbor_block) {
+bool judge_if_can_merge(BUDDY_BLOCK_STICK* inserted_bbma_block_stick, BUDDY_BLOCK_STICK* the_begin_bbma_block, BUDDY_BLOCK_STICK* the_position_where_inserting_the_free_bbma_block, BUDDY_BLOCK_STICK* the_cur_bbma_expected_neighbor_block) {
+    if (inserted_bbma_block_stick->size == S_16M) {
+        return false;
+    }
+    bool where_is_the_neighbor = the_cur_bbma_expected_neighbor_block < inserted_bbma_block_stick;
     if (where_is_the_neighbor) {
         if (the_position_where_inserting_the_free_bbma_block == NULL) {
             if (the_cur_bbma_expected_neighbor_block == the_begin_bbma_block) {
@@ -203,8 +207,20 @@ bool judge_if_can_merge(bool where_is_the_neighbor, BUDDY_BLOCK_STICK* the_begin
     return false;
 }
 
-
-
+BUDDY_BLOCK_STICK* merge_the_block(BUDDY_BLOCK_STICK* inserted_bbma_block_stick, BUDDY_BLOCK_STICK* the_cur_bbma_expected_neighbor_block, bool where_is_the_neighbor) {
+    if (where_is_the_neighbor) {
+        delete_a_free_block_in_bbma_system(the_cur_bbma_expected_neighbor_block);
+        the_cur_bbma_expected_neighbor_block->next = NULL;
+        the_cur_bbma_expected_neighbor_block->prev = NULL;
+        the_cur_bbma_expected_neighbor_block->size ++;
+        return the_cur_bbma_expected_neighbor_block;
+    } else {
+        inserted_bbma_block_stick->next = NULL;
+        inserted_bbma_block_stick->prev = NULL;
+        inserted_bbma_block_stick->size ++;
+        return inserted_bbma_block_stick;
+    }
+}
 
 void insert_free_bbma_block_into_bbma_system(BUDDY_BLOCK_STICK* inserted_bbma_block_stick, BUDDY_BLOCK_SIZE bbma_block_size) {
     spin_lock(&bbma_lock[bbma_block_size - FIND_BBMA_OFFSET]);
@@ -218,7 +234,9 @@ void insert_free_bbma_block_into_bbma_system(BUDDY_BLOCK_STICK* inserted_bbma_bl
         if (the_begin_bbma_block == NULL) {
             buddy_block_list[bbma_block_size - FIND_BBMA_OFFSET] = inserted_bbma_block_stick;
         } else {
-            
+            if (judge_if_can_merge(inserted_bbma_block_stick, the_begin_bbma_block, the_position_where_inserting_the_free_bbma_block, the_cur_bbma_expected_neighbor_block)) {
+
+            }
         }
     }
 
