@@ -180,78 +180,48 @@ BUDDY_BLOCK_STICK* find_the_position_where_inserting_the_free_bbma_block(BUDDY_B
     return NULL;
 }
 
-void insert_free_bbma_block_into_bbma_system(BUDDY_BLOCK_STICK* inserted_bbma_block_stick, BUDDY_BLOCK_SIZE bbma_block_size) {
-    spin_lock(&bbma_lock[bbma_block_size - FIND_BBMA_OFFSET]);
-    BUDDY_BLOCK_STICK* the_cur_bbma_block = buddy_block_list[bbma_block_size - FIND_BBMA_OFFSET];
-    BUDDY_BLOCK_STICK* the_cur_bbma_neighbor_block = bbma_align_to_larger_block((void*)inserted_bbma_block_stick + BBMA_STICK_SIZE, bbma_block_size + 1) - BBMA_STICK_SIZE;
-    BUDDY_BLOCK_STICK* the_position_where_inserting_the_free_bbma_block = find_the_position_where_inserting_the_free_bbma_block(inserted_bbma_block_stick, bbma_block_size);
-    bool where_is_the_neighbor = the_cur_bbma_neighbor_block < inserted_bbma_block_stick;
+bool judge_if_can_merge(bool where_is_the_neighbor, BUDDY_BLOCK_STICK* the_begin_bbma_block, BUDDY_BLOCK_STICK* the_position_where_inserting_the_free_bbma_block, BUDDY_BLOCK_STICK* the_cur_bbma_expected_neighbor_block) {
     if (where_is_the_neighbor) {
         if (the_position_where_inserting_the_free_bbma_block == NULL) {
-            inserted_bbma_block_stick->next = the_cur_bbma_block;
-            the_cur_bbma_block->prev = inserted_bbma_block_stick;
-            buddy_block_list[bbma_block_size - FIND_BBMA_OFFSET] = inserted_bbma_block_stick;
+            if (the_cur_bbma_expected_neighbor_block == the_begin_bbma_block) {
+                return true;
+            } 
         } else {
-            if (the_position_where_inserting_the_free_bbma_block == the_cur_bbma_neighbor_block) {
-                if (the_position_where_inserting_the_free_bbma_block->prev == NULL) {
-                    buddy_block_list[bbma_block_size - FIND_BBMA_OFFSET] = the_position_where_inserting_the_free_bbma_block->next;
-                } else {
-                    the_position_where_inserting_the_free_bbma_block->prev->next = the_position_where_inserting_the_free_bbma_block->next;
-                }
-                if (the_position_where_inserting_the_free_bbma_block->next != NULL) {
-                    the_position_where_inserting_the_free_bbma_block->next->prev = the_position_where_inserting_the_free_bbma_block->prev;
-                }
-                the_position_where_inserting_the_free_bbma_block->next = NULL;
-                the_position_where_inserting_the_free_bbma_block->prev = NULL;
-                the_position_where_inserting_the_free_bbma_block->size ++;
-                insert_free_bbma_block_into_bbma_system(the_position_where_inserting_the_free_bbma_block, the_position_where_inserting_the_free_bbma_block->size);
-            } else {
-                inserted_bbma_block_stick->next = the_position_where_inserting_the_free_bbma_block->next;
-                the_position_where_inserting_the_free_bbma_block->next = inserted_bbma_block_stick;
-                inserted_bbma_block_stick->prev = the_position_where_inserting_the_free_bbma_block;
-                if (inserted_bbma_block_stick->next != NULL) {
-                    inserted_bbma_block_stick->next->prev = inserted_bbma_block_stick;
-                }
-            }
+            if (the_cur_bbma_expected_neighbor_block == the_position_where_inserting_the_free_bbma_block) {
+                return true;
+            } 
         }
     } else {
         if (the_position_where_inserting_the_free_bbma_block == NULL) {
-            if (buddy_block_list[bbma_block_size - FIND_BBMA_OFFSET] == NULL) {
-                buddy_block_list[bbma_block_size - FIND_BBMA_OFFSET] = inserted_bbma_block_stick;
-            } else {
-                if (the_cur_bbma_neighbor_block == buddy_block_list[bbma_block_size - FIND_BBMA_OFFSET]) {
-                    buddy_block_list[bbma_block_size - FIND_BBMA_OFFSET] = buddy_block_list[bbma_block_size - FIND_BBMA_OFFSET]->next;
-                    inserted_bbma_block_stick->size = inserted_bbma_block_stick->size + 1;
-                    insert_free_bbma_block_into_bbma_system(inserted_bbma_block_stick, inserted_bbma_block_stick->size);
-                } else {
-                    inserted_bbma_block_stick->next = buddy_block_list[bbma_block_size - FIND_BBMA_OFFSET];
-                    buddy_block_list[bbma_block_size - FIND_BBMA_OFFSET]->prev = inserted_bbma_block_stick;
-                    buddy_block_list[bbma_block_size - FIND_BBMA_OFFSET] = inserted_bbma_block_stick;
-                }
-            } 
+            return false;
         } else {
-            if (the_position_where_inserting_the_free_bbma_block->next == NULL) {
-                the_position_where_inserting_the_free_bbma_block->next = inserted_bbma_block_stick;
-                inserted_bbma_block_stick->prev = the_position_where_inserting_the_free_bbma_block;
-            } else {
-                if (the_position_where_inserting_the_free_bbma_block->next == the_cur_bbma_neighbor_block) {
-                    the_position_where_inserting_the_free_bbma_block->next = the_cur_bbma_neighbor_block->next;
-                    if (the_cur_bbma_neighbor_block->next != NULL) {
-                        the_cur_bbma_neighbor_block->next->prev = the_position_where_inserting_the_free_bbma_block;
-                    }
-                    inserted_bbma_block_stick->size ++;
-                    insert_free_bbma_block_into_bbma_system(inserted_bbma_block_stick, inserted_bbma_block_stick->size);
-                } else {
-                    inserted_bbma_block_stick->next = the_position_where_inserting_the_free_bbma_block->next;
-                    the_position_where_inserting_the_free_bbma_block->next = inserted_bbma_block_stick;
-                    inserted_bbma_block_stick->prev = the_position_where_inserting_the_free_bbma_block;
-                    if (inserted_bbma_block_stick->next != NULL) {
-                        inserted_bbma_block_stick->next->prev = inserted_bbma_block_stick;
-                    }
-                }
-            }
+            if (the_cur_bbma_expected_neighbor_block == the_position_where_inserting_the_free_bbma_block->next) {
+                return true;
+            } 
         }
     }
+    return false;
+}
+
+
+
+
+void insert_free_bbma_block_into_bbma_system(BUDDY_BLOCK_STICK* inserted_bbma_block_stick, BUDDY_BLOCK_SIZE bbma_block_size) {
+    spin_lock(&bbma_lock[bbma_block_size - FIND_BBMA_OFFSET]);
+    BUDDY_BLOCK_STICK* the_begin_bbma_block = buddy_block_list[bbma_block_size - FIND_BBMA_OFFSET];
+    BUDDY_BLOCK_STICK* the_cur_bbma_expected_neighbor_block = bbma_align_to_larger_block((void*)inserted_bbma_block_stick + BBMA_STICK_SIZE, bbma_block_size + 1) - BBMA_STICK_SIZE;
+    BUDDY_BLOCK_STICK* the_position_where_inserting_the_free_bbma_block = find_the_position_where_inserting_the_free_bbma_block(inserted_bbma_block_stick, bbma_block_size);
+    bool where_is_the_neighbor = the_cur_bbma_expected_neighbor_block < inserted_bbma_block_stick;
+
+    // deal with the situation that the inserted block is the first block in the list
+    if (the_position_where_inserting_the_free_bbma_block == NULL) {
+        if (the_begin_bbma_block == NULL) {
+            buddy_block_list[bbma_block_size - FIND_BBMA_OFFSET] = inserted_bbma_block_stick;
+        } else {
+            
+        }
+    }
+
     spin_unlock(&bbma_lock[bbma_block_size - FIND_BBMA_OFFSET]);
 }
 
