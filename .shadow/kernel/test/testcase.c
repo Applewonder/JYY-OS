@@ -163,7 +163,7 @@ void do_test_1() {
 }
 
 void do_test_2() {
-    printf("\033[32m Test 1 begin\n\033[0m");
+    printf("\033[32m Test 2 begin\n\033[0m");
     file = fopen("/home/appletree/JYY-OS/kernel/test/testlog.txt", "w");
     fclose(file);
     pmm->init();
