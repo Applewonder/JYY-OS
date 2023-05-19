@@ -159,6 +159,7 @@ void* bbma_align_to_larger_block(void* ptr, BUDDY_BLOCK_SIZE bbma_size) {
     }
     return (void*)((long)ptr & (~mask));
 }
+
 BUDDY_BLOCK_STICK* find_the_position_where_inserting_the_free_bbma_block(BUDDY_BLOCK_STICK* inserted_bbma_block_stick, BUDDY_BLOCK_SIZE bbma_block_size) {
     BUDDY_BLOCK_STICK* the_cur_bbma_block = buddy_block_list[bbma_block_size - FIND_BBMA_OFFSET];
     while (the_cur_bbma_block != NULL) {
