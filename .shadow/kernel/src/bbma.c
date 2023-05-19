@@ -51,6 +51,10 @@ void* bbma_alloc(size_t size, bool is_from_slab) {
         bbma_size = S_4K;
     } else {
         bbma_size = determine_bbma_size(size);
+        if (bbma_size == BBMA_REFUSE) {
+            // panic_on(true, "bbma size error");
+            return NULL;
+        }
     }
     void* possible_bbma_addr = find_the_free_space_in_bbma_system(bbma_size);
     if (possible_bbma_addr == NULL) {
@@ -258,6 +262,9 @@ void insert_free_bbma_block_into_bbma_system(BUDDY_BLOCK_STICK* inserted_bbma_bl
 }
 
 void bbma_free(void* ptr) {
+    if (ptr == NULL) {
+        return;
+    }
     BUDDY_BLOCK_STICK* cur_bbma_block_stick = ptr - BBMA_STICK_SIZE;
     BUDDY_BLOCK_SIZE cur_bbma_block_size = cur_bbma_block_stick->size;
     cur_bbma_block_stick->prev = NULL;
