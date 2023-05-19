@@ -229,17 +229,31 @@ void insert_free_bbma_block_into_bbma_system(BUDDY_BLOCK_STICK* inserted_bbma_bl
     BUDDY_BLOCK_STICK* the_position_where_inserting_the_free_bbma_block = find_the_position_where_inserting_the_free_bbma_block(inserted_bbma_block_stick, bbma_block_size);
     bool where_is_the_neighbor = the_cur_bbma_expected_neighbor_block < inserted_bbma_block_stick;
 
-    // deal with the situation that the inserted block is the first block in the list
-    if (the_position_where_inserting_the_free_bbma_block == NULL) {
-        if (the_begin_bbma_block == NULL) {
-            buddy_block_list[bbma_block_size - FIND_BBMA_OFFSET] = inserted_bbma_block_stick;
-        } else {
-            if (judge_if_can_merge(inserted_bbma_block_stick, the_begin_bbma_block, the_position_where_inserting_the_free_bbma_block, the_cur_bbma_expected_neighbor_block)) {
-
-            }
-        }
+    if (the_begin_bbma_block == NULL) {
+        buddy_block_list[bbma_block_size - FIND_BBMA_OFFSET] = inserted_bbma_block_stick;
+        spin_unlock(&bbma_lock[bbma_block_size - FIND_BBMA_OFFSET]);
+        return;
     }
 
+    if (judge_if_can_merge(inserted_bbma_block_stick, the_begin_bbma_block, the_position_where_inserting_the_free_bbma_block, the_cur_bbma_expected_neighbor_block)) {
+        BUDDY_BLOCK_STICK* ready_to_insert = merge_the_block(inserted_bbma_block_stick, the_cur_bbma_expected_neighbor_block, where_is_the_neighbor);
+        insert_free_bbma_block_into_bbma_system(ready_to_insert, bbma_block_size + 1);
+        spin_unlock(&bbma_lock[bbma_block_size - FIND_BBMA_OFFSET]);
+        return;
+    }
+    // deal with the situation that the inserted block is the first block in the list
+    if (the_position_where_inserting_the_free_bbma_block == NULL) {
+        inserted_bbma_block_stick->next = the_begin_bbma_block;
+        the_begin_bbma_block->prev = inserted_bbma_block_stick;
+        buddy_block_list[bbma_block_size - FIND_BBMA_OFFSET] = inserted_bbma_block_stick;
+    } else {
+        inserted_bbma_block_stick->next = the_position_where_inserting_the_free_bbma_block->next;
+        inserted_bbma_block_stick->prev = the_position_where_inserting_the_free_bbma_block;
+        the_position_where_inserting_the_free_bbma_block->next = inserted_bbma_block_stick;
+        if (inserted_bbma_block_stick->next != NULL) {
+            inserted_bbma_block_stick->next->prev = inserted_bbma_block_stick;
+        }
+    }
     spin_unlock(&bbma_lock[bbma_block_size - FIND_BBMA_OFFSET]);
 }
 
