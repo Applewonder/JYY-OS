@@ -155,7 +155,7 @@ void* divide_larger_bbma_block_from_bbma_system(BUDDY_BLOCK_SIZE bbma_size) {
 void* bbma_align_to_larger_block(void* ptr, BUDDY_BLOCK_SIZE bbma_size) {
     long mask = (1 << bbma_size) - 1;
     if (!((long)ptr & mask)) {
-        return (void*)((long)ptr & (~mask)) + (1 << bbma_size);
+        return (void*)((long)ptr & (~mask)) + (1 << (bbma_size - 1));
     }
     return (void*)((long)ptr & (~mask));
 }
