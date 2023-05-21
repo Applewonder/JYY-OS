@@ -19,6 +19,7 @@ test: git
 		@gcc $(shell find src/ -name "*.c")  \
 				$(shell find test/ -name "*.c") \
 				-g\
+				-fsanitize=thread\
 				-Iframework -Itest -Iinclude -DTEST -lpthread\
 				-o build/test
 runtest: 
@@ -26,6 +27,17 @@ runtest:
 
 testall: test
 		@build/test 0
+		@build/test 1
+		@build/test 2
+
+testcase0: test
+		@build/test 0
+
+testcase1: test
+		@build/test 1
+
+testcase2: test
+		@build/test 2
 
 debug: 
 	./debug.sh
