@@ -87,6 +87,7 @@
 // };
 
 #include "testcase.h"
+#include "slab.h"
 
 mutex_t mutex = MUTEX_INIT();
 FILE *file;
@@ -123,7 +124,7 @@ static void entry_0(int tid) {
 //   printf("thread_id[%d]: %ld\n", cur_cpu, thread_id[cur_cpu]);
   for (int i = 0; i < 10000; i++)
   {
-    int choose_type = i % 6;
+    int choose_type = i % SLAB_NUM;
     test_alloc_and_free(1 << (5 + choose_type), 0);
   }
 }
@@ -134,8 +135,8 @@ static void entry_1(int tid) {
 //   printf("thread_id[%d]: %ld\n", cur_cpu, thread_id[cur_cpu]);
   for (int i = 0; i < 14; i++)
   {
-    int choose_type = i % 14;
-    test_alloc_and_free(1 << (11 + choose_type), 1);
+    int choose_type = i % BBMA_NUM;
+    test_alloc_and_free(1 << (12 + choose_type), 1);
   }
 }
 
@@ -145,8 +146,8 @@ static void entry_2(int tid) {
 //   printf("thread_id[%d]: %ld\n", cur_cpu, thread_id[cur_cpu]);
   for (int i = 0; i < 14; i++)
   {
-    int choose_type = i % 14;
-    test_alloc_and_free(1 << (11 + choose_type), 2);
+    int choose_type = i % BBMA_NUM;
+    test_alloc_and_free(1 << (12 + choose_type), 2);
   }
 }
 
