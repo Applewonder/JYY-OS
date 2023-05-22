@@ -120,7 +120,8 @@ BUDDY_BLOCK_STICK* divide_larger_bbma_block_from_bbma_system(BUDDY_BLOCK_SIZE bb
         the_bbma_block_stick = divide_larger_bbma_block_from_bbma_system(bbma_size + 1);
         if (the_bbma_block_stick ==  NULL) {
             return NULL;
-        }   
+        }
+        spin_lock(&bbma_lock[bbma_size - FIND_BBMA_OFFSET]);
     }
     the_bbma_block_addr = convert_index_to_addr(the_bbma_block_stick);
     BUDDY_BLOCK_STICK* left_divided_child = the_bbma_block_stick;
