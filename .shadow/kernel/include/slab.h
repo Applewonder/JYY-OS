@@ -1,7 +1,7 @@
 #ifndef SLAB_H
 #define SLAB_H
 # include <common.h>
-# include <bbma.h>
+# include <cbma.h>
 
 #define SLAB_NUM 6
 #define SLAB_REQUEST_SPACE 0x1000
