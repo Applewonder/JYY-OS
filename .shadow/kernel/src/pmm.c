@@ -46,7 +46,7 @@ static void pmm_init() {
   printf("Got %d MiB heap: [%p, %p)\n", HEAP_SIZE >> 20, heap.start, heap.end);
   void* align_begin_address = (void*)align_to((uintptr_t)heap.start, 24);
 
-  bbma_init(align_begin_address + (1 << 24), heap.end);
+  bbma_init(align_begin_address, heap.end);
   slab_init();
 }
 #endif
