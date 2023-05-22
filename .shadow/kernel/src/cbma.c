@@ -256,9 +256,7 @@ bool judge_if_can_merge(BUDDY_BLOCK_STICK* inserted_bbma_block_stick, BUDDY_BLOC
     bool where_is_the_neighbor = the_cur_bbma_expected_neighbor_block < inserted_bbma_block_stick;
     if (where_is_the_neighbor) {
         if (the_position_where_inserting_the_free_bbma_block == NULL) {
-            if (the_cur_bbma_expected_neighbor_block == the_begin_bbma_block) {
-                return true;
-            } 
+            return false;
         } else {
             if (the_cur_bbma_expected_neighbor_block == the_position_where_inserting_the_free_bbma_block) {
                 return true;
@@ -266,7 +264,9 @@ bool judge_if_can_merge(BUDDY_BLOCK_STICK* inserted_bbma_block_stick, BUDDY_BLOC
         }
     } else {
         if (the_position_where_inserting_the_free_bbma_block == NULL) {
-            return false;
+            if (the_cur_bbma_expected_neighbor_block == the_begin_bbma_block) {
+                return true;
+            } 
         } else {
             if (the_cur_bbma_expected_neighbor_block == the_position_where_inserting_the_free_bbma_block->next) {
                 return true;
