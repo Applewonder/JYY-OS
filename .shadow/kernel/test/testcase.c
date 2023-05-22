@@ -130,6 +130,7 @@ void write_in_file(void* ptr, size_t size, bool is_alloc, int test_id) {
 
 void test_alloc_and_free(size_t size, int test_id) {
     mutex_lock(&mutex);
+    fprintf(file, "Print the Chain\n");
     print_bbma_chain(size);
     void* ptr = pmm->alloc(size);
     write_in_file(ptr, size, true, test_id);
