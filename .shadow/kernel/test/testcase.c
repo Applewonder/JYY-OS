@@ -94,10 +94,17 @@ mutex_t mutex = MUTEX_INIT();
 FILE *file;
 
 extern unsigned long thread_id[];
+extern BUDDY_BLOCK_STICK* buddy_blocks[BBMA_NUM];
 
 void print_bbma_chain(size_t size) {
     BUDDY_BLOCK_SIZE bbma_size = determine_bbma_size(size);
-    BUDDY_BLOCK_STICK* start_stick = buddy_blocks[bbma_size];
+    BUDDY_BLOCK_STICK* cur_stick = buddy_blocks[bbma_size];
+    while (cur_stick != NULL)
+    {
+      fprintf(file, "%p -> ", convert_index_to_addr(cur_stick));
+      cur_stick = cur_stick->next;
+    }
+    fprintf(file, "\n");
 }
 
 void write_in_file(void* ptr, size_t size, bool is_alloc, int test_id) {
