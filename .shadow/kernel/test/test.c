@@ -118,7 +118,7 @@ void judger_for_alloc_and_free(int test_id) {
             }
             insert_alloc_chain((void*)alloc_address, alloc_size, line_num);
             // print_chain();
-        } else {
+        } else if (line[0] == 'F'){
             strcpy(destinationArray, &line[5]);
             unsigned long free_address = strtoul(destinationArray, NULL, 16);
             if (judge_if_has_bad_free(free_address)) {
