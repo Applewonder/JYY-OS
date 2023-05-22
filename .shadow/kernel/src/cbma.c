@@ -8,7 +8,7 @@ static void* begin_alloc_addr;
 
 BUDDY_BLOCK_STICK* buddy_blocks[BBMA_NUM];
 // spinlock_t bbma_lock[BBMA_NUM];
-spin_lock_t bbma_lock;
+spinlock_t bbma_lock;
 
 
 BUDDY_BLOCK_SIZE determine_bbma_size(size_t size) {
