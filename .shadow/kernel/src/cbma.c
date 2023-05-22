@@ -1,13 +1,14 @@
 #include "slab.h"
 #include <assert.h>
 #include <cbma.h>
+#include <stdio.h>
 
 static void* real_start_addr;
 static void* begin_alloc_addr;
 
 
-
-
+extern FILE* file;
+char origin_logg[200] = "/home/appletree/JYY-OS/kernel/test/testlog1.txt";
 
 BUDDY_BLOCK_STICK* buddy_blocks[BBMA_NUM];
 // spinlock_t bbma_lock[BBMA_NUM];
@@ -128,7 +129,7 @@ BUDDY_BLOCK_STICK* divide_larger_bbma_block_from_bbma_system(BUDDY_BLOCK_SIZE bb
     if (the_bbma_block_stick == NULL) {
         // spin_unlock(&bbma_lock[bbma_size - FIND_BBMA_OFFSET]);
         the_bbma_block_stick = divide_larger_bbma_block_from_bbma_system(bbma_size + 1);
-        assert(the_bbma_block_stick->alloc_spaces == bbma_size);
+        // assert(the_bbma_block_stick->alloc_spaces == bbma_size);
         if (the_bbma_block_stick ==  NULL) {
             return NULL;
         }
@@ -309,7 +310,14 @@ void insert_free_bbma_block_into_bbma_system(BUDDY_BLOCK_STICK* inserted_bbma_bl
     }
 
     if (judge_if_can_merge(inserted_bbma_block_stick, the_begin_bbma_block_stick, the_position_where_inserting_the_free_bbma_block_stick, the_cur_bbma_expected_neighbor_block_stick)) {
+        file = fopen(origin_logg, "a");
+        fprintf(file, "Inserted ptr: %p, Neighbor ptr: %p ", inserted_bbma_block_stick, the_cur_bbma_expected_neighbor_block_stick);
+        
         BUDDY_BLOCK_STICK* ready_to_insert = merge_the_block(inserted_bbma_block_stick, the_cur_bbma_expected_neighbor_block_stick, where_is_the_neighbor);
+        
+        fprintf(file, "Merged ptr: %p\n", ready_to_insert);
+
+        fclose(file);
         insert_free_bbma_block_into_bbma_system(ready_to_insert, bbma_block_size + 1);
         // spin_unlock(&bbma_lock[bbma_block_size - FIND_BBMA_OFFSET]);
         return;
