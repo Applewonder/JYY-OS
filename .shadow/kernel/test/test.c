@@ -78,7 +78,7 @@ bool judge_if_have_duplicate_alloc(unsigned long start_alloc, unsigned long end_
       cur = cur->next;
       continue;
     } else {
-      printf("\033[31m Error: Duplicate alloc in line %d\n\033[0m", cur->line_num);
+      printf("\033[31m Error: Duplicate alloc: %p\n\033[0m", cur->alloc);
       return true;
     }
   }
@@ -111,7 +111,7 @@ void judger_for_alloc_and_free(int test_id) {
             strcpy(destinationArray, &line[size_start_index]);
             unsigned long alloc_size = strtoul(destinationArray, NULL, 10);
             if (judge_if_have_duplicate_alloc(alloc_address, alloc_address + alloc_size)) {
-              printf("\033[31m Error: Duplicate alloc in line %d\n\033[0m", line_num);
+              printf("\033[31m Error: Duplicate alloc: %p\n\033[0m", (void*)alloc_address);
               exit(1);
             }
             insert_alloc_chain((void*)alloc_address, alloc_size, line_num);
