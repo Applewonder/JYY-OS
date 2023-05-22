@@ -139,6 +139,17 @@ static void entry_1(int tid) {
   }
 }
 
+static void entry_2(int tid) { 
+  int cur_cpu = tid - 1;
+  thread_id[cur_cpu] = pthread_self();
+//   printf("thread_id[%d]: %ld\n", cur_cpu, thread_id[cur_cpu]);
+  for (int i = 0; i < 14; i++)
+  {
+    int choose_type = i % 14;
+    test_alloc_and_free(1 << (11 + choose_type), 2);
+  }
+}
+
 
 void do_test_0() {
     printf("\033[32m Test 0 begin\n\033[0m");
@@ -168,7 +179,7 @@ void do_test_2() {
     fclose(file);
     pmm->init();
     for (int i = 0; i < 1; i++){
-        create(entry_1);
+        create(entry_2);
     }
     join();
 }
