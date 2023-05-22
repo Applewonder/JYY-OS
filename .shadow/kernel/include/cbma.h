@@ -45,4 +45,6 @@ void insert_free_bbma_block_into_bbma_system(BUDDY_BLOCK_STICK* inserted_bbma_bl
 void delete_a_free_block_in_bbma_system(BUDDY_BLOCK_STICK* block);
 void bbma_free(void* ptr);
 void bbma_init(void* start, void* end);
+void* convert_addr_to_index(void* addr);
+void* convert_index_to_addr(void* index);
 #endif
