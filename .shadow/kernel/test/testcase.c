@@ -94,7 +94,7 @@ mutex_t mutex = MUTEX_INIT();
 FILE *file;
 
 extern unsigned long thread_id[];
-extern BUDDY_BLOCK_STICK* buddy_blocks[BBMA_NUM];
+extern BUDDY_BLOCK_STICK* buddy_blocks[];
 
 void print_bbma_chain(size_t size) {
     BUDDY_BLOCK_SIZE bbma_size = determine_bbma_size(size);
