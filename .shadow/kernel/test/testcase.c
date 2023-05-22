@@ -130,7 +130,13 @@ void write_in_file(void* ptr, size_t size, bool is_alloc, int test_id) {
 
 void test_alloc_and_free(size_t size, int test_id) {
     mutex_lock(&mutex);
-    fprintf(file, "Print the Chain\n");
+    char str[20];
+    sprintf(str, "%d", test_id);
+    char origin_log[200] = "/home/appletree/JYY-OS/kernel/test/testlog";
+    strcat(origin_log, str);
+    strcat(origin_log, ".txt");
+    file = fopen(origin_log, "a");
+    
     print_bbma_chain(size);
     void* ptr = pmm->alloc(size);
     write_in_file(ptr, size, true, test_id);
