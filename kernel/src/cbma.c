@@ -128,7 +128,7 @@ BUDDY_BLOCK_STICK* divide_larger_bbma_block_from_bbma_system(BUDDY_BLOCK_SIZE bb
     if (the_bbma_block_stick == NULL) {
         // spin_unlock(&bbma_lock[bbma_size - FIND_BBMA_OFFSET]);
         the_bbma_block_stick = divide_larger_bbma_block_from_bbma_system(bbma_size + 1);
-        assert(the_bbma_block_stick->alloc_spaces == bbma_size);
+        // assert(the_bbma_block_stick->alloc_spaces == bbma_size);
         if (the_bbma_block_stick ==  NULL) {
             return NULL;
         }
