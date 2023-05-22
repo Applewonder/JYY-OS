@@ -45,7 +45,9 @@ BUDDY_BLOCK_SIZE determine_bbma_size(size_t size) {
 
 void* get_the_free_space_by_dividing(BUDDY_BLOCK_SIZE bbma_size) {
     BUDDY_BLOCK_STICK* bbma_stick = divide_larger_bbma_block_from_bbma_system(bbma_size + 1);
+    spin_lock(&bbma_lock[bbma_size - FIND_BBMA_OFFSET]);
     delete_a_free_block_in_bbma_system(bbma_stick);
+    spin_unlock(&bbma_lock[bbma_size - FIND_BBMA_OFFSET]);
     return convert_index_to_addr(bbma_stick);
 }
 
