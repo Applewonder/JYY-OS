@@ -142,7 +142,7 @@ static void entry_1(int tid) {
 
 void do_test_0() {
     printf("\033[32m Test 0 begin\n\033[0m");
-    file = fopen("/home/appletree/JYY-OS/kernel/test/testlog.txt", "w");
+    file = fopen("/home/appletree/JYY-OS/kernel/test/testlog0.txt", "w");
     fclose(file);
     pmm->init();
     for (int i = 0; i < CPU_NUM; i++){
@@ -153,7 +153,7 @@ void do_test_0() {
 
 void do_test_1() {
     printf("\033[32m Test 1 begin\n\033[0m");
-    file = fopen("/home/appletree/JYY-OS/kernel/test/testlog.txt", "w");
+    file = fopen("/home/appletree/JYY-OS/kernel/test/testlog1.txt", "w");
     fclose(file);
     pmm->init();
     for (int i = 0; i < CPU_NUM; i++){
@@ -164,7 +164,7 @@ void do_test_1() {
 
 void do_test_2() {
     printf("\033[32m Test 2 begin\n\033[0m");
-    file = fopen("/home/appletree/JYY-OS/kernel/test/testlog.txt", "w");
+    file = fopen("/home/appletree/JYY-OS/kernel/test/testlog2.txt", "w");
     fclose(file);
     pmm->init();
     for (int i = 0; i < 1; i++){

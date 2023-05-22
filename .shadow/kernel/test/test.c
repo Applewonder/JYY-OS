@@ -87,9 +87,16 @@ bool judge_if_has_bad_free(unsigned long start_free) {
   return !delete_alloc_block((void*)start_free);
 }
 
-void judger_for_alloc_and_free() {
+void judger_for_alloc_and_free(int test_id) {
     int line_num = 0;
-    file = fopen("/home/appletree/JYY-OS/kernel/test/testlog.txt", "r");
+
+    char str[20];
+    sprintf(str, "%d", test_id);
+    char origin_log[200] = "/home/appletree/JYY-OS/kernel/test/testlog";
+    strcat(origin_log, str);
+    strcat(origin_log, ".txt");
+
+    file = fopen(origin_log, "r");
     while (fgets(line, sizeof(line), file) != NULL) {
         if (line[0] == 'A') {
             int start_index = 6;
@@ -127,19 +134,19 @@ int main(int argc, char *argv[]) {
   switch(atoi(argv[1])) {
     case 0: {
       do_test_0();
-      judger_for_alloc_and_free();
+      judger_for_alloc_and_free(0);
       printf("\033[32m Test 0 passed\n\033[0m");
       break;
     }
     case 1: {
       do_test_1();
-      judger_for_alloc_and_free();
+      judger_for_alloc_and_free(1);
       printf("\033[32m Test 1 passed\n\033[0m");
       break;
     }
     case 2: {
       do_test_2();
-      judger_for_alloc_and_free();
+      judger_for_alloc_and_free(2);
       printf("\033[32m Test 2 passed\n\033[0m");
       break;
     }
