@@ -102,7 +102,7 @@ void print_bbma_chain(size_t size) {
     
     while (cur_stick != NULL)
     {
-      assert(0);
+      // assert(0);
       fprintf(file, "%p -> ", convert_index_to_addr(cur_stick));
       cur_stick = cur_stick->next;
     }
