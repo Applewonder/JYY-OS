@@ -171,7 +171,7 @@ void insert_two_new_divided_child_into_bbma_system(BUDDY_BLOCK_STICK* left_divid
 
 void* find_the_free_space_in_bbma_system(BUDDY_BLOCK_SIZE bbma_size) {
     void* bbma_addr = NULL;
-    spin_lock(&bbma_lock[bbma_size]);
+    spin_lock(&bbma_lock[bbma_size - FIND_BBMA_OFFSET]);
     if (buddy_blocks[bbma_size - FIND_BBMA_OFFSET] != NULL) {
         bbma_addr = buddy_blocks[bbma_size - FIND_BBMA_OFFSET];
         delete_a_free_block_in_bbma_system(bbma_addr);
@@ -179,7 +179,7 @@ void* find_the_free_space_in_bbma_system(BUDDY_BLOCK_SIZE bbma_size) {
         bbma_stick->alloc_spaces = bbma_size;
         bbma_addr = convert_index_to_addr(bbma_addr);
     }
-    spin_unlock(&bbma_lock[bbma_size]);
+    spin_unlock(&bbma_lock[bbma_size - FIND_BBMA_OFFSET]);
     return bbma_addr;
 }
 
