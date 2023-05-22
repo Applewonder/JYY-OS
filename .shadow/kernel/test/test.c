@@ -78,7 +78,9 @@ bool judge_if_have_duplicate_alloc(unsigned long start_alloc, unsigned long end_
       cur = cur->next;
       continue;
     } else {
-      printf("\033[31m Error: Duplicate alloc: %p\n\033[0m", cur->alloc);
+      printf("\033[31m Error: Duplicate alloc: %p, size: %ld\n\033[0m", cur->alloc, cur->size);
+      printf("\033[31m Error: Duplicate alloc: %p, size: %ld\n\033[0m", (void*)start_alloc, end_alloc - start_alloc);
+
       return true;
     }
   }
