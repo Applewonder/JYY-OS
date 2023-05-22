@@ -99,10 +99,11 @@ extern BUDDY_BLOCK_STICK* buddy_blocks[];
 void print_bbma_chain(size_t size) {
     BUDDY_BLOCK_SIZE bbma_size = determine_bbma_size(size);
     BUDDY_BLOCK_STICK* cur_stick = buddy_blocks[bbma_size];
-    
+    assert(cur_stick != (void*)0x00000000000e);
     while (cur_stick != NULL)
     {
       // assert(0);
+      assert(cur_stick != (void*)0x00000000000e);
       fprintf(file, "%p -> ", convert_index_to_addr(cur_stick));
       cur_stick = cur_stick->next;
     }
