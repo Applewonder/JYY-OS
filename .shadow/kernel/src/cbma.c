@@ -7,7 +7,8 @@ static void* begin_alloc_addr;
 
 
 BUDDY_BLOCK_STICK* buddy_blocks[BBMA_NUM];
-spinlock_t bbma_lock[BBMA_NUM];
+// spinlock_t bbma_lock[BBMA_NUM];
+spin_lock_t bbma_lock;
 
 
 BUDDY_BLOCK_SIZE determine_bbma_size(size_t size) {
@@ -45,13 +46,14 @@ BUDDY_BLOCK_SIZE determine_bbma_size(size_t size) {
 
 void* get_the_free_space_by_dividing(BUDDY_BLOCK_SIZE bbma_size) {
     BUDDY_BLOCK_STICK* bbma_stick = divide_larger_bbma_block_from_bbma_system(bbma_size + 1);
-    spin_lock(&bbma_lock[bbma_size - FIND_BBMA_OFFSET]);
+    // spin_lock(&bbma_lock[bbma_size - FIND_BBMA_OFFSET]);
     delete_a_free_block_in_bbma_system(bbma_stick);
-    spin_unlock(&bbma_lock[bbma_size - FIND_BBMA_OFFSET]);
+    // spin_unlock(&bbma_lock[bbma_size - FIND_BBMA_OFFSET]);
     return convert_index_to_addr(bbma_stick);
 }
 
 void* bbma_alloc(size_t size, bool is_from_slab) {
+    spin_lock(&bbma_lock);
     BUDDY_BLOCK_SIZE bbma_size = BBMA_REFUSE;
     if (is_from_slab) {
         if (size != SLAB_REQUEST_SPACE) {
@@ -70,6 +72,7 @@ void* bbma_alloc(size_t size, bool is_from_slab) {
     if (possible_bbma_addr == NULL) {
         possible_bbma_addr = get_the_free_space_by_dividing(bbma_size);
     }
+    spin_unlock(&bbma_lock);
     return possible_bbma_addr;
 }
 
@@ -114,17 +117,17 @@ BUDDY_BLOCK_STICK* divide_larger_bbma_block_from_bbma_system(BUDDY_BLOCK_SIZE bb
     if (bbma_size == BBMA_REFUSE) {
         return NULL;
     }
-    spin_lock(&bbma_lock[bbma_size - FIND_BBMA_OFFSET]);
+    // spin_lock(&bbma_lock[bbma_size - FIND_BBMA_OFFSET]);
     BUDDY_BLOCK_STICK* the_bbma_block_stick = buddy_blocks[bbma_size - FIND_BBMA_OFFSET];
     void* the_bbma_block_addr = NULL;
     if (the_bbma_block_stick == NULL) {
-        spin_unlock(&bbma_lock[bbma_size - FIND_BBMA_OFFSET]);
+        // spin_unlock(&bbma_lock[bbma_size - FIND_BBMA_OFFSET]);
         the_bbma_block_stick = divide_larger_bbma_block_from_bbma_system(bbma_size + 1);
         assert(the_bbma_block_stick->alloc_spaces == bbma_size);
         if (the_bbma_block_stick ==  NULL) {
             return NULL;
         }
-        spin_lock(&bbma_lock[bbma_size - FIND_BBMA_OFFSET]);
+        // spin_lock(&bbma_lock[bbma_size - FIND_BBMA_OFFSET]);
     }
     the_bbma_block_addr = convert_index_to_addr(the_bbma_block_stick);
     BUDDY_BLOCK_STICK* left_divided_child = the_bbma_block_stick;
@@ -135,7 +138,7 @@ BUDDY_BLOCK_STICK* divide_larger_bbma_block_from_bbma_system(BUDDY_BLOCK_SIZE bb
 #endif
     delete_a_free_block_in_bbma_system(the_bbma_block_stick);
     insert_two_new_divided_child_into_bbma_system(left_divided_child, right_divided_child, bbma_size - 1);
-    spin_unlock(&bbma_lock[bbma_size - FIND_BBMA_OFFSET]);
+    // spin_unlock(&bbma_lock[bbma_size - FIND_BBMA_OFFSET]);
     return left_divided_child;
 }
 
@@ -146,7 +149,7 @@ void insert_two_new_divided_child_into_bbma_system(BUDDY_BLOCK_STICK* left_divid
     right_divided_child->prev = left_divided_child;
     left_divided_child->prev = NULL;
     right_divided_child->next = NULL;
-    spin_lock(&bbma_lock[bbma_size - FIND_BBMA_OFFSET]);
+    // spin_lock(&bbma_lock[bbma_size - FIND_BBMA_OFFSET]);
     BUDDY_BLOCK_STICK* the_cur_bbma_block = buddy_blocks[bbma_size - FIND_BBMA_OFFSET];
     while (the_cur_bbma_block != NULL) {
         if (the_cur_bbma_block < left_divided_child) {
@@ -173,12 +176,12 @@ void insert_two_new_divided_child_into_bbma_system(BUDDY_BLOCK_STICK* left_divid
         }
     }
     buddy_blocks[bbma_size - FIND_BBMA_OFFSET] = left_divided_child;
-    spin_unlock(&bbma_lock[bbma_size - FIND_BBMA_OFFSET]);
+    // spin_unlock(&bbma_lock[bbma_size - FIND_BBMA_OFFSET]);
 }
 
 void* find_the_free_space_in_bbma_system(BUDDY_BLOCK_SIZE bbma_size) {
     void* bbma_addr = NULL;
-    spin_lock(&bbma_lock[bbma_size - FIND_BBMA_OFFSET]);
+    // spin_lock(&bbma_lock[bbma_size - FIND_BBMA_OFFSET]);
 #ifdef TEST
     int cur_cpu = cpu_current();
     printf("Tread %d got the lock %d\n", cur_cpu, bbma_size - FIND_BBMA_OFFSET);
@@ -190,7 +193,7 @@ void* find_the_free_space_in_bbma_system(BUDDY_BLOCK_SIZE bbma_size) {
         bbma_stick->alloc_spaces = bbma_size;
         bbma_addr = convert_index_to_addr(bbma_addr);
     }
-    spin_unlock(&bbma_lock[bbma_size - FIND_BBMA_OFFSET]);
+    // spin_unlock(&bbma_lock[bbma_size - FIND_BBMA_OFFSET]);
     return bbma_addr;
 }
 
@@ -284,7 +287,7 @@ BUDDY_BLOCK_STICK* merge_the_block(BUDDY_BLOCK_STICK* inserted_bbma_block_stick,
 }
 
 void insert_free_bbma_block_into_bbma_system(BUDDY_BLOCK_STICK* inserted_bbma_block_stick, BUDDY_BLOCK_SIZE bbma_block_size) {
-    spin_lock(&bbma_lock[bbma_block_size - FIND_BBMA_OFFSET]);
+    // spin_lock(&bbma_lock[bbma_block_size - FIND_BBMA_OFFSET]);
 #ifdef TEST
     int cur_cpu = cpu_current();
     printf("Tread %d got the lock %d\n", cur_cpu, bbma_block_size - FIND_BBMA_OFFSET);
@@ -296,14 +299,14 @@ void insert_free_bbma_block_into_bbma_system(BUDDY_BLOCK_STICK* inserted_bbma_bl
 
     if (the_begin_bbma_block_stick == NULL) {
         buddy_blocks[bbma_block_size - FIND_BBMA_OFFSET] = inserted_bbma_block_stick;
-        spin_unlock(&bbma_lock[bbma_block_size - FIND_BBMA_OFFSET]);
+        // spin_unlock(&bbma_lock[bbma_block_size - FIND_BBMA_OFFSET]);
         return;
     }
 
     if (judge_if_can_merge(inserted_bbma_block_stick, the_begin_bbma_block_stick, the_position_where_inserting_the_free_bbma_block_stick, the_cur_bbma_expected_neighbor_block_stick)) {
         BUDDY_BLOCK_STICK* ready_to_insert = merge_the_block(inserted_bbma_block_stick, the_cur_bbma_expected_neighbor_block_stick, where_is_the_neighbor);
         insert_free_bbma_block_into_bbma_system(ready_to_insert, bbma_block_size + 1);
-        spin_unlock(&bbma_lock[bbma_block_size - FIND_BBMA_OFFSET]);
+        // spin_unlock(&bbma_lock[bbma_block_size - FIND_BBMA_OFFSET]);
         return;
     }
     // deal with the situation that the inserted block is the first block in the list
@@ -319,10 +322,11 @@ void insert_free_bbma_block_into_bbma_system(BUDDY_BLOCK_STICK* inserted_bbma_bl
             inserted_bbma_block_stick->next->prev = inserted_bbma_block_stick;
         }
     }
-    spin_unlock(&bbma_lock[bbma_block_size - FIND_BBMA_OFFSET]);
+    // spin_unlock(&bbma_lock[bbma_block_size - FIND_BBMA_OFFSET]);
 }
 
 void bbma_free(void* ptr) {
+    spin_lock(&bbma_lock);
     if (ptr == NULL) {
         return;
     }
@@ -331,4 +335,5 @@ void bbma_free(void* ptr) {
     cur_bbma_block_stick->prev = NULL;
     cur_bbma_block_stick->next = NULL;
     insert_free_bbma_block_into_bbma_system(cur_bbma_block_stick, cur_bbma_block_size);
+    spin_unlock(&bbma_lock);
 }
