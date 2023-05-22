@@ -298,6 +298,8 @@ void insert_free_bbma_block_into_bbma_system(BUDDY_BLOCK_STICK* inserted_bbma_bl
 //     int cur_cpu = cpu_current();
 //     printf("Tread %d got the lock %d\n", cur_cpu, bbma_block_size - FIND_BBMA_OFFSET);
 // #endif
+    inserted_bbma_block_stick->next = NULL;
+    inserted_bbma_block_stick->prev = NULL;
     BUDDY_BLOCK_STICK* the_begin_bbma_block_stick = buddy_blocks[bbma_block_size - FIND_BBMA_OFFSET];
     BUDDY_BLOCK_STICK* the_cur_bbma_expected_neighbor_block_stick = convert_addr_to_index(bbma_align_to_larger_block(convert_index_to_addr(inserted_bbma_block_stick), bbma_block_size + 1));
     BUDDY_BLOCK_STICK* the_position_where_inserting_the_free_bbma_block_stick = find_the_position_where_inserting_the_free_bbma_block(inserted_bbma_block_stick, bbma_block_size);
@@ -318,6 +320,8 @@ void insert_free_bbma_block_into_bbma_system(BUDDY_BLOCK_STICK* inserted_bbma_bl
         fprintf(file, "Merged ptr: %p\n", ready_to_insert);
 
         fclose(file);
+        
+
         insert_free_bbma_block_into_bbma_system(ready_to_insert, bbma_block_size + 1);
         // spin_unlock(&bbma_lock[bbma_block_size - FIND_BBMA_OFFSET]);
         return;
