@@ -30,6 +30,7 @@ enum BLOCK_SIZE_{
 
 struct buddy_block_{
     BUDDY_BLOCK_SIZE alloc_spaces;
+    
 };
 
 void* get_the_free_space_by_dividing(BUDDY_BLOCK_SIZE bbma_size);
