@@ -58,6 +58,7 @@ void* bbma_alloc(size_t size, bool is_from_slab) {
     if (is_from_slab) {
         if (size != SLAB_REQUEST_SPACE) {
             // panic_on(true, "slab size error");
+            spin_unlock(&bbma_lock);
             return NULL;
         }
         bbma_size = S_4K;
@@ -65,6 +66,7 @@ void* bbma_alloc(size_t size, bool is_from_slab) {
         bbma_size = determine_bbma_size(size);
         if (bbma_size == BBMA_REFUSE) {
             // panic_on(true, "bbma size error");
+            spin_unlock(&bbma_lock);
             return NULL;
         }
     }
