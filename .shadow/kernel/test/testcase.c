@@ -100,6 +100,7 @@ void print_bbma_chain(size_t size) {
     BUDDY_BLOCK_SIZE bbma_size = determine_bbma_size(size);
     BUDDY_BLOCK_STICK* cur_stick = buddy_blocks[bbma_size - FIND_BBMA_OFFSET];
     assert(cur_stick != (void*)0x00000000000e);
+    fprintf(file, "Size: %ld ", size);
     while (cur_stick != NULL)
     {
       // assert(0);
@@ -117,7 +118,6 @@ void write_in_file(void* ptr, size_t size, bool is_alloc, int test_id) {
     char origin_log[200] = "/home/appletree/JYY-OS/kernel/test/testlog";
     strcat(origin_log, str);
     strcat(origin_log, ".txt");
-    mutex_lock(&mutex);
     file = fopen(origin_log, "a");
     if (is_alloc) {
         fprintf(file, "Alloc %p, Size %ld\n", ptr, size);
@@ -126,17 +126,18 @@ void write_in_file(void* ptr, size_t size, bool is_alloc, int test_id) {
         fprintf(file, "Free %p\n", ptr);
     }
     fclose(file);
-    mutex_unlock(&mutex);
 }
 
 void test_alloc_and_free(size_t size, int test_id) {
     mutex_lock(&mutex);
     print_bbma_chain(size);
-    mutex_unlock(&mutex);
     void* ptr = pmm->alloc(size);
     write_in_file(ptr, size, true, test_id);
+    mutex_unlock(&mutex);
     pmm->free(ptr);
+    mutex_lock(&mutex);
     write_in_file(ptr, size, false, test_id);
+    mutex_unlock(&mutex);
 }
 
 static void entry_0(int tid) { 
