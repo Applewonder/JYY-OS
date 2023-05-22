@@ -132,10 +132,10 @@ BUDDY_BLOCK_STICK* divide_larger_bbma_block_from_bbma_system(BUDDY_BLOCK_SIZE bb
     the_bbma_block_addr = convert_index_to_addr(the_bbma_block_stick);
     BUDDY_BLOCK_STICK* left_divided_child = the_bbma_block_stick;
     BUDDY_BLOCK_STICK* right_divided_child = convert_addr_to_index(bbma_align_to_larger_block(the_bbma_block_addr, bbma_size));
-#ifdef TEST
-    int cur_cpu = cpu_current();
-    printf("Tread %d got the lock %d\n", cur_cpu, bbma_size - FIND_BBMA_OFFSET);
-#endif
+// #ifdef TEST
+//     int cur_cpu = cpu_current();
+//     printf("Tread %d got the lock %d\n", cur_cpu, bbma_size - FIND_BBMA_OFFSET);
+// #endif
     delete_a_free_block_in_bbma_system(the_bbma_block_stick);
     insert_two_new_divided_child_into_bbma_system(left_divided_child, right_divided_child, bbma_size - 1);
     // spin_unlock(&bbma_lock[bbma_size - FIND_BBMA_OFFSET]);
@@ -182,10 +182,10 @@ void insert_two_new_divided_child_into_bbma_system(BUDDY_BLOCK_STICK* left_divid
 void* find_the_free_space_in_bbma_system(BUDDY_BLOCK_SIZE bbma_size) {
     void* bbma_addr = NULL;
     // spin_lock(&bbma_lock[bbma_size - FIND_BBMA_OFFSET]);
-#ifdef TEST
-    int cur_cpu = cpu_current();
-    printf("Tread %d got the lock %d\n", cur_cpu, bbma_size - FIND_BBMA_OFFSET);
-#endif
+// #ifdef TEST
+//     int cur_cpu = cpu_current();
+//     printf("Tread %d got the lock %d\n", cur_cpu, bbma_size - FIND_BBMA_OFFSET);
+// #endif
     if (buddy_blocks[bbma_size - FIND_BBMA_OFFSET] != NULL) {
         bbma_addr = buddy_blocks[bbma_size - FIND_BBMA_OFFSET];
         delete_a_free_block_in_bbma_system(bbma_addr);
@@ -288,10 +288,10 @@ BUDDY_BLOCK_STICK* merge_the_block(BUDDY_BLOCK_STICK* inserted_bbma_block_stick,
 
 void insert_free_bbma_block_into_bbma_system(BUDDY_BLOCK_STICK* inserted_bbma_block_stick, BUDDY_BLOCK_SIZE bbma_block_size) {
     // spin_lock(&bbma_lock[bbma_block_size - FIND_BBMA_OFFSET]);
-#ifdef TEST
-    int cur_cpu = cpu_current();
-    printf("Tread %d got the lock %d\n", cur_cpu, bbma_block_size - FIND_BBMA_OFFSET);
-#endif
+// #ifdef TEST
+//     int cur_cpu = cpu_current();
+//     printf("Tread %d got the lock %d\n", cur_cpu, bbma_block_size - FIND_BBMA_OFFSET);
+// #endif
     BUDDY_BLOCK_STICK* the_begin_bbma_block_stick = buddy_blocks[bbma_block_size - FIND_BBMA_OFFSET];
     BUDDY_BLOCK_STICK* the_cur_bbma_expected_neighbor_block_stick = convert_addr_to_index(bbma_align_to_larger_block(convert_index_to_addr(inserted_bbma_block_stick), bbma_block_size + 1));
     BUDDY_BLOCK_STICK* the_position_where_inserting_the_free_bbma_block_stick = find_the_position_where_inserting_the_free_bbma_block(inserted_bbma_block_stick, bbma_block_size);
