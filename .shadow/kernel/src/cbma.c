@@ -6,6 +6,9 @@ static void* real_start_addr;
 static void* begin_alloc_addr;
 
 
+
+
+
 BUDDY_BLOCK_STICK* buddy_blocks[BBMA_NUM];
 // spinlock_t bbma_lock[BBMA_NUM];
 spinlock_t bbma_lock;
