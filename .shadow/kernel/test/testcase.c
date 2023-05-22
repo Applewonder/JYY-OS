@@ -136,8 +136,9 @@ void test_alloc_and_free(size_t size, int test_id) {
     strcat(origin_log, str);
     strcat(origin_log, ".txt");
     file = fopen(origin_log, "a");
-    
+
     print_bbma_chain(size);
+    fclose(file);
     void* ptr = pmm->alloc(size);
     write_in_file(ptr, size, true, test_id);
     mutex_unlock(&mutex);
