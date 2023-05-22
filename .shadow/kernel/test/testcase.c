@@ -104,6 +104,7 @@ void print_bbma_chain(size_t size) {
     {
       // assert(0);
       assert(cur_stick != (void*)0x00000000000e);
+      assert(cur_stick->next != (void*)0x00000000000e);
       fprintf(file, "%p -> ", convert_index_to_addr(cur_stick));
       cur_stick = cur_stick->next;
     }
