@@ -133,7 +133,7 @@ static void entry_1(int tid) {
   int cur_cpu = tid - 1;
   thread_id[cur_cpu] = pthread_self();
 //   printf("thread_id[%d]: %ld\n", cur_cpu, thread_id[cur_cpu]);
-  for (int i = 0; i < 14; i++)
+  for (int i = 0; i < BBMA_NUM; i++)
   {
     int choose_type = i % BBMA_NUM;
     test_alloc_and_free(1 << (12 + choose_type), 1);
@@ -144,7 +144,7 @@ static void entry_2(int tid) {
   int cur_cpu = tid - 1;
   thread_id[cur_cpu] = pthread_self();
 //   printf("thread_id[%d]: %ld\n", cur_cpu, thread_id[cur_cpu]);
-  for (int i = 0; i < 14; i++)
+  for (int i = 0; i < BBMA_NUM; i++)
   {
     int choose_type = i % BBMA_NUM;
     test_alloc_and_free(1 << (12 + choose_type), 2);
