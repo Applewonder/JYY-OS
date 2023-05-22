@@ -87,12 +87,33 @@
 // };
 
 #include "testcase.h"
+#include "cbma.h"
 #include "slab.h"
 
 mutex_t mutex = MUTEX_INIT();
 FILE *file;
 
 extern unsigned long thread_id[];
+extern BUDDY_BLOCK_STICK* buddy_blocks[];
+
+void print_bbma_chain(size_t size) {
+    BUDDY_BLOCK_SIZE bbma_size = determine_bbma_size(size);
+    BUDDY_BLOCK_STICK* cur_stick = buddy_blocks[bbma_size - FIND_BBMA_OFFSET];
+    assert(cur_stick != (void*)0x00000000000e);
+    fprintf(file, "Size: %ld ", size);
+    long print_count = 0;
+    while (cur_stick != NULL)
+    {
+      // assert(0);
+      assert(print_count < 10000);
+      print_count++;
+      assert(cur_stick != (void*)0x00000000000e);
+      assert(cur_stick->next != (void*)0x00000000000e);
+      fprintf(file, "%p -> ", convert_index_to_addr(cur_stick));
+      cur_stick = cur_stick->next;
+    }
+    fprintf(file, "\n");
+}
 
 void write_in_file(void* ptr, size_t size, bool is_alloc, int test_id) {
     char str[20];
@@ -100,22 +121,34 @@ void write_in_file(void* ptr, size_t size, bool is_alloc, int test_id) {
     char origin_log[200] = "/home/appletree/JYY-OS/kernel/test/testlog";
     strcat(origin_log, str);
     strcat(origin_log, ".txt");
-    mutex_lock(&mutex);
     file = fopen(origin_log, "a");
     if (is_alloc) {
         fprintf(file, "Alloc %p, Size %ld\n", ptr, size);
+        print_bbma_chain(size);
     } else {
         fprintf(file, "Free %p\n", ptr);
     }
     fclose(file);
-    mutex_unlock(&mutex);
 }
 
 void test_alloc_and_free(size_t size, int test_id) {
+    mutex_lock(&mutex);
+    char str[20];
+    sprintf(str, "%d", test_id);
+    char origin_log[200] = "/home/appletree/JYY-OS/kernel/test/testlog";
+    strcat(origin_log, str);
+    strcat(origin_log, ".txt");
+    file = fopen(origin_log, "a");
+
+    print_bbma_chain(size);
+    fclose(file);
     void* ptr = pmm->alloc(size);
     write_in_file(ptr, size, true, test_id);
+    mutex_unlock(&mutex);
     pmm->free(ptr);
+    mutex_lock(&mutex);
     write_in_file(ptr, size, false, test_id);
+    mutex_unlock(&mutex);
 }
 
 static void entry_0(int tid) { 
@@ -168,7 +201,7 @@ void do_test_1() {
     file = fopen("/home/appletree/JYY-OS/kernel/test/testlog1.txt", "w");
     fclose(file);
     pmm->init();
-    for (int i = 0; i < CPU_NUM; i++){
+    for (int i = 0; i < 6; i++){
         create(entry_1);
     }
     join();
