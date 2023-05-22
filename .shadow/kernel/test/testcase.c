@@ -101,9 +101,12 @@ void print_bbma_chain(size_t size) {
     BUDDY_BLOCK_STICK* cur_stick = buddy_blocks[bbma_size - FIND_BBMA_OFFSET];
     assert(cur_stick != (void*)0x00000000000e);
     fprintf(file, "Size: %ld ", size);
+    long print_count = 0;
     while (cur_stick != NULL)
     {
       // assert(0);
+      assert(print_count < 10000);
+      print_count++;
       assert(cur_stick != (void*)0x00000000000e);
       assert(cur_stick->next != (void*)0x00000000000e);
       fprintf(file, "%p -> ", convert_index_to_addr(cur_stick));
