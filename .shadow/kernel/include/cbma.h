@@ -34,13 +34,15 @@ struct buddy_block_{
     BUDDY_BLOCK_STICK* prev;
 };
 
-void* get_the_free_space_by_dividing(BUDDY_BLOCK_SIZE bbma_size);
-void* bbma_alloc(size_t size, bool is_from_slab);
 BUDDY_BLOCK_SIZE determine_bbma_size(size_t size);
-void delete_a_free_block_in_bbma_system(BUDDY_BLOCK_STICK* block);
-void* divide_larger_bbma_block_from_bbma_system(BUDDY_BLOCK_SIZE bbma_size);
+void* bbma_alloc(size_t size, bool is_from_slab);
 void* find_the_free_space_in_bbma_system(BUDDY_BLOCK_SIZE bbma_size);
+void* divide_larger_bbma_block_from_bbma_system(BUDDY_BLOCK_SIZE bbma_size);
 void insert_two_new_divided_child_into_bbma_system(BUDDY_BLOCK_STICK* left_divided_child, BUDDY_BLOCK_STICK* right_divided_child, BUDDY_BLOCK_SIZE bbma_size);
-void* convert_addr_to_index(void* addr);
-void* convert_index_to_addr(void* index);
+void* bbma_align_to_larger_block(void* ptr, BUDDY_BLOCK_SIZE bbma_size);
+BUDDY_BLOCK_STICK* find_the_position_where_inserting_the_free_bbma_block(BUDDY_BLOCK_STICK* inserted_bbma_block_stick, BUDDY_BLOCK_SIZE bbma_block_size);
+void insert_free_bbma_block_into_bbma_system(BUDDY_BLOCK_STICK* inserted_bbma_block_stick, BUDDY_BLOCK_SIZE bbma_block_size);
+void delete_a_free_block_in_bbma_system(BUDDY_BLOCK_STICK* block);
+void bbma_free(void* ptr);
+void bbma_init(void* start, void* end);
 #endif

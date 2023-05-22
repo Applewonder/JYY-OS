@@ -11,7 +11,7 @@ spinlock_t bbma_lock[BBMA_NUM];
 
 
 BUDDY_BLOCK_SIZE determine_bbma_size(size_t size) {
-    size_t real_size = size + BBMA_STICK_SIZE;
+    size_t real_size = size;
     if (real_size <= (1 << S_4K)) {
         return S_4K;
     } else if (real_size <= (1 << S_8K)) {
