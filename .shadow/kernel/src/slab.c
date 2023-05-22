@@ -17,7 +17,9 @@ SLAB_SIZE determine_slab_size(size_t size) {
         return S_512B;
     } else if (size <= 1024) {
         return S_1KB;
-    } else {
+    } else if (size <= 2048) {
+        return S_2KB;
+    }else {
         return SLAB_REFUSE;
     }
 }
@@ -71,8 +73,7 @@ void* find_the_free_space_in_slab(int cpu_num, SLAB_SIZE slab_size) {
 
 void initialize_a_slab_new_page(int cpu_num, SLAB_SIZE slab_size, SLAB_STICK* slab_page) {
     long slab_stick_size = align_to(SLAB_STICK_SIZE, slab_size);
-    long bbma_stick_size = align_to(BBMA_STICK_SIZE, slab_size);
-    slab_page->current_slab_free_space = (SLAB_REQUEST_SPACE - slab_stick_size - bbma_stick_size) >> slab_size;
+    slab_page->current_slab_free_space = (SLAB_REQUEST_SPACE - slab_stick_size) >> slab_size;
     slab_page->current_slab_free_block_list = (uintptr_t)NULL;
     unsigned int slab_free_space = slab_page->current_slab_free_space;
     uintptr_t slab_block_addr = (uintptr_t)slab_page + slab_stick_size;

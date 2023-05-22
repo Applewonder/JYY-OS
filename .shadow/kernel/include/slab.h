@@ -3,7 +3,7 @@
 # include <common.h>
 # include <cbma.h>
 
-#define SLAB_NUM 6
+#define SLAB_NUM 7
 #define SLAB_REQUEST_SPACE 0x1000
 #define SLAB_STICK_SIZE sizeof(SLAB_STICK)
 #define SLAB_BLOCK_SIZE sizeof(SLAB_FREE_BLOCK)
@@ -18,6 +18,7 @@ enum SLAB_SIZE_{
     S_256B,
     S_512B,
     S_1KB,
+    S_2KB,
     SLAB_REFUSE,
 };
 
