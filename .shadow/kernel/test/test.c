@@ -17,6 +17,7 @@ typedef struct Task_ TASK;
 struct Task_{
   void *alloc;
   unsigned long size;
+  int line_num;
   TASK* next;
 };
 
@@ -39,12 +40,12 @@ int find_the_target_index(char* line) {
   return index;
 }
 
-void insert_alloc_chain(void* alloc, unsigned long size) {
+void insert_alloc_chain(void* alloc, unsigned long size, int line_num) {
   // printf("Inserting alloc block\n");
   TASK* new_task = (TASK*)malloc(sizeof(TASK));
   new_task->alloc = alloc;
   new_task->size = size;
-  new_task->next = NULL;
+  new_task->line_num = line_num;
 
   new_task->next = head;
   head = new_task;
@@ -77,6 +78,7 @@ bool judge_if_have_duplicate_alloc(unsigned long start_alloc, unsigned long end_
       cur = cur->next;
       continue;
     } else {
+      printf("\033[31m Error: Duplicate alloc in line %d\n\033[0m", cur->line_num);
       return true;
     }
   }
@@ -109,10 +111,10 @@ void judger_for_alloc_and_free(int test_id) {
             strcpy(destinationArray, &line[size_start_index]);
             unsigned long alloc_size = strtoul(destinationArray, NULL, 10);
             if (judge_if_have_duplicate_alloc(alloc_address, alloc_address + alloc_size)) {
-              printf("\033[31m Error: Duplicate alloc\n\033[0m");
+              printf("\033[31m Error: Duplicate alloc in line %d\n\033[0m", line_num);
               exit(1);
             }
-            insert_alloc_chain((void*)alloc_address, alloc_size);
+            insert_alloc_chain((void*)alloc_address, alloc_size, line_num);
             // print_chain();
         } else {
             strcpy(destinationArray, &line[5]);
