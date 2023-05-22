@@ -87,12 +87,18 @@
 // };
 
 #include "testcase.h"
+#include "cbma.h"
 #include "slab.h"
 
 mutex_t mutex = MUTEX_INIT();
 FILE *file;
 
 extern unsigned long thread_id[];
+
+void print_bbma_chain(size_t size) {
+    BUDDY_BLOCK_SIZE bbma_size = determine_bbma_size(size);
+    BUDDY_BLOCK_STICK* start_stick = buddy_blocks[bbma_size];
+}
 
 void write_in_file(void* ptr, size_t size, bool is_alloc, int test_id) {
     char str[20];
@@ -104,6 +110,7 @@ void write_in_file(void* ptr, size_t size, bool is_alloc, int test_id) {
     file = fopen(origin_log, "a");
     if (is_alloc) {
         fprintf(file, "Alloc %p, Size %ld\n", ptr, size);
+        print_bbma_chain(size);
     } else {
         fprintf(file, "Free %p\n", ptr);
     }
