@@ -87,12 +87,16 @@ void* convert_addr_to_index(void* addr) {
 
 void delete_a_free_block_in_bbma_system(BUDDY_BLOCK_STICK* bbma_stick) {
     if (bbma_stick->prev == NULL) {
-        buddy_blocks[bbma_stick->alloc_spaces - FIND_BBMA_OFFSET] = bbma_stick->next;  
+        BUDDY_BLOCK_SIZE bbma_size = bbma_stick->alloc_spaces;
+        buddy_blocks[bbma_size - FIND_BBMA_OFFSET] = bbma_stick->next;
+        if (bbma_stick->next != NULL) {
+            bbma_stick->next->prev = NULL;
+        }
     } else {
         bbma_stick->prev->next = bbma_stick->next;
-    }
-    if (bbma_stick->next != NULL) {
-            bbma_stick->next->prev = NULL;
+        if (bbma_stick->next != NULL) {
+            bbma_stick->next->prev = bbma_stick->prev;
+        }
     }
 }
 
