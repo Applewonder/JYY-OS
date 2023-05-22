@@ -87,6 +87,7 @@
 // };
 
 #include "testcase.h"
+#include "slab.h"
 
 mutex_t mutex = MUTEX_INIT();
 FILE *file;
@@ -123,7 +124,7 @@ static void entry_0(int tid) {
 //   printf("thread_id[%d]: %ld\n", cur_cpu, thread_id[cur_cpu]);
   for (int i = 0; i < 10000; i++)
   {
-    int choose_type = i % 6;
+    int choose_type = i % SLAB_NUM;
     test_alloc_and_free(1 << (5 + choose_type), 0);
   }
 }
@@ -132,17 +133,28 @@ static void entry_1(int tid) {
   int cur_cpu = tid - 1;
   thread_id[cur_cpu] = pthread_self();
 //   printf("thread_id[%d]: %ld\n", cur_cpu, thread_id[cur_cpu]);
-  for (int i = 0; i < 14; i++)
+  for (int i = 0; i < BBMA_NUM; i++)
   {
-    int choose_type = i % 14;
-    test_alloc_and_free(1 << (11 + choose_type), 1);
+    int choose_type = i % BBMA_NUM;
+    test_alloc_and_free(1 << (12 + choose_type), 1);
+  }
+}
+
+static void entry_2(int tid) { 
+  int cur_cpu = tid - 1;
+  thread_id[cur_cpu] = pthread_self();
+//   printf("thread_id[%d]: %ld\n", cur_cpu, thread_id[cur_cpu]);
+  for (int i = 0; i < BBMA_NUM; i++)
+  {
+    int choose_type = i % BBMA_NUM;
+    test_alloc_and_free(1 << (12 + choose_type), 2);
   }
 }
 
 
 void do_test_0() {
     printf("\033[32m Test 0 begin\n\033[0m");
-    file = fopen("/home/appletree/JYY-OS/kernel/test/testlog.txt", "w");
+    file = fopen("/home/appletree/JYY-OS/kernel/test/testlog0.txt", "w");
     fclose(file);
     pmm->init();
     for (int i = 0; i < CPU_NUM; i++){
@@ -153,7 +165,7 @@ void do_test_0() {
 
 void do_test_1() {
     printf("\033[32m Test 1 begin\n\033[0m");
-    file = fopen("/home/appletree/JYY-OS/kernel/test/testlog.txt", "w");
+    file = fopen("/home/appletree/JYY-OS/kernel/test/testlog1.txt", "w");
     fclose(file);
     pmm->init();
     for (int i = 0; i < CPU_NUM; i++){
@@ -164,11 +176,11 @@ void do_test_1() {
 
 void do_test_2() {
     printf("\033[32m Test 2 begin\n\033[0m");
-    file = fopen("/home/appletree/JYY-OS/kernel/test/testlog.txt", "w");
+    file = fopen("/home/appletree/JYY-OS/kernel/test/testlog2.txt", "w");
     fclose(file);
     pmm->init();
     for (int i = 0; i < 1; i++){
-        create(entry_1);
+        create(entry_2);
     }
     join();
 }

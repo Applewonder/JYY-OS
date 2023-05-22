@@ -1,6 +1,6 @@
-#include "slab.h"
-#include <assert.h>
-#include <bbma.h>
+// #include "slab.h"
+// #include <assert.h>
+// #include <bbma.h>
 
 BUDDY_BLOCK_STICK* buddy_block_list[BBMA_NUM];
 spinlock_t bbma_lock[BBMA_NUM];
@@ -38,7 +38,6 @@ BUDDY_BLOCK_SIZE determine_bbma_size(size_t size) {
     } else {
         return BBMA_REFUSE;
     }
-    
 }
 
 void* bbma_alloc(size_t size, bool is_from_slab) {
