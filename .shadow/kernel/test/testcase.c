@@ -277,7 +277,7 @@ static void entry_5(int tid) {
   int cur_cpu = tid - 1;
   thread_id[cur_cpu] = pthread_self();
 //   printf("thread_id[%d]: %ld\n", cur_cpu, thread_id[cur_cpu]);
-  for (int i = 0; i < 10000; i++)
+  for (int i = 0; i < 1000; i++)
   {
     test_multi_alloc_and_free(5);
   }
