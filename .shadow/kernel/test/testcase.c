@@ -266,7 +266,7 @@ static void entry_6(int tid) {
       int index = rand() % end_index;
       mutex_lock(&mutex);
       pmm->free(already_alloc[index]);
-      write_in_file(ptr, 0, false, test_id);
+      write_in_file(already_alloc[index], 0, false, 6);
       mutex_unlock(&mutex);
       already_alloc[index] = already_alloc[end_index - 1];
       end_index --;
@@ -280,7 +280,7 @@ static void entry_6(int tid) {
         fprintf(file, "Failed to alloc\n");
         fclose(file);
       } else {
-        write_in_file(ptr, size, true, test_id);
+        write_in_file(ptr, size, true, 6);
       }
       already_alloc[end_index] = ptr;
       end_index ++;
