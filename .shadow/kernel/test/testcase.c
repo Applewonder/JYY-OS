@@ -276,6 +276,7 @@ static void entry_6(int tid) {
       int index = rand() % end_index;
       pmm->free(already_alloc[index]);
       mutex_lock(&mutex);
+      
       write_in_file(already_alloc[index], 0, false, 6);
       mutex_unlock(&mutex);
       already_alloc[index] = already_alloc[end_index - 1];
