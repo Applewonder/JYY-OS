@@ -264,7 +264,6 @@ void print_chain_in_file(int test_id, int size, bool is_end) {
     char origin_log[200] = "/home/appletree/JYY-OS/kernel/test/testlog";
     strcat(origin_log, str);
     strcat(origin_log, ".txt");
-    mutex_lock(&mutex);
     file = fopen(origin_log, "a+");
     if (size > 2 *1024) {
       int log_size = determine_bbma_size(size);
@@ -278,10 +277,10 @@ void print_chain_in_file(int test_id, int size, bool is_end) {
       fprintf(file, "\n");
     }
     fclose(file);
-    mutex_unlock(&mutex);
 }
 
 static void entry_6(int tid) { 
+  printf("entry_6\n");
   int cur_cpu = tid - 1;
   thread_id[cur_cpu] = pthread_self();
 //   printf("thread_id[%d]: %ld\n", cur_cpu, thread_id[cur_cpu]);
@@ -290,38 +289,42 @@ static void entry_6(int tid) {
   int end_index = 0;
   int round_cnt = 0;
   while (round_cnt < 10000) {
+    // printf("round_cnt: %d\n", round_cnt);
     int choose_type = rand() % 2;
     if (choose_type && end_index) {
       int index = rand() % end_index;
       BUDDY_BLOCK_STICK* stick_addr =convert_addr_to_index(already_alloc[index]);
       int size = 1 << stick_addr->alloc_spaces;
-      print_chain_in_file(6, size, false);
+      // mutex_lock(&mutex);
+      // print_chain_in_file(6, size, false);
+      // mutex_unlock(&mutex);
       pmm->free(already_alloc[index]);
-      mutex_lock(&mutex);
-      
-      write_in_file(already_alloc[index], 0, false, 6);
-      mutex_unlock(&mutex);
-      print_chain_in_file(6, size, true);
+      // mutex_lock(&mutex);
+      // write_in_file(already_alloc[index], 0, false, 6);
+      // print_chain_in_file(6, size, true);
+      // mutex_unlock(&mutex);
       already_alloc[index] = already_alloc[end_index - 1];
       end_index --;
     } else {
       int size = (rand() % 16 * 1024 * 1024) + 1;
-      print_chain_in_file(6, size, false);
+      // mutex_lock(&mutex);
+      // print_chain_in_file(6, size, false);
+      // mutex_unlock(&mutex);
       void* ptr = pmm->alloc(size);
-      mutex_lock(&mutex);
+      // mutex_lock(&mutex);
       if (ptr == NULL) {
         file = fopen("/home/appletree/JYY-OS/kernel/test/testlog6.txt", "a");
         fprintf(file, "Try to alloc Size: %d. Can not alloc\n", size);
         fclose(file);
-        mutex_unlock(&mutex);
       } else {
-        write_in_file(ptr, size, true, 6);
-        mutex_unlock(&mutex);
-        print_chain_in_file(6, size, true);
+        // write_in_file(ptr, size, true, 6);
+
+        // print_chain_in_file(6, size, true);
 
         already_alloc[end_index] = ptr;
         end_index ++;
       }
+      // mutex_unlock(&mutex);
     }
     round_cnt ++;
   }
@@ -398,6 +401,7 @@ void do_test_6() {
     file = fopen("/home/appletree/JYY-OS/kernel/test/testlog6.txt", "w");
     fclose(file);
     pmm->init();
+    printf("init done\n");
     for (int i = 0; i < 2; i++){
         create(entry_6);
     }
