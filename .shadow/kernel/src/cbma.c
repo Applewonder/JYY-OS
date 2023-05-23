@@ -313,6 +313,7 @@ void insert_free_bbma_block_into_bbma_system(BUDDY_BLOCK_STICK* inserted_bbma_bl
 }
 
 void spy_insert_chain_block(BUDDY_BLOCK_STICK* position, BUDDY_BLOCK_STICK* item) {
+    assert(item != NULL);
     if (position == NULL) {
         BUDDY_BLOCK_SIZE insert_size = item->alloc_spaces;
         item->prev = NULL;
