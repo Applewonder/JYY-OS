@@ -47,4 +47,5 @@ void bbma_free(void* ptr);
 void bbma_init(void* start, void* end);
 void* convert_addr_to_index(void* addr);
 void* convert_index_to_addr(void* index);
+void spy_insert_chain_block(BUDDY_BLOCK_STICK* position, BUDDY_BLOCK_STICK* item);
 #endif

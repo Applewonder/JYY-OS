@@ -124,10 +124,14 @@ void write_in_file(void* ptr, size_t size, bool is_alloc, int test_id) {
     file = fopen(origin_log, "a");
     if (is_alloc) {
         fprintf(file, "Alloc %p, Size %ld\n", ptr, size);
+        fprintf(file, "End Alloc\n");
         print_bbma_chain(size);
     } else {
         fprintf(file, "Free %p\n", ptr);
+        fprintf(file, "End Free\n");
+        print_bbma_chain(size);
     }
+    fprintf(file, "\n");
     fclose(file);
 }
 
@@ -139,14 +143,25 @@ void test_alloc_and_free(size_t size, int test_id) {
     strcat(origin_log, str);
     strcat(origin_log, ".txt");
     file = fopen(origin_log, "a");
+    fprintf(file, "Before Alloc\n");
+    print_bbma_chain(size);
 
+    void* ptr = pmm->alloc(size);
+    if (ptr == NULL) {
+        fprintf(file, "Failed to alloc\n");
+    }
+    fclose(file);
+    write_in_file(ptr, size, true, test_id);
+
+
+    mutex_unlock(&mutex);
+
+    mutex_lock(&mutex);
+    file = fopen(origin_log, "a");
+    fprintf(file, "Before Free\n");
     print_bbma_chain(size);
     fclose(file);
-    void* ptr = pmm->alloc(size);
-    write_in_file(ptr, size, true, test_id);
-    mutex_unlock(&mutex);
     pmm->free(ptr);
-    mutex_lock(&mutex);
     write_in_file(ptr, size, false, test_id);
     mutex_unlock(&mutex);
 }

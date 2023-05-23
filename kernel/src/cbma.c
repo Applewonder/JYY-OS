@@ -1,13 +1,15 @@
 #include "slab.h"
 #include <assert.h>
 #include <cbma.h>
+#include <stdio.h>
 
 static void* real_start_addr;
 static void* begin_alloc_addr;
 
-
-
-
+#ifdef TEST
+extern FILE* file;
+char origin_logg[200] = "/home/appletree/JYY-OS/kernel/test/testlog1.txt";
+#endif
 
 BUDDY_BLOCK_STICK* buddy_blocks[BBMA_NUM];
 // spinlock_t bbma_lock[BBMA_NUM];
@@ -50,6 +52,9 @@ BUDDY_BLOCK_SIZE determine_bbma_size(size_t size) {
 void* get_the_free_space_by_dividing(BUDDY_BLOCK_SIZE bbma_size) {
     BUDDY_BLOCK_STICK* bbma_stick = divide_larger_bbma_block_from_bbma_system(bbma_size + 1);
     // spin_lock(&bbma_lock[bbma_size - FIND_BBMA_OFFSET]);
+    if (bbma_stick == NULL) {
+        return NULL;
+    }
     delete_a_free_block_in_bbma_system(bbma_stick);
     // spin_unlock(&bbma_lock[bbma_size - FIND_BBMA_OFFSET]);
     return convert_index_to_addr(bbma_stick);
@@ -111,11 +116,11 @@ void delete_a_free_block_in_bbma_system(BUDDY_BLOCK_STICK* bbma_stick) {
 }
 
 void* bbma_align_to_larger_block(void* ptr, BUDDY_BLOCK_SIZE bbma_size) {
-    long mask = (1 << bbma_size) - 1;
-    if (!((long)ptr & mask)) {
-        return (void*)((long)ptr & (~mask)) + (1 << (bbma_size - 1));
+    uintptr_t mask = (1 << bbma_size) - 1;
+    if (!((uintptr_t)ptr & mask)) {
+        return (void*)((uintptr_t)ptr & (~mask)) + (1 << (bbma_size - 1));
     }
-    return (void*)((long)ptr & (~mask));
+    return (void*)((uintptr_t)ptr & (~mask));
 }
 
 BUDDY_BLOCK_STICK* divide_larger_bbma_block_from_bbma_system(BUDDY_BLOCK_SIZE bbma_size) {
@@ -141,13 +146,19 @@ BUDDY_BLOCK_STICK* divide_larger_bbma_block_from_bbma_system(BUDDY_BLOCK_SIZE bb
 //     int cur_cpu = cpu_current();
 //     printf("Tread %d got the lock %d\n", cur_cpu, bbma_size - FIND_BBMA_OFFSET);
 // #endif
+    assert(the_bbma_block_stick != NULL);
     delete_a_free_block_in_bbma_system(the_bbma_block_stick);
+    assert(left_divided_child != NULL);
     insert_two_new_divided_child_into_bbma_system(left_divided_child, right_divided_child, bbma_size - 1);
+    assert(left_divided_child != NULL);
     // spin_unlock(&bbma_lock[bbma_size - FIND_BBMA_OFFSET]);
     return left_divided_child;
 }
 
 void insert_two_new_divided_child_into_bbma_system(BUDDY_BLOCK_STICK* left_divided_child, BUDDY_BLOCK_STICK* right_divided_child, BUDDY_BLOCK_SIZE bbma_size){
+#ifdef TEST
+    assert(left_divided_child != right_divided_child);
+#endif
     left_divided_child->alloc_spaces = bbma_size;
     right_divided_child->alloc_spaces = bbma_size;
     left_divided_child->next = right_divided_child;
@@ -155,32 +166,9 @@ void insert_two_new_divided_child_into_bbma_system(BUDDY_BLOCK_STICK* left_divid
     left_divided_child->prev = NULL;
     right_divided_child->next = NULL;
     // spin_lock(&bbma_lock[bbma_size - FIND_BBMA_OFFSET]);
-    BUDDY_BLOCK_STICK* the_cur_bbma_block = buddy_blocks[bbma_size - FIND_BBMA_OFFSET];
-    while (the_cur_bbma_block != NULL) {
-        if (the_cur_bbma_block < left_divided_child) {
-            if (the_cur_bbma_block->next == NULL) {
-                the_cur_bbma_block->next = left_divided_child;
-                left_divided_child->prev = the_cur_bbma_block;
-                return;
-            } else {
-                the_cur_bbma_block = the_cur_bbma_block->next;
-            }
-        } else {
-            if (the_cur_bbma_block->prev == NULL) {
-                buddy_blocks[bbma_size - FIND_BBMA_OFFSET] = left_divided_child;
-                right_divided_child->next = the_cur_bbma_block;
-                the_cur_bbma_block->prev = right_divided_child;
-                return;
-            } else {
-                the_cur_bbma_block->prev->next = left_divided_child;
-                left_divided_child->prev = the_cur_bbma_block->prev;
-                right_divided_child->next = the_cur_bbma_block;
-                the_cur_bbma_block->prev = right_divided_child;
-                return;
-            }
-        }
-    }
-    buddy_blocks[bbma_size - FIND_BBMA_OFFSET] = left_divided_child;
+    BUDDY_BLOCK_STICK* inserted_position = find_the_position_where_inserting_the_free_bbma_block(left_divided_child, bbma_size);
+    spy_insert_chain_block(inserted_position, left_divided_child);
+    spy_insert_chain_block(left_divided_child , right_divided_child);
     // spin_unlock(&bbma_lock[bbma_size - FIND_BBMA_OFFSET]);
 }
 
@@ -193,6 +181,7 @@ void* find_the_free_space_in_bbma_system(BUDDY_BLOCK_SIZE bbma_size) {
 // #endif
     if (buddy_blocks[bbma_size - FIND_BBMA_OFFSET] != NULL) {
         bbma_addr = buddy_blocks[bbma_size - FIND_BBMA_OFFSET];
+        assert(bbma_addr != NULL);
         delete_a_free_block_in_bbma_system(bbma_addr);
         BUDDY_BLOCK_STICK* bbma_stick = (BUDDY_BLOCK_STICK*)bbma_addr;
         bbma_stick->alloc_spaces = bbma_size;
@@ -213,19 +202,22 @@ void bbma_init(void* start, void* end) {
     unsigned long bbma_init_block_stick_gap = (bbma_init_block_size >> S_4K) * BBMA_STICK_SIZE;
     void* cur_buddy_block_addr = begin_alloc_addr;
     BUDDY_BLOCK_STICK* cur_bbma_block_stick = convert_addr_to_index(cur_buddy_block_addr);
+
     cur_bbma_block_stick->prev = NULL;
     cur_bbma_block_stick->next = NULL;
-    buddy_blocks[S_16M - FIND_BBMA_OFFSET] = cur_bbma_block_stick;
+
+    BUDDY_BLOCK_STICK* prev_bbma_block_stick = buddy_blocks[S_16M - FIND_BBMA_OFFSET];
+    
     while(cur_buddy_block_addr + bbma_init_block_size <= end) {
         cur_bbma_block_stick->alloc_spaces = S_16M;
+        spy_insert_chain_block(prev_bbma_block_stick, cur_bbma_block_stick);
+        prev_bbma_block_stick = cur_bbma_block_stick;
         if (cur_buddy_block_addr + 2 * bbma_init_block_size <= end) {
-            cur_bbma_block_stick->next = ((void*)cur_bbma_block_stick) + bbma_init_block_stick_gap;
-            cur_bbma_block_stick->next->prev = cur_bbma_block_stick;
+            cur_bbma_block_stick = ((void*)cur_bbma_block_stick) + bbma_init_block_stick_gap;
         } else {
-            cur_bbma_block_stick->next = NULL;
+            cur_bbma_block_stick = NULL;
         }
         cur_buddy_block_addr += bbma_init_block_size;
-        cur_bbma_block_stick = cur_bbma_block_stick->next;
     }
 }
 
@@ -277,18 +269,23 @@ bool judge_if_can_merge(BUDDY_BLOCK_STICK* inserted_bbma_block_stick, BUDDY_BLOC
 }
 
 BUDDY_BLOCK_STICK* merge_the_block(BUDDY_BLOCK_STICK* inserted_bbma_block_stick, BUDDY_BLOCK_STICK* the_cur_bbma_expected_neighbor_block, bool where_is_the_neighbor) {
+    BUDDY_BLOCK_STICK* merged_block = NULL;
     if (where_is_the_neighbor) {
+#ifdef TEST
+        assert(the_cur_bbma_expected_neighbor_block != NULL);
+#endif
         delete_a_free_block_in_bbma_system(the_cur_bbma_expected_neighbor_block);
-        the_cur_bbma_expected_neighbor_block->next = NULL;
-        the_cur_bbma_expected_neighbor_block->prev = NULL;
-        the_cur_bbma_expected_neighbor_block->alloc_spaces ++;
-        return the_cur_bbma_expected_neighbor_block;
+        merged_block = the_cur_bbma_expected_neighbor_block;
+        merged_block->next = NULL;
+        merged_block->prev = NULL;
+        merged_block->alloc_spaces = the_cur_bbma_expected_neighbor_block->alloc_spaces + 1;
     } else {
-        inserted_bbma_block_stick->next = NULL;
-        inserted_bbma_block_stick->prev = NULL;
-        inserted_bbma_block_stick->alloc_spaces ++;
-        return inserted_bbma_block_stick;
+        merged_block = inserted_bbma_block_stick;
+        merged_block->next = NULL;
+        merged_block->prev = NULL;
+        merged_block->alloc_spaces = inserted_bbma_block_stick->alloc_spaces + 1;
     }
+    return merged_block;
 }
 
 void insert_free_bbma_block_into_bbma_system(BUDDY_BLOCK_STICK* inserted_bbma_block_stick, BUDDY_BLOCK_SIZE bbma_block_size) {
@@ -297,37 +294,59 @@ void insert_free_bbma_block_into_bbma_system(BUDDY_BLOCK_STICK* inserted_bbma_bl
 //     int cur_cpu = cpu_current();
 //     printf("Tread %d got the lock %d\n", cur_cpu, bbma_block_size - FIND_BBMA_OFFSET);
 // #endif
+    inserted_bbma_block_stick->next = NULL;
+    inserted_bbma_block_stick->prev = NULL;
     BUDDY_BLOCK_STICK* the_begin_bbma_block_stick = buddy_blocks[bbma_block_size - FIND_BBMA_OFFSET];
     BUDDY_BLOCK_STICK* the_cur_bbma_expected_neighbor_block_stick = convert_addr_to_index(bbma_align_to_larger_block(convert_index_to_addr(inserted_bbma_block_stick), bbma_block_size + 1));
     BUDDY_BLOCK_STICK* the_position_where_inserting_the_free_bbma_block_stick = find_the_position_where_inserting_the_free_bbma_block(inserted_bbma_block_stick, bbma_block_size);
     bool where_is_the_neighbor = the_cur_bbma_expected_neighbor_block_stick < inserted_bbma_block_stick;
 
     if (the_begin_bbma_block_stick == NULL) {
-        buddy_blocks[bbma_block_size - FIND_BBMA_OFFSET] = inserted_bbma_block_stick;
+        spy_insert_chain_block(NULL, inserted_bbma_block_stick);
         // spin_unlock(&bbma_lock[bbma_block_size - FIND_BBMA_OFFSET]);
         return;
     }
 
     if (judge_if_can_merge(inserted_bbma_block_stick, the_begin_bbma_block_stick, the_position_where_inserting_the_free_bbma_block_stick, the_cur_bbma_expected_neighbor_block_stick)) {
+#ifdef TEST
+        file = fopen(origin_logg, "a");
+        fprintf(file, "Inserted ptr: %p, Neighbor ptr: %p ", inserted_bbma_block_stick, the_cur_bbma_expected_neighbor_block_stick);
+#endif
         BUDDY_BLOCK_STICK* ready_to_insert = merge_the_block(inserted_bbma_block_stick, the_cur_bbma_expected_neighbor_block_stick, where_is_the_neighbor);
+#ifdef TEST
+        fprintf(file, "Merged ptr: %p\n", ready_to_insert);
+        fclose(file);
+#endif
+        if (!where_is_the_neighbor) {
+            delete_a_free_block_in_bbma_system(the_cur_bbma_expected_neighbor_block_stick);
+        }
         insert_free_bbma_block_into_bbma_system(ready_to_insert, bbma_block_size + 1);
         // spin_unlock(&bbma_lock[bbma_block_size - FIND_BBMA_OFFSET]);
         return;
     }
     // deal with the situation that the inserted block is the first block in the list
-    if (the_position_where_inserting_the_free_bbma_block_stick == NULL) {
-        inserted_bbma_block_stick->next = the_begin_bbma_block_stick;
-        the_begin_bbma_block_stick->prev = inserted_bbma_block_stick;
-        buddy_blocks[bbma_block_size - FIND_BBMA_OFFSET] = inserted_bbma_block_stick;
-    } else {
-        inserted_bbma_block_stick->next = the_position_where_inserting_the_free_bbma_block_stick->next;
-        inserted_bbma_block_stick->prev = the_position_where_inserting_the_free_bbma_block_stick;
-        the_position_where_inserting_the_free_bbma_block_stick->next = inserted_bbma_block_stick;
-        if (inserted_bbma_block_stick->next != NULL) {
-            inserted_bbma_block_stick->next->prev = inserted_bbma_block_stick;
-        }
-    }
+    spy_insert_chain_block(the_position_where_inserting_the_free_bbma_block_stick, inserted_bbma_block_stick);
     // spin_unlock(&bbma_lock[bbma_block_size - FIND_BBMA_OFFSET]);
+}
+
+void spy_insert_chain_block(BUDDY_BLOCK_STICK* position, BUDDY_BLOCK_STICK* item) {
+#ifdef TEST
+    assert(item != NULL);
+#endif
+    if (position == NULL) {
+        BUDDY_BLOCK_SIZE insert_size = item->alloc_spaces;
+        item->prev = NULL;
+        item ->next = buddy_blocks[insert_size - FIND_BBMA_OFFSET];
+        if (buddy_blocks[insert_size - FIND_BBMA_OFFSET] != NULL)
+            buddy_blocks[insert_size - FIND_BBMA_OFFSET]->prev = item;
+        buddy_blocks[insert_size - FIND_BBMA_OFFSET] = item;
+    } else {
+        item->prev = position;
+        item->next = position->next;
+        if (position->next != NULL)
+            position->next->prev = item;
+        position->next = item;
+    }
 }
 
 void bbma_free(void* ptr) {
