@@ -52,6 +52,7 @@ BUDDY_BLOCK_SIZE determine_bbma_size(size_t size) {
 void* get_the_free_space_by_dividing(BUDDY_BLOCK_SIZE bbma_size) {
     BUDDY_BLOCK_STICK* bbma_stick = divide_larger_bbma_block_from_bbma_system(bbma_size + 1);
     // spin_lock(&bbma_lock[bbma_size - FIND_BBMA_OFFSET]);
+    assert(bbma_stick != NULL);
     delete_a_free_block_in_bbma_system(bbma_stick);
     // spin_unlock(&bbma_lock[bbma_size - FIND_BBMA_OFFSET]);
     return convert_index_to_addr(bbma_stick);
@@ -98,7 +99,6 @@ void* convert_addr_to_index(void* addr) {
 }
 
 void delete_a_free_block_in_bbma_system(BUDDY_BLOCK_STICK* bbma_stick) {
-    assert(bbma_stick != NULL);
     if (bbma_stick->prev == NULL) {
         BUDDY_BLOCK_SIZE bbma_size = bbma_stick->alloc_spaces;
         buddy_blocks[bbma_size - FIND_BBMA_OFFSET] = bbma_stick->next;
@@ -177,6 +177,7 @@ void* find_the_free_space_in_bbma_system(BUDDY_BLOCK_SIZE bbma_size) {
 // #endif
     if (buddy_blocks[bbma_size - FIND_BBMA_OFFSET] != NULL) {
         bbma_addr = buddy_blocks[bbma_size - FIND_BBMA_OFFSET];
+        assert(bbma_addr != NULL);
         delete_a_free_block_in_bbma_system(bbma_addr);
         BUDDY_BLOCK_STICK* bbma_stick = (BUDDY_BLOCK_STICK*)bbma_addr;
         bbma_stick->alloc_spaces = bbma_size;
@@ -264,6 +265,7 @@ bool judge_if_can_merge(BUDDY_BLOCK_STICK* inserted_bbma_block_stick, BUDDY_BLOC
 BUDDY_BLOCK_STICK* merge_the_block(BUDDY_BLOCK_STICK* inserted_bbma_block_stick, BUDDY_BLOCK_STICK* the_cur_bbma_expected_neighbor_block, bool where_is_the_neighbor) {
     BUDDY_BLOCK_STICK* merged_block = NULL;
     if (where_is_the_neighbor) {
+        assert(the_cur_bbma_expected_neighbor_block != NULL);
         delete_a_free_block_in_bbma_system(the_cur_bbma_expected_neighbor_block);
         merged_block = the_cur_bbma_expected_neighbor_block;
         merged_block->next = NULL;
