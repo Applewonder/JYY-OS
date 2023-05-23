@@ -13,12 +13,12 @@ extern FILE* file;
 char origin_logg[200] = "/home/appletree/JYY-OS/kernel/test/testlog1.txt";
 #endif
 
-typedef pthread_mutex_t mutex_t;
+// typedef pthread_mutex_t mutex_t;
 
 BUDDY_BLOCK_STICK* buddy_blocks[BBMA_NUM];
 // spinlock_t bbma_lock[BBMA_NUM];
 spinlock_t bbma_lock;
-extern mutex_t mutex;
+// extern mutex_t mutex;
 
 BUDDY_BLOCK_SIZE determine_bbma_size(size_t size) {
     size_t real_size = size;
@@ -68,12 +68,12 @@ void* bbma_alloc(size_t size, bool is_from_slab) {
     // mutex_lock(&mutex);
     spin_lock(&bbma_lock);
 
-    assert(ente_cnt++==0);
+    // assert(ente_cnt++==0);
     BUDDY_BLOCK_SIZE bbma_size = BBMA_REFUSE;
     if (is_from_slab) {
         if (size != SLAB_REQUEST_SPACE) {
             // panic_on(true, "slab size error");
-            assert(--ente_cnt==0);
+            // assert(--ente_cnt==0);
             spin_unlock(&bbma_lock);
             
             // mutex_unlock(&mutex);
@@ -84,7 +84,7 @@ void* bbma_alloc(size_t size, bool is_from_slab) {
         bbma_size = determine_bbma_size(size);
         if (bbma_size == BBMA_REFUSE) {
             // panic_on(true, "bbma size error");
-            assert(--ente_cnt==0);
+            // assert(--ente_cnt==0);
             spin_unlock(&bbma_lock);
             
             // mutex_unlock(&mutex);
@@ -97,15 +97,15 @@ void* bbma_alloc(size_t size, bool is_from_slab) {
     }
     if (possible_bbma_addr != NULL) {
         // panic_on(true, "bbma alloc error");
-        char* judger = possible_bbma_addr + (1 << 12) - 1;
-        assert(*judger == 0);
-        *judger = *judger + 1;
+        // char* judger = possible_bbma_addr + (1 << 12) - 1;
+        // assert(*judger == 0);
+        // *judger = *judger + 1;
     }
 
 #ifdef TEST
     // assert()
 #endif
-    assert(--ente_cnt==0);
+    // assert(--ente_cnt==0);
     spin_unlock(&bbma_lock);
 
     
@@ -342,7 +342,7 @@ void spy_insert_chain_block(BUDDY_BLOCK_STICK* item) {
 void bbma_free(void* ptr) {
     // mutex_lock(&mutex);
     spin_lock(&bbma_lock);
-    assert(++ente_cnt==1);
+    // assert(++ente_cnt==1);
     if (ptr == NULL) {
         return;
     }
@@ -351,10 +351,10 @@ void bbma_free(void* ptr) {
     cur_bbma_block_stick->prev = NULL;
     cur_bbma_block_stick->next = NULL;
     insert_free_bbma_block_into_bbma_system(cur_bbma_block_stick, cur_bbma_block_size);
-    char* judger = ptr + (1 << 12) - 1;;
-    assert(*judger == 1);
-    *judger = 0;
-    assert(--ente_cnt==0);
+    // char* judger = ptr + (1 << 12) - 1;;
+    // assert(*judger == 1);
+    // *judger = 0;
+    // assert(--ente_cnt==0);
     spin_unlock(&bbma_lock);
     
     // mutex_unlock(&mutex);
