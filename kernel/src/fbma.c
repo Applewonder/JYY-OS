@@ -1,8 +1,9 @@
 #include "slab.h"
+#include "threads.h"
 #include <assert.h>
 #include <cbma.h>
 #include <stdio.h>
-#include "threads.h"
+// #include "threads.h"
 
 static void* real_start_addr;
 static void* begin_alloc_addr;
@@ -12,12 +13,12 @@ extern FILE* file;
 char origin_logg[200] = "/home/appletree/JYY-OS/kernel/test/testlog1.txt";
 #endif
 
-typedef pthread_mutex_t mutex_t;
+// typedef pthread_mutex_t mutex_t;
 
 BUDDY_BLOCK_STICK* buddy_blocks[BBMA_NUM];
 // spinlock_t bbma_lock[BBMA_NUM];
 spinlock_t bbma_lock;
-extern mutex_t mutex;
+// extern mutex_t mutex;
 
 BUDDY_BLOCK_SIZE determine_bbma_size(size_t size) {
     size_t real_size = size;
@@ -62,14 +63,20 @@ void* get_the_free_space_by_dividing(BUDDY_BLOCK_SIZE bbma_size) {
     // spin_unlock(&bbma_lock[bbma_size - FIND_BBMA_OFFSET]);
     return convert_index_to_addr(bbma_stick);
 }
-
+int ente_cnt = 0;
 void* bbma_alloc(size_t size, bool is_from_slab) {
-    mutex_lock(&mutex);
+    // mutex_lock(&mutex);
+    spin_lock(&bbma_lock);
+
+    // assert(ente_cnt++==0);
     BUDDY_BLOCK_SIZE bbma_size = BBMA_REFUSE;
     if (is_from_slab) {
         if (size != SLAB_REQUEST_SPACE) {
             // panic_on(true, "slab size error");
+            // assert(--ente_cnt==0);
             spin_unlock(&bbma_lock);
+            
+            // mutex_unlock(&mutex);
             return NULL;
         }
         bbma_size = S_4K;
@@ -77,7 +84,10 @@ void* bbma_alloc(size_t size, bool is_from_slab) {
         bbma_size = determine_bbma_size(size);
         if (bbma_size == BBMA_REFUSE) {
             // panic_on(true, "bbma size error");
+            // assert(--ente_cnt==0);
             spin_unlock(&bbma_lock);
+            
+            // mutex_unlock(&mutex);
             return NULL;
         }
     }
@@ -95,7 +105,12 @@ void* bbma_alloc(size_t size, bool is_from_slab) {
 #ifdef TEST
     // assert()
 #endif
-    mutex_unlock(&mutex);
+    // assert(--ente_cnt==0);
+    spin_unlock(&bbma_lock);
+
+    
+    // mutex_unlock(&mutex);
+    
     return possible_bbma_addr;
 }
 
@@ -221,12 +236,12 @@ void bbma_init(void* start, void* end) {
     cur_bbma_block_stick->prev = NULL;
     cur_bbma_block_stick->next = NULL;
 
-    BUDDY_BLOCK_STICK* prev_bbma_block_stick = buddy_blocks[S_16M - FIND_BBMA_OFFSET];
+    // BUDDY_BLOCK_STICK* prev_bbma_block_stick = NULL;
     
     while(cur_buddy_block_addr + bbma_init_block_size <= end) {
         cur_bbma_block_stick->alloc_spaces = S_16M;
         spy_insert_chain_block(cur_bbma_block_stick);
-        prev_bbma_block_stick = cur_bbma_block_stick;
+        // prev_bbma_block_stick = cur_bbma_block_stick;
         if (cur_buddy_block_addr + 2 * bbma_init_block_size <= end) {
             cur_bbma_block_stick = ((void*)cur_bbma_block_stick) + bbma_init_block_stick_gap;
         } else {
@@ -325,7 +340,9 @@ void spy_insert_chain_block(BUDDY_BLOCK_STICK* item) {
 }
 
 void bbma_free(void* ptr) {
-    mutex_lock(&mutex);
+    // mutex_lock(&mutex);
+    spin_lock(&bbma_lock);
+    // assert(++ente_cnt==1);
     if (ptr == NULL) {
         return;
     }
@@ -337,5 +354,8 @@ void bbma_free(void* ptr) {
     // char* judger = ptr + (1 << 12) - 1;;
     // assert(*judger == 1);
     // *judger = 0;
-    mutex_unlock(&mutex);
+    // assert(--ente_cnt==0);
+    spin_unlock(&bbma_lock);
+    
+    // mutex_unlock(&mutex);
 }
