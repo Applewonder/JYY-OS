@@ -54,5 +54,8 @@ testcase5: test
 testcase6: test
 		@build/test 6
 
+testcase7: test
+		@build/test 7
+
 debug: 
 	./debug.sh

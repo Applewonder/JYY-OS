@@ -15,7 +15,6 @@ BUDDY_BLOCK_STICK* buddy_blocks[BBMA_NUM];
 // spinlock_t bbma_lock[BBMA_NUM];
 spinlock_t bbma_lock;
 
-
 BUDDY_BLOCK_SIZE determine_bbma_size(size_t size) {
     size_t real_size = size;
     if (real_size <= (1 << S_4K)) {
@@ -103,6 +102,7 @@ void* convert_addr_to_index(void* addr) {
 void delete_a_free_block_in_bbma_system(BUDDY_BLOCK_STICK* bbma_stick) {
     if (bbma_stick->prev == NULL) {
         BUDDY_BLOCK_SIZE bbma_size = bbma_stick->alloc_spaces;
+        bbma_stick->is_free = false;
         buddy_blocks[bbma_size - FIND_BBMA_OFFSET] = bbma_stick->next;
         if (bbma_stick->next != NULL) {
             bbma_stick->next->prev = NULL;
@@ -146,17 +146,11 @@ BUDDY_BLOCK_STICK* divide_larger_bbma_block_from_bbma_system(BUDDY_BLOCK_SIZE bb
 //     int cur_cpu = cpu_current();
 //     printf("Tread %d got the lock %d\n", cur_cpu, bbma_size - FIND_BBMA_OFFSET);
 // #endif
-#ifdef TEST
     assert(the_bbma_block_stick != NULL);
-#endif
     delete_a_free_block_in_bbma_system(the_bbma_block_stick);
-#ifdef TEST
     assert(left_divided_child != NULL);
-#endif
     insert_two_new_divided_child_into_bbma_system(left_divided_child, right_divided_child, bbma_size - 1);
-#ifdef TEST
     assert(left_divided_child != NULL);
-#endif
     // spin_unlock(&bbma_lock[bbma_size - FIND_BBMA_OFFSET]);
     return left_divided_child;
 }
@@ -165,6 +159,8 @@ void insert_two_new_divided_child_into_bbma_system(BUDDY_BLOCK_STICK* left_divid
 #ifdef TEST
     assert(left_divided_child != right_divided_child);
 #endif
+    left_divided_child->is_free = true;
+    right_divided_child->is_free = true;
     left_divided_child->alloc_spaces = bbma_size;
     right_divided_child->alloc_spaces = bbma_size;
     left_divided_child->next = right_divided_child;
@@ -187,9 +183,7 @@ void* find_the_free_space_in_bbma_system(BUDDY_BLOCK_SIZE bbma_size) {
 // #endif
     if (buddy_blocks[bbma_size - FIND_BBMA_OFFSET] != NULL) {
         bbma_addr = buddy_blocks[bbma_size - FIND_BBMA_OFFSET];
-#ifdef TEST
         assert(bbma_addr != NULL);
-#endif
         delete_a_free_block_in_bbma_system(bbma_addr);
         BUDDY_BLOCK_STICK* bbma_stick = (BUDDY_BLOCK_STICK*)bbma_addr;
         bbma_stick->alloc_spaces = bbma_size;

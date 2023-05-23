@@ -32,6 +32,7 @@ struct buddy_block_{
     BUDDY_BLOCK_SIZE alloc_spaces;
     BUDDY_BLOCK_STICK* next;
     BUDDY_BLOCK_STICK* prev;
+    bool is_free;
 };
 
 BUDDY_BLOCK_SIZE determine_bbma_size(size_t size);
