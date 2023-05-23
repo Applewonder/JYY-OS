@@ -306,11 +306,11 @@ void insert_free_bbma_block_into_bbma_system(BUDDY_BLOCK_STICK* inserted_bbma_bl
     if (judge_if_can_merge(inserted_bbma_block_stick, the_begin_bbma_block_stick, the_position_where_inserting_the_free_bbma_block_stick, the_cur_bbma_expected_neighbor_block_stick)) {
 #ifdef TEST
         file = fopen(origin_logg, "a");
-        fprintf(file, "Inserted ptr: %p, Neighbor ptr: %p ", inserted_bbma_block_stick, the_cur_bbma_expected_neighbor_block_stick);
+        fprintf(file, "Inserted ptr: %p, Neighbor ptr: %p ", convert_index_to_addr(inserted_bbma_block_stick), convert_addr_to_index(the_cur_bbma_expected_neighbor_block_stick));
 #endif
         BUDDY_BLOCK_STICK* ready_to_insert = merge_the_block(inserted_bbma_block_stick, the_cur_bbma_expected_neighbor_block_stick, where_is_the_neighbor);
 #ifdef TEST
-        fprintf(file, "Merged ptr: %p\n", ready_to_insert);
+        fprintf(file, "Merged ptr: %p\n", convert_addr_to_index(ready_to_insert));
         fclose(file);
 #endif
         insert_free_bbma_block_into_bbma_system(ready_to_insert, bbma_block_size + 1);
