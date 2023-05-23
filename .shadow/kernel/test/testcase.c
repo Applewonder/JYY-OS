@@ -282,6 +282,7 @@ static void entry_6(int tid) {
       } else {
         write_in_file(ptr, size, true, 6);
       }
+      mutex_unlock(&mutex);
       already_alloc[end_index] = ptr;
       end_index ++;
     }
