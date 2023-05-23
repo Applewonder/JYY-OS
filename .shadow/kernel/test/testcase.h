@@ -7,3 +7,4 @@ void do_test_1();
 void do_test_2();
 void do_test_3();
 void do_test_4();
+void do_test_5();
