@@ -92,7 +92,7 @@ bool judge_if_has_bad_free(unsigned long start_free) {
 }
 
 void judger_for_alloc_and_free(int test_id) {
-    int line_num = 0;
+    int line_num = 1;
 
     char str[20];
     sprintf(str, "%d", test_id);
