@@ -63,10 +63,12 @@ void* get_the_free_space_by_dividing(BUDDY_BLOCK_SIZE bbma_size) {
     // spin_unlock(&bbma_lock[bbma_size - FIND_BBMA_OFFSET]);
     return convert_index_to_addr(bbma_stick);
 }
-
+int ente_cnt = 0;
 void* bbma_alloc(size_t size, bool is_from_slab) {
     // mutex_lock(&mutex);
     spin_lock(&bbma_lock);
+
+    assert(ente_cnt++==0);
     BUDDY_BLOCK_SIZE bbma_size = BBMA_REFUSE;
     if (is_from_slab) {
         if (size != SLAB_REQUEST_SPACE) {
@@ -330,6 +332,7 @@ void spy_insert_chain_block(BUDDY_BLOCK_STICK* item) {
 void bbma_free(void* ptr) {
     // mutex_lock(&mutex);
     spin_lock(&bbma_lock);
+    assert(--ente_cnt==0);
     if (ptr == NULL) {
         return;
     }
