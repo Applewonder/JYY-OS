@@ -133,7 +133,7 @@ void judger_for_alloc_and_free(int test_id) {
 }
 
 int main(int argc, char *argv[]) {
-  
+  srand((unsigned)time(NULL));
   if (argc < 2) exit(1);
   switch(atoi(argv[1])) {
     case 0: {
@@ -152,6 +152,12 @@ int main(int argc, char *argv[]) {
       do_test_2();
       judger_for_alloc_and_free(2);
       printf("\033[32m Test 2 passed\n\033[0m");
+      break;
+    }
+    case 3: {
+      do_test_3();
+      judger_for_alloc_and_free(3);
+      printf("\033[32m Test 3 passed\n\033[0m");
       break;
     }
   }

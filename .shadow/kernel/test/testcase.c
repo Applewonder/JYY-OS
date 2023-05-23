@@ -89,6 +89,7 @@
 #include "testcase.h"
 #include "cbma.h"
 #include "slab.h"
+#include <time.h>
 
 mutex_t mutex = MUTEX_INIT();
 FILE *file;
@@ -199,6 +200,16 @@ static void entry_2(int tid) {
   }
 }
 
+static void entry_3(int tid) { 
+  int cur_cpu = tid - 1;
+  thread_id[cur_cpu] = pthread_self();
+//   printf("thread_id[%d]: %ld\n", cur_cpu, thread_id[cur_cpu]);
+  for (int i = 0; i < 10000; i++)
+  {
+    int choose_type = rand() % BBMA_NUM;
+    test_alloc_and_free(1 << (12 + choose_type), 3);
+  }
+}
 
 void do_test_0() {
     printf("\033[32m Test 0 begin\n\033[0m");
@@ -229,6 +240,17 @@ void do_test_2() {
     pmm->init();
     for (int i = 0; i < 1; i++){
         create(entry_2);
+    }
+    join();
+}
+
+void do_test_3() {
+    printf("\033[32m Test 3 begin\n\033[0m");
+    file = fopen("/home/appletree/JYY-OS/kernel/test/testlog3.txt", "w");
+    fclose(file);
+    pmm->init();
+    for (int i = 0; i < 1; i++){
+        create(entry_3);
     }
     join();
 }
