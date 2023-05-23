@@ -156,7 +156,9 @@ BUDDY_BLOCK_STICK* divide_larger_bbma_block_from_bbma_system(BUDDY_BLOCK_SIZE bb
 }
 
 void insert_two_new_divided_child_into_bbma_system(BUDDY_BLOCK_STICK* left_divided_child, BUDDY_BLOCK_STICK* right_divided_child, BUDDY_BLOCK_SIZE bbma_size){
+#ifdef TEST
     assert(left_divided_child != right_divided_child);
+#endif
     left_divided_child->alloc_spaces = bbma_size;
     right_divided_child->alloc_spaces = bbma_size;
     left_divided_child->next = right_divided_child;
@@ -269,7 +271,9 @@ bool judge_if_can_merge(BUDDY_BLOCK_STICK* inserted_bbma_block_stick, BUDDY_BLOC
 BUDDY_BLOCK_STICK* merge_the_block(BUDDY_BLOCK_STICK* inserted_bbma_block_stick, BUDDY_BLOCK_STICK* the_cur_bbma_expected_neighbor_block, bool where_is_the_neighbor) {
     BUDDY_BLOCK_STICK* merged_block = NULL;
     if (where_is_the_neighbor) {
+#ifdef TEST
         assert(the_cur_bbma_expected_neighbor_block != NULL);
+#endif
         delete_a_free_block_in_bbma_system(the_cur_bbma_expected_neighbor_block);
         merged_block = the_cur_bbma_expected_neighbor_block;
         merged_block->next = NULL;
@@ -326,7 +330,9 @@ void insert_free_bbma_block_into_bbma_system(BUDDY_BLOCK_STICK* inserted_bbma_bl
 }
 
 void spy_insert_chain_block(BUDDY_BLOCK_STICK* position, BUDDY_BLOCK_STICK* item) {
+#ifdef TEST
     assert(item != NULL);
+#endif
     if (position == NULL) {
         BUDDY_BLOCK_SIZE insert_size = item->alloc_spaces;
         item->prev = NULL;
