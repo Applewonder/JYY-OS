@@ -47,11 +47,9 @@ void write_in_file(void* ptr, size_t size, bool is_alloc, int test_id) {
 
     if (is_alloc) {
         fprintf(file, "Alloc %p, Size %ld\n", ptr, size);
-        fprintf(file, "\n");
         // print_bbma_chain(size);
     } else {
         fprintf(file, "Free %p\n", ptr);
-        fprintf(file, "\n");
         // print_bbma_chain(size);
     }
     // fprintf(file, "\n");
@@ -260,7 +258,7 @@ static void entry_5(int tid) {
 //     }
 // }
 
-void print_chain_in_file(int test_id, int size) {
+void print_chain_in_file(int test_id, int size, bool is_end) {
     char str[20];
     sprintf(str, "%d", test_id);
     char origin_log[200] = "/home/appletree/JYY-OS/kernel/test/testlog";
@@ -275,6 +273,9 @@ void print_chain_in_file(int test_id, int size) {
     } else {
       int log_size = determine_slab_size(size);
       fprintf(file, "Slab alloc: %dB\n", 1 << log_size);
+    }
+    if (is_end) {
+      fprintf(file, "\n");
     }
     fclose(file);
     mutex_unlock(&mutex);
@@ -294,18 +295,18 @@ static void entry_6(int tid) {
       int index = rand() % end_index;
       BUDDY_BLOCK_STICK* stick_addr =convert_addr_to_index(already_alloc[index]);
       int size = 1 << stick_addr->alloc_spaces;
-      print_chain_in_file(6, size);
+      print_chain_in_file(6, size, false);
       pmm->free(already_alloc[index]);
       mutex_lock(&mutex);
       
       write_in_file(already_alloc[index], 0, false, 6);
       mutex_unlock(&mutex);
-      print_chain_in_file(6, size);
+      print_chain_in_file(6, size, true);
       already_alloc[index] = already_alloc[end_index - 1];
       end_index --;
     } else {
       int size = (rand() % 16 * 1024 * 1024) + 1;
-      print_chain_in_file(6, size);
+      print_chain_in_file(6, size, false);
       void* ptr = pmm->alloc(size);
       mutex_lock(&mutex);
       if (ptr == NULL) {
@@ -316,7 +317,7 @@ static void entry_6(int tid) {
       } else {
         write_in_file(ptr, size, true, 6);
         mutex_unlock(&mutex);
-        print_chain_in_file(6, size);
+        print_chain_in_file(6, size, true);
 
         already_alloc[end_index] = ptr;
         end_index ++;
