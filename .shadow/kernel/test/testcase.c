@@ -295,9 +295,9 @@ static void entry_6(int tid) {
       int size = 1 << stick_addr->alloc_spaces;
       mutex_lock(&mutex);
       print_chain_in_file(6, size, false);
-      mutex_unlock(&mutex);
+      // mutex_unlock(&mutex);
       pmm->free(already_alloc[index]);
-      mutex_lock(&mutex);
+      // mutex_lock(&mutex);
       write_in_file(already_alloc[index], 0, false, 6);
       print_chain_in_file(6, size, true);
       mutex_unlock(&mutex);
@@ -307,9 +307,9 @@ static void entry_6(int tid) {
       int size = (rand() % 16 * 1024 * 1024) + 1;
       mutex_lock(&mutex);
       print_chain_in_file(6, size, false);
-      mutex_unlock(&mutex);
+      // mutex_unlock(&mutex);
       void* ptr = pmm->alloc(size);
-      mutex_lock(&mutex);
+      // mutex_lock(&mutex);
       if (ptr == NULL) {
         file = fopen("/home/appletree/JYY-OS/kernel/test/testlog6.txt", "a");
         fprintf(file, "Try to alloc Size: %d. Can not alloc\n", size);
