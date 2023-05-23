@@ -145,7 +145,9 @@ BUDDY_BLOCK_STICK* divide_larger_bbma_block_from_bbma_system(BUDDY_BLOCK_SIZE bb
 //     printf("Tread %d got the lock %d\n", cur_cpu, bbma_size - FIND_BBMA_OFFSET);
 // #endif
     delete_a_free_block_in_bbma_system(the_bbma_block_stick);
+    assert(left_divided_child != NULL);
     insert_two_new_divided_child_into_bbma_system(left_divided_child, right_divided_child, bbma_size - 1);
+    assert(left_divided_child != NULL);
     // spin_unlock(&bbma_lock[bbma_size - FIND_BBMA_OFFSET]);
     return left_divided_child;
 }
