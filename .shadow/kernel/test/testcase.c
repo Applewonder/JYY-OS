@@ -280,6 +280,7 @@ void print_chain_in_file(int test_id, int size, bool is_end) {
 }
 
 static void entry_6(int tid) { 
+  printf("entry_6\n");
   int cur_cpu = tid - 1;
   thread_id[cur_cpu] = pthread_self();
 //   printf("thread_id[%d]: %ld\n", cur_cpu, thread_id[cur_cpu]);
