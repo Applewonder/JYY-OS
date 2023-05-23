@@ -141,16 +141,17 @@ void test_alloc_and_free(size_t size, int test_id) {
     file = fopen(origin_log, "a");
 
     print_bbma_chain(size);
-    fclose(file);
-    mutex_unlock(&mutex);
+
     void* ptr = pmm->alloc(size);
-    mutex_lock(&mutex);
+    if (ptr == NULL) {
+        fprintf(file, "Failed to alloc\n");
+    }
+    fclose(file);
     write_in_file(ptr, size, true, test_id);
     mutex_unlock(&mutex);
+
     mutex_lock(&mutex);
     pmm->free(ptr);
-    mutex_unlock(&mutex);
-    mutex_lock(&mutex);
     write_in_file(ptr, size, false, test_id);
     mutex_unlock(&mutex);
 }
