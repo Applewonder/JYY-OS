@@ -236,12 +236,12 @@ void bbma_init(void* start, void* end) {
     cur_bbma_block_stick->prev = NULL;
     cur_bbma_block_stick->next = NULL;
 
-    BUDDY_BLOCK_STICK* prev_bbma_block_stick = buddy_blocks[S_16M - FIND_BBMA_OFFSET];
+    // BUDDY_BLOCK_STICK* prev_bbma_block_stick = NULL;
     
     while(cur_buddy_block_addr + bbma_init_block_size <= end) {
         cur_bbma_block_stick->alloc_spaces = S_16M;
         spy_insert_chain_block(cur_bbma_block_stick);
-        prev_bbma_block_stick = cur_bbma_block_stick;
+        // prev_bbma_block_stick = cur_bbma_block_stick;
         if (cur_buddy_block_addr + 2 * bbma_init_block_size <= end) {
             cur_bbma_block_stick = ((void*)cur_bbma_block_stick) + bbma_init_block_stick_gap;
         } else {
