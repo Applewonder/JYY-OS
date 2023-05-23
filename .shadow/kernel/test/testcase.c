@@ -96,7 +96,7 @@ void once_slab_alloc(SLAB_SIZE size, char origin_log[], int test_id) {
 }
 
 void once_bbma_alloc(BUDDY_BLOCK_SIZE size, char origin_log[], int test_id) {
-    int real_size = 1 << (14 + size);
+    int real_size = 1 << (12 + size);
     mutex_lock(&mutex);
     file = fopen(origin_log, "a");
     fprintf(file, "Before Alloc\n");
@@ -111,11 +111,11 @@ void once_bbma_alloc(BUDDY_BLOCK_SIZE size, char origin_log[], int test_id) {
     mutex_unlock(&mutex);
 }
 
-void once_slab_free(void* ptr, SLAB_SIZE size, char origin_log[], int test_id) {
+void once_bbma_free(void* ptr, BUDDY_BLOCK_SIZE size, char origin_log[], int test_id) {
     if (ptr == NULL) {
         return;
     }
-    int real_size = 1 << (5 + size);
+    int real_size = 1 << (12 + size);
     mutex_lock(&mutex);
     file = fopen(origin_log, "a");
     fprintf(file, "Before Free\n");
@@ -232,7 +232,68 @@ static void entry_5(int tid) {
   }
 }
 
+void test_multi_alloc(int test_id) {
+    char str[20];
+    sprintf(str, "%d", test_id);
+    char origin_log[200] = "/home/appletree/JYY-OS/kernel/test/testlog";
+    strcat(origin_log, str);
+    strcat(origin_log, ".txt");
 
+    for (int i = 0; i < 3; i ++) {
+      for (int i = 0; i < 10000; i++)
+      {
+        pmm->alloc(1 << (5 + i % SLAB_NUM));
+        write_in_file(ptr, size, true, test_id);
+
+      }
+      
+    }
+}
+
+
+
+static void entry_6(int tid) { 
+  int cur_cpu = tid - 1;
+  thread_id[cur_cpu] = pthread_self();
+//   printf("thread_id[%d]: %ld\n", cur_cpu, thread_id[cur_cpu]);
+
+  char str[20];
+  sprintf(str, "%d", test_id);
+  char origin_log[200] = "/home/appletree/JYY-OS/kernel/test/testlog";
+  strcat(origin_log, str);
+  strcat(origin_log, ".txt");
+
+  void* already_alloc[50000];
+  int end_index = 0;
+  int round_cnt = 0;
+  while (round_cnt < 10000) {
+    int choose_type = rand() % 2;
+    if (choose_type && end) {
+      int index = rand() % end_index;
+      mutex_lock(&mutex)
+      pmm->free(already_alloc[index]);
+      write_in_file(ptr, size, false, test_id);
+      mutex_unlock(&mutex);
+      already_alloc[index] = already_alloc[end_index - 1];
+      end_index --;
+    } else {
+      int size = rand() % 16 * 1024 * 1024;
+      mutex_lock(&mutex)
+      void* ptr = pmm->alloc(size);
+      
+      if (ptr == NULL) {
+        file = fopen(origin_log, "a");
+        fprintf(file, "Failed to alloc\n");
+        fclose(file);
+      } else {
+        write_in_file(ptr, size, true, test_id);
+      }
+      already_alloc[end_index] = ptr;
+      end_index ++;
+    }
+    round_cnt ++;
+  }
+}
 
 void do_test_0() {
     printf("\033[32m Test 0 begin\n\033[0m");
@@ -296,6 +357,17 @@ void do_test_5() {
     pmm->init();
     for (int i = 0; i < 6; i++){
         create(entry_5);
+    }
+    join();
+}
+
+void do_test_6() {
+    printf("\033[32m Test 6 begin\n\033[0m");
+    file = fopen("/home/appletree/JYY-OS/kernel/test/testlog6.txt", "w");
+    fclose(file);
+    pmm->init();
+    for (int i = 0; i < 6; i++){
+        create(entry_6);
     }
     join();
 }
