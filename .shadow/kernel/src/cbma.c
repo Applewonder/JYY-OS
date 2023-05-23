@@ -152,7 +152,6 @@ BUDDY_BLOCK_STICK* divide_larger_bbma_block_from_bbma_system(BUDDY_BLOCK_SIZE bb
     insert_two_new_divided_child_into_bbma_system(left_divided_child, right_divided_child, bbma_size - 1);
     assert(left_divided_child != NULL);
     // spin_unlock(&bbma_lock[bbma_size - FIND_BBMA_OFFSET]);
-    printf("divide larger bbma block from bbma system: %p\n", left_divided_child);
     return left_divided_child;
 }
 
