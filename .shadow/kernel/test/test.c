@@ -71,15 +71,15 @@ bool delete_alloc_block(void* alloc) {
   return false;
 }
 
-bool judge_if_have_duplicate_alloc(unsigned long start_alloc, unsigned long end_alloc) {
+bool judge_if_have_duplicate_alloc(unsigned long start_alloc, unsigned long end_alloc, int line_num) {
   TASK* cur = head;
   while (cur != NULL) {
     if ((unsigned long)cur->alloc >= end_alloc || (unsigned long)(cur->alloc + cur->size) <= start_alloc) {
       cur = cur->next;
       continue;
     } else {
-      printf("\033[31m Error: Duplicate alloc: %p, size: %ld\n\033[0m", cur->alloc, cur->size);
-      printf("\033[31m Error: Duplicate alloc: %p, size: %ld\n\033[0m", (void*)start_alloc, end_alloc - start_alloc);
+      printf("\033[31m Error: Duplicate alloc: %p, size: %ld, line:%d\n\033[0m", cur->alloc, cur->size, cur->line_num);
+      printf("\033[31m Error: Duplicate alloc: %p, size: %ld, line:%d\n\033[0m", (void*)start_alloc, end_alloc - start_alloc, line_num);
 
       return true;
     }
