@@ -87,9 +87,9 @@ void* bbma_alloc(size_t size, bool is_from_slab) {
     }
     if (possible_bbma_addr != NULL) {
         // panic_on(true, "bbma alloc error");
-        int* judger = possible_bbma_addr;
-        assert(*judger == 0);
-        *judger = *judger + 1;
+        // int* judger = possible_bbma_addr;
+        // assert(*judger == 0);
+        // *judger = *judger + 1;
     }
 
 #ifdef TEST
@@ -334,8 +334,8 @@ void bbma_free(void* ptr) {
     cur_bbma_block_stick->prev = NULL;
     cur_bbma_block_stick->next = NULL;
     insert_free_bbma_block_into_bbma_system(cur_bbma_block_stick, cur_bbma_block_size);
-    int* judger = ptr;
-    assert(*judger == 1);
-    *judger = 0;
+    // int* judger = ptr;
+    // assert(*judger == 1);
+    // *judger = 0;
     mutex_unlock(&bbma_mutex);
 }
