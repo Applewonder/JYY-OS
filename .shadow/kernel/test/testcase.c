@@ -401,6 +401,7 @@ void do_test_6() {
     file = fopen("/home/appletree/JYY-OS/kernel/test/testlog6.txt", "w");
     fclose(file);
     pmm->init();
+    printf("init done\n");
     for (int i = 0; i < 2; i++){
         create(entry_6);
     }
