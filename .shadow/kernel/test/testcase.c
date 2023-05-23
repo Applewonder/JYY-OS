@@ -38,11 +38,11 @@ void write_in_file(void* ptr, size_t size, bool is_alloc, int test_id) {
     if (is_alloc) {
         fprintf(file, "Alloc %p, Size %ld\n", ptr, size);
         fprintf(file, "End Alloc\n");
-        print_bbma_chain(size);
+        // print_bbma_chain(size);
     } else {
         fprintf(file, "Free %p\n", ptr);
         fprintf(file, "End Free\n");
-        print_bbma_chain(size);
+        // print_bbma_chain(size);
     }
     fprintf(file, "\n");
     fclose(file);
