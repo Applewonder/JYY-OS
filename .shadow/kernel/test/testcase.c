@@ -35,6 +35,16 @@ void write_in_file(void* ptr, size_t size, bool is_alloc, int test_id) {
     strcat(origin_log, str);
     strcat(origin_log, ".txt");
     file = fopen(origin_log, "a");
+    
+    BUDDY_BLOCK_SIZE bbma_size = determine_bbma_size(size);
+    SLAB_SIZE slab_size = determine_slab_size(size);
+
+    if (size > 2 * 1024) {
+      size = (1 << bbma_size);
+    } else {
+      size = (1 << slab_size);
+    }
+
     if (is_alloc) {
         fprintf(file, "Alloc %p, Size %ld\n", ptr, size);
         fprintf(file, "End Alloc\n");
