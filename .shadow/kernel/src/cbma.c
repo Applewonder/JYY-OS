@@ -200,20 +200,22 @@ void bbma_init(void* start, void* end) {
     unsigned long bbma_init_block_stick_gap = (bbma_init_block_size >> S_4K) * BBMA_STICK_SIZE;
     void* cur_buddy_block_addr = begin_alloc_addr;
     BUDDY_BLOCK_STICK* cur_bbma_block_stick = convert_addr_to_index(cur_buddy_block_addr);
+
     cur_bbma_block_stick->prev = NULL;
     cur_bbma_block_stick->next = NULL;
-    buddy_blocks[S_16M - FIND_BBMA_OFFSET] = cur_bbma_block_stick;
+    cur_bbma_block_stick->alloc_spaces = S_16M;
+
+    BUDDY_BLOCK_STICK* prev_bbma_block_stick = buddy_blocks[S_16M - FIND_BBMA_OFFSET];
+    
     while(cur_buddy_block_addr + bbma_init_block_size <= end) {
-        cur_bbma_block_stick->alloc_spaces = S_16M;
-        BUDDY_BLOCK_STICK* prev_bbma_block_stick = cur_bbma_block_stick->prev;
         spy_insert_chain_block(prev_bbma_block_stick, cur_bbma_block_stick);
+        prev_bbma_block_stick = cur_bbma_block_stick;
         if (cur_buddy_block_addr + 2 * bbma_init_block_size <= end) {
-            cur_bbma_block_stick->next = ((void*)cur_bbma_block_stick) + bbma_init_block_stick_gap;
+            cur_bbma_block_stick = ((void*)cur_bbma_block_stick) + bbma_init_block_stick_gap;
         } else {
-            cur_bbma_block_stick->next = NULL;
+            cur_bbma_block_stick = NULL;
         }
         cur_buddy_block_addr += bbma_init_block_size;
-        cur_bbma_block_stick = cur_bbma_block_stick->next;
     }
 }
 
