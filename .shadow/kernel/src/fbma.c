@@ -168,7 +168,6 @@ void insert_two_new_divided_child_into_bbma_system(BUDDY_BLOCK_STICK* left_divid
     left_divided_child->prev = NULL;
     right_divided_child->next = NULL;
     // spin_lock(&bbma_lock[bbma_size - FIND_BBMA_OFFSET]);
-    BUDDY_BLOCK_STICK* inserted_position = find_the_position_where_inserting_the_free_bbma_block(left_divided_child, bbma_size);
     spy_insert_chain_block(left_divided_child);
     spy_insert_chain_block(right_divided_child);
     // spin_unlock(&bbma_lock[bbma_size - FIND_BBMA_OFFSET]);
