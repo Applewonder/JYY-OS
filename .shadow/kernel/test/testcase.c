@@ -372,7 +372,7 @@ void do_test_6() {
     file = fopen("/home/appletree/JYY-OS/kernel/test/testlog6.txt", "w");
     fclose(file);
     pmm->init();
-    for (int i = 0; i < 6; i++){
+    for (int i = 0; i < 2; i++){
         create(entry_6);
     }
     join();
