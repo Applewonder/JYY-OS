@@ -275,20 +275,23 @@ static void entry_6(int tid) {
     if (choose_type && end_index) {
       int index = rand() % end_index;
       pmm->free(already_alloc[index]);
+      mutex_lock(&mutex);
       write_in_file(already_alloc[index], 0, false, 6);
+      mutex_unlock(&mutex);
       already_alloc[index] = already_alloc[end_index - 1];
       end_index --;
     } else {
       int size = (rand() % 16 * 1024 * 1024) + 1;
       void* ptr = pmm->alloc(size);
-      
+      mutex_lock(&mutex);
       if (ptr == NULL) {
         file = fopen("/home/appletree/JYY-OS/kernel/test/testlog6.txt", "a");
-
         fprintf(file, "Try to alloc Size: %d. Can not alloc\n", size);
         fclose(file);
+        mutex_unlock(&mutex);
       } else {
         write_in_file(ptr, size, true, 6);
+        mutex_unlock(&mutex);
         already_alloc[end_index] = ptr;
         end_index ++;
       }
