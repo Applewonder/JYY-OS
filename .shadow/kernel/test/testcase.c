@@ -54,7 +54,7 @@ void write_in_file(void* ptr, size_t size, bool is_alloc, int test_id) {
         fprintf(file, "End Free\n");
         // print_bbma_chain(size);
     }
-    fprintf(file, "\n");
+    // fprintf(file, "\n");
     fclose(file);
 }
 
