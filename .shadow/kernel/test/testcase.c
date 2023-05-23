@@ -297,8 +297,8 @@ static void entry_6(int tid) {
       print_chain_in_file(6, size, false);
       pmm->free(already_alloc[index]);
       write_in_file(already_alloc[index], 0, false, 6);
-      mutex_unlock(&mutex);
       print_chain_in_file(6, size, true);
+      mutex_unlock(&mutex);
       already_alloc[index] = already_alloc[end_index - 1];
       end_index --;
     } else {
