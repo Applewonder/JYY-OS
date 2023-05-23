@@ -257,22 +257,16 @@ static void entry_6(int tid) {
   thread_id[cur_cpu] = pthread_self();
 //   printf("thread_id[%d]: %ld\n", cur_cpu, thread_id[cur_cpu]);
 
-  char str[20];
-  sprintf(str, "%d", test_id);
-  char origin_log[200] = "/home/appletree/JYY-OS/kernel/test/testlog";
-  strcat(origin_log, str);
-  strcat(origin_log, ".txt");
-
   void* already_alloc[50000];
   int end_index = 0;
   int round_cnt = 0;
   while (round_cnt < 10000) {
     int choose_type = rand() % 2;
-    if (choose_type && end) {
+    if (choose_type && end_index) {
       int index = rand() % end_index;
-      mutex_lock(&mutex)
+      mutex_lock(&mutex);
       pmm->free(already_alloc[index]);
-      write_in_file(ptr, size, false, test_id);
+      write_in_file(ptr, 0, false, test_id);
       mutex_unlock(&mutex);
       already_alloc[index] = already_alloc[end_index - 1];
       end_index --;
