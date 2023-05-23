@@ -276,7 +276,7 @@ static void entry_6(int tid) {
       void* ptr = pmm->alloc(size);
       
       if (ptr == NULL) {
-        file = fopen(origin_log, "a");
+        file = fopen(o"/home/appletree/JYY-OS/kernel/test/testlog6.txt", "a");
         fprintf(file, "Failed to alloc\n");
         fclose(file);
       } else {
