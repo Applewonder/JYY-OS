@@ -260,7 +260,25 @@ static void entry_5(int tid) {
 //     }
 // }
 
-
+void print_chain_in_file(int test_id, int size) {
+    char str[20];
+    sprintf(str, "%d", test_id);
+    char origin_log[200] = "/home/appletree/JYY-OS/kernel/test/testlog";
+    strcat(origin_log, str);
+    strcat(origin_log, ".txt");
+    mutex_lock(&mutex);
+    file = fopen(origin_log, "a+");
+    if (size > 2 *1024) {
+      int log_size = determine_bbma_size(size);
+      fprintf(file, "Size: %dKB\n", 1 << (log_size - 10));
+      print_bbma_chain(size);
+    } else {
+      int log_size = determine_slab_size(size);
+      fprintf(file, "Slab alloc: %dB\n", 1 << log_size);
+    }
+    fclose(file);
+    mutex_unlock(&mutex);
+}
 
 static void entry_6(int tid) { 
   int cur_cpu = tid - 1;
@@ -274,15 +292,20 @@ static void entry_6(int tid) {
     int choose_type = rand() % 2;
     if (choose_type && end_index) {
       int index = rand() % end_index;
+      BUDDY_BLOCK_STICK* stick_addr =convert_addr_to_index(already_alloc[index]);
+      int size = 1 << stick_addr->alloc_spaces;
+      print_chain_in_file(6, size);
       pmm->free(already_alloc[index]);
       mutex_lock(&mutex);
       
       write_in_file(already_alloc[index], 0, false, 6);
       mutex_unlock(&mutex);
+      print_chain_in_file(6, size);
       already_alloc[index] = already_alloc[end_index - 1];
       end_index --;
     } else {
       int size = (rand() % 16 * 1024 * 1024) + 1;
+      print_chain_in_file(6, size);
       void* ptr = pmm->alloc(size);
       mutex_lock(&mutex);
       if (ptr == NULL) {
@@ -293,6 +316,7 @@ static void entry_6(int tid) {
       } else {
         write_in_file(ptr, size, true, 6);
         mutex_unlock(&mutex);
+        print_chain_in_file(6, size);
         already_alloc[end_index] = ptr;
         end_index ++;
       }
