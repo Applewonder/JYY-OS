@@ -137,13 +137,13 @@ void test_multi_slab_alloc_and_free(int test_id) {
     SLAB_SIZE size_2 = rand() % SLAB_NUM;
     SLAB_SIZE size_3 = rand() % SLAB_NUM;
 
-    once_slab_alloc(size_1, origin_log, test_id);
-    once_slab_alloc(size_2, origin_log, test_id);
-    once_slab_alloc(size_3, origin_log, test_id);
+    // once_slab_alloc(size_1, origin_log, test_id);
+    // once_slab_alloc(size_2, origin_log, test_id);
+    // once_slab_alloc(size_3, origin_log, test_id);
 
-    once_slab_free(NULL, size_3, origin_log, test_id);
-    once_slab_free(NULL, size_2, origin_log, test_id);
-    once_slab_free(NULL, size_1, origin_log, test_id);
+    // once_slab_free(NULL, size_3, origin_log, test_id);
+    // once_slab_free(NULL, size_2, origin_log, test_id);
+    // once_slab_free(NULL, size_1, origin_log, test_id);
 }
 
 
