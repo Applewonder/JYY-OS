@@ -101,6 +101,7 @@ void judger_for_alloc_and_free(int test_id) {
     strcat(origin_log, ".txt");
 
     file = fopen(origin_log, "r");
+    int count_s = 0;
     while (fgets(line, sizeof(line), file) != NULL) {
         if (line[0] == 'A') {
             int start_index = 6;
@@ -126,8 +127,14 @@ void judger_for_alloc_and_free(int test_id) {
               // print_chain();
               exit(1);
             }
+        } else if (line[0] == 'S'){
+          count_s ++;
         }
         line_num++;
+        if (count_s == 4) {
+          count_s = 0;
+          line_num ++;
+        }
     }
     fclose(file);
 }
