@@ -271,7 +271,7 @@ static void entry_6(int tid) {
       already_alloc[index] = already_alloc[end_index - 1];
       end_index --;
     } else {
-      int size = rand() % 16 * 1024 * 1024;
+      int size = rand() % 16 * 1024 * 1024 + 1;
       mutex_lock(&mutex);
       void* ptr = pmm->alloc(size);
       
