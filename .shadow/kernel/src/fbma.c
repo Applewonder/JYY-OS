@@ -87,7 +87,7 @@ void* bbma_alloc(size_t size, bool is_from_slab) {
     }
 
 #ifdef TEST
-    assert()
+    // assert()
 #endif
     mutex_unlock(&bbma_mutex);
     return possible_bbma_addr;
