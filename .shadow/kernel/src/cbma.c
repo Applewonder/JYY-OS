@@ -199,7 +199,7 @@ void bbma_init(void* start, void* end) {
     while(cur_buddy_block_addr + bbma_init_block_size <= end) {
         cur_bbma_block_stick->alloc_spaces = S_16M;
         BUDDY_BLOCK_STICK* prev_bbma_block_stick = cur_bbma_block_stick->prev;
-        spy_insert_chain_block(cur_bbma_block_stick, prev_bbma_block_stick);
+        spy_insert_chain_block(prev_bbma_block_stick, cur_bbma_block_stick);
         if (cur_buddy_block_addr + 2 * bbma_init_block_size <= end) {
             cur_bbma_block_stick->next = ((void*)cur_bbma_block_stick) + bbma_init_block_stick_gap;
         } else {
