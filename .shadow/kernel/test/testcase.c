@@ -323,7 +323,7 @@ void do_test_3() {
     file = fopen("/home/appletree/JYY-OS/kernel/test/testlog3.txt", "w");
     fclose(file);
     pmm->init();
-    for (int i = 0; i < 1; i++){
+    for (int i = 0; i < 6; i++){
         create(entry_3);
     }
     join();
@@ -334,7 +334,7 @@ void do_test_4() {
     file = fopen("/home/appletree/JYY-OS/kernel/test/testlog4.txt", "w");
     fclose(file);
     pmm->init();
-    for (int i = 0; i < 1; i++){
+    for (int i = 0; i < 6; i++){
         create(entry_4);
     }
     join();
@@ -345,7 +345,7 @@ void do_test_5() {
     file = fopen("/home/appletree/JYY-OS/kernel/test/testlog4.txt", "w");
     fclose(file);
     pmm->init();
-    for (int i = 0; i < 1; i++){
+    for (int i = 0; i < 6; i++){
         create(entry_5);
     }
     join();
