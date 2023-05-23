@@ -211,6 +211,17 @@ static void entry_3(int tid) {
   }
 }
 
+static void entry_4(int tid) { 
+  int cur_cpu = tid - 1;
+  thread_id[cur_cpu] = pthread_self();
+//   printf("thread_id[%d]: %ld\n", cur_cpu, thread_id[cur_cpu]);
+  for (int i = 0; i < 10000; i++)
+  {
+    int choose_type = rand() % SLAB_NUM;
+    test_alloc_and_free(1 << (5 + choose_type), 4);
+  }
+}
+
 void do_test_0() {
     printf("\033[32m Test 0 begin\n\033[0m");
     file = fopen("/home/appletree/JYY-OS/kernel/test/testlog0.txt", "w");
@@ -251,6 +262,17 @@ void do_test_3() {
     pmm->init();
     for (int i = 0; i < 1; i++){
         create(entry_3);
+    }
+    join();
+}
+
+void do_test_4() {
+    printf("\033[32m Test 4 begin\n\033[0m");
+    file = fopen("/home/appletree/JYY-OS/kernel/test/testlog4.txt", "w");
+    fclose(file);
+    pmm->init();
+    for (int i = 0; i < 1; i++){
+        create(entry_4);
     }
     join();
 }

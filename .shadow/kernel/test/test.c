@@ -160,5 +160,11 @@ int main(int argc, char *argv[]) {
       printf("\033[32m Test 3 passed\n\033[0m");
       break;
     }
+    case 4: {
+      do_test_4();
+      judger_for_alloc_and_free(4);
+      printf("\033[32m Test 4 passed\n\033[0m");
+      break;
+    }
   }
 }
