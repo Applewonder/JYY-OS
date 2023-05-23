@@ -1,4 +1,5 @@
 #include "slab.h"
+#include "threads.h"
 #include <assert.h>
 #include <cbma.h>
 #include <stdio.h>
@@ -17,7 +18,7 @@ typedef pthread_mutex_t mutex_t;
 BUDDY_BLOCK_STICK* buddy_blocks[BBMA_NUM];
 // spinlock_t bbma_lock[BBMA_NUM];
 spinlock_t bbma_lock;
-// extern mutex_t mutex;
+extern mutex_t mutex;
 
 BUDDY_BLOCK_SIZE determine_bbma_size(size_t size) {
     size_t real_size = size;
@@ -64,6 +65,7 @@ void* get_the_free_space_by_dividing(BUDDY_BLOCK_SIZE bbma_size) {
 }
 
 void* bbma_alloc(size_t size, bool is_from_slab) {
+    mutex_lock(&mutex);
     spin_lock(&bbma_lock);
     BUDDY_BLOCK_SIZE bbma_size = BBMA_REFUSE;
     if (is_from_slab) {
@@ -95,7 +97,8 @@ void* bbma_alloc(size_t size, bool is_from_slab) {
 #ifdef TEST
     // assert()
 #endif
-    spin_unlock(&bbma_lock);
+    // spin_unlock(&bbma_lock);
+    mutex_unlock(&mutex);
     return possible_bbma_addr;
 }
 
@@ -325,7 +328,8 @@ void spy_insert_chain_block(BUDDY_BLOCK_STICK* item) {
 }
 
 void bbma_free(void* ptr) {
-    spin_lock(&bbma_lock);
+    mutex_lock(&mutex);
+    // spin_lock(&bbma_lock);
     if (ptr == NULL) {
         return;
     }
@@ -337,5 +341,6 @@ void bbma_free(void* ptr) {
     char* judger = ptr + (1 << 12) - 1;;
     assert(*judger == 1);
     *judger = 0;
-    spin_unlock(&bbma_lock);
+    // spin_unlock(&bbma_lock);
+    mutex_unlock(&mutex);
 }
