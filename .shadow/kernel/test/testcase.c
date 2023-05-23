@@ -1,91 +1,3 @@
-// #include <common.h>
-// #include <buddy.h>
-
-// static void os_init() {
-//   pmm->init();
-// }
-
-// static void *test_alloc(int size) {
-//   void *p = pmm->alloc(size);
-// #ifndef TEST
-//   printf("CPU #%d Allocating in %p, %d byte(s) (%x)\n", cpu_current(), p, size, size);
-// #else
-//   printf("CPU Allocating in %p, %d byte(s) (%x)\n", p, size, size);
-// #endif
-//   assert((size | ((uintptr_t)p == size + (uintptr_t)p)) || ((size-1) | (uintptr_t)p) == (size-1) + (uintptr_t)p);
-//   return p;
-// }
-
-// static void test_free(void *addr) {
-//   printf("CPU #%d Freeing in %p\n", cpu_current(), addr);
-//   assert(addr != NULL);
-//   pmm->free(addr);
-// #ifndef TEST
-// #else
-//   printf("CPU Freeing in %p\n", addr);
-// #endif
-//   // buddy_debug_print();
-// }
-
-// #ifndef TEST
-// static void os_run() {
-//   // for (const char *s = "Hello World from CPU #*\n"; *s; s++) {
-//   //   putch(*s == '*' ? '0' + cpu_current() : *s);
-//   // }
-//   printf("Hello World from CPU #%d\n", cpu_current());
-//   // test_alloc(1);
-//   // test_alloc(2);
-//   // test_alloc(4);
-//   // test_alloc(8);
-//   void *p1 = test_alloc(1024 * 1024);
-//   // void *p2 = test_alloc(1024 * 1024);
-//   // void *p3 = test_alloc(1024 * 1024);
-//   // void *p4 = test_alloc(1024 * 1024);
-//   // void *p5 = test_alloc(1024 * 1024 + 1);
-//   // // buddy_debug_print();
-//   // printf("--------free-------\n");
-//   test_free(p1);
-//   // test_free(p2);
-//   // test_free(p3); 
-//   // test_free(p4);
-//   // test_free(p5);
-//   typedef struct Task {
-//     void *alloc;
-//     int size;
-//   } Task;
-//   #define TEST_SIZE 10000
-//   Task tasks[TEST_SIZE];
-//   for (int i = 0; i < TEST_SIZE; i++) {
-//     tasks[i].size = (1 << (rand() % 3 + 13));
-//     tasks[i].alloc = test_alloc(tasks[i].size);
-//     // assert((size | ((uintptr_t)p == size + (uintptr_t)p)) || ((size-1) | (uintptr_t)p) == (size-1) + (uintptr_t)p);
-//   }
-//   for (int i = 0; i < TEST_SIZE; i++) {
-//     if (tasks[i].alloc)
-//     test_free(tasks[i].alloc);
-//   }
-//   // size_t size = 16 * 1024 * 1024;
-//   // void *p = pmm->alloc(size);
-//   // printf("CPU #%d Allocating in %x, %d byte(s) %x\n", cpu_current(), (uintptr_t)p, size, size);
-//   // for (volatile int i = 0; i < 10000; i ++);
-//   printf("SUCCESS\n");
-//   while (1);
-// }
-// #else 
-// static void os_run() {
-//   // for (const char *s = "Hello World from CPU #*\n"; *s; s++) {
-//   //   putch(*s == '*' ? '0' + cpu_current() : *s);
-//   // }
-//   printf("Testing\n");
-//   while (1) ;
-// }
-// #endif
-
-// MODULE_DEF(os) = {
-//   .init = os_init,
-//   .run  = os_run,
-// };
-
 #include "testcase.h"
 #include "cbma.h"
 #include "slab.h"
@@ -167,7 +79,7 @@ void test_alloc_and_free(size_t size, int test_id) {
     mutex_unlock(&mutex);
 }
 
-void once_alloc(SLAB_SIZE size, char origin_log[], int test_id) {
+void once_slab_alloc(SLAB_SIZE size, char origin_log[], int test_id) {
     int real_size = 1 << (5 + size);
     mutex_lock(&mutex);
     file = fopen(origin_log, "a");
@@ -183,7 +95,23 @@ void once_alloc(SLAB_SIZE size, char origin_log[], int test_id) {
     mutex_unlock(&mutex);
 }
 
-void once_free(void* ptr, SLAB_SIZE size, char origin_log[], int test_id) {
+void once_bbma_alloc(BUDDY_BLOCK_SIZE size, char origin_log[], int test_id) {
+    int real_size = 1 << (14 + size);
+    mutex_lock(&mutex);
+    file = fopen(origin_log, "a");
+    fprintf(file, "Before Alloc\n");
+    print_bbma_chain(real_size);
+
+    void* ptr = pmm->alloc(real_size);
+    if (ptr == NULL) {
+        fprintf(file, "Failed to alloc\n");
+    }
+    fclose(file);
+    write_in_file(ptr, real_size, true, test_id);
+    mutex_unlock(&mutex);
+}
+
+void once_slab_free(void* ptr, SLAB_SIZE size, char origin_log[], int test_id) {
     if (ptr == NULL) {
         return;
     }
@@ -198,7 +126,7 @@ void once_free(void* ptr, SLAB_SIZE size, char origin_log[], int test_id) {
     mutex_unlock(&mutex);
 }
 
-void test_multi_alloc_and_free(int test_id) {
+void test_multi_slab_alloc_and_free(int test_id) {
     char str[20];
     sprintf(str, "%d", test_id);
     char origin_log[200] = "/home/appletree/JYY-OS/kernel/test/testlog";
@@ -209,13 +137,34 @@ void test_multi_alloc_and_free(int test_id) {
     SLAB_SIZE size_2 = rand() % SLAB_NUM;
     SLAB_SIZE size_3 = rand() % SLAB_NUM;
 
-    once_alloc(size_1, origin_log, test_id);
-    once_alloc(size_2, origin_log, test_id);
-    once_alloc(size_3, origin_log, test_id);
+    once_slab_alloc(size_1, origin_log, test_id);
+    once_slab_alloc(size_2, origin_log, test_id);
+    once_slab_alloc(size_3, origin_log, test_id);
 
-    once_free(NULL, size_3, origin_log, test_id);
-    once_free(NULL, size_2, origin_log, test_id);
-    once_free(NULL, size_1, origin_log, test_id);
+    once_slab_free(NULL, size_3, origin_log, test_id);
+    once_slab_free(NULL, size_2, origin_log, test_id);
+    once_slab_free(NULL, size_1, origin_log, test_id);
+}
+
+
+void test_multi_bbma_alloc_and_free(int test_id) {
+    char str[20];
+    sprintf(str, "%d", test_id);
+    char origin_log[200] = "/home/appletree/JYY-OS/kernel/test/testlog";
+    strcat(origin_log, str);
+    strcat(origin_log, ".txt");
+
+    SLAB_SIZE size_1 = rand() % SLAB_NUM;
+    SLAB_SIZE size_2 = rand() % SLAB_NUM;
+    SLAB_SIZE size_3 = rand() % SLAB_NUM;
+
+    once_bbma_alloc(size_1, origin_log, test_id);
+    once_bbma_alloc(size_2, origin_log, test_id);
+    once_bbma_alloc(size_3, origin_log, test_id);
+
+    once_bbma_free(NULL, size_3, origin_log, test_id);
+    once_bbma_free(NULL, size_2, origin_log, test_id);
+    once_bbma_free(NULL, size_1, origin_log, test_id);
 }
 
 static void entry_0(int tid) { 
@@ -279,7 +228,7 @@ static void entry_5(int tid) {
 //   printf("thread_id[%d]: %ld\n", cur_cpu, thread_id[cur_cpu]);
   for (int i = 0; i < 1000; i++)
   {
-    test_multi_alloc_and_free(5);
+    test_multi_slab_alloc_and_free(5);
   }
 }
 
