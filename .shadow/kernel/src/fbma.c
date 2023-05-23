@@ -85,6 +85,10 @@ void* bbma_alloc(size_t size, bool is_from_slab) {
     if (possible_bbma_addr == NULL) {
         possible_bbma_addr = get_the_free_space_by_dividing(bbma_size);
     }
+
+#ifdef TEST
+    assert()
+#endif
     mutex_unlock(&bbma_mutex);
     return possible_bbma_addr;
 }
@@ -249,13 +253,13 @@ BUDDY_BLOCK_STICK* merge_the_block(BUDDY_BLOCK_STICK* inserted_bbma_block_stick,
         merged_block = the_cur_bbma_expected_neighbor_block;
         merged_block->next = NULL;
         merged_block->prev = NULL;
-        merged_block->is_free = false;
+        merged_block->is_free = true;
         merged_block->alloc_spaces = the_cur_bbma_expected_neighbor_block->alloc_spaces + 1;
     } else {
         merged_block = inserted_bbma_block_stick;
         merged_block->next = NULL;
         merged_block->prev = NULL;
-        merged_block->is_free = false;
+        merged_block->is_free = true;
         merged_block->alloc_spaces = inserted_bbma_block_stick->alloc_spaces + 1;
     }
     return merged_block;
