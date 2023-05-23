@@ -32,6 +32,7 @@ struct buddy_block_{
     BUDDY_BLOCK_SIZE alloc_spaces;
     BUDDY_BLOCK_STICK* next;
     BUDDY_BLOCK_STICK* prev;
+    bool is_free;
 };
 
 BUDDY_BLOCK_SIZE determine_bbma_size(size_t size);
@@ -47,5 +48,7 @@ void bbma_free(void* ptr);
 void bbma_init(void* start, void* end);
 void* convert_addr_to_index(void* addr);
 void* convert_index_to_addr(void* index);
-void spy_insert_chain_block(BUDDY_BLOCK_STICK* position, BUDDY_BLOCK_STICK* item);
+// void spy_insert_chain_block(BUDDY_BLOCK_STICK* position, BUDDY_BLOCK_STICK* item);
+void spy_insert_chain_block(BUDDY_BLOCK_STICK* item);
+bool judge_if_can_merge(BUDDY_BLOCK_STICK* inserted_bbma_block_stick, BUDDY_BLOCK_STICK* the_cur_bbma_expected_neighbor_block);
 #endif

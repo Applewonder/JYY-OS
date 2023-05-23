@@ -15,7 +15,6 @@ BUDDY_BLOCK_STICK* buddy_blocks[BBMA_NUM];
 // spinlock_t bbma_lock[BBMA_NUM];
 spinlock_t bbma_lock;
 
-
 BUDDY_BLOCK_SIZE determine_bbma_size(size_t size) {
     size_t real_size = size;
     if (real_size <= (1 << S_4K)) {
@@ -101,6 +100,7 @@ void* convert_addr_to_index(void* addr) {
 }
 
 void delete_a_free_block_in_bbma_system(BUDDY_BLOCK_STICK* bbma_stick) {
+    bbma_stick->is_free = false;
     if (bbma_stick->prev == NULL) {
         BUDDY_BLOCK_SIZE bbma_size = bbma_stick->alloc_spaces;
         buddy_blocks[bbma_size - FIND_BBMA_OFFSET] = bbma_stick->next;
@@ -159,16 +159,18 @@ void insert_two_new_divided_child_into_bbma_system(BUDDY_BLOCK_STICK* left_divid
 #ifdef TEST
     assert(left_divided_child != right_divided_child);
 #endif
+    left_divided_child->is_free = true;
+    right_divided_child->is_free = true;
     left_divided_child->alloc_spaces = bbma_size;
     right_divided_child->alloc_spaces = bbma_size;
-    left_divided_child->next = right_divided_child;
-    right_divided_child->prev = left_divided_child;
+    left_divided_child->next = NULL;
+    right_divided_child->prev = NULL;
     left_divided_child->prev = NULL;
     right_divided_child->next = NULL;
     // spin_lock(&bbma_lock[bbma_size - FIND_BBMA_OFFSET]);
     BUDDY_BLOCK_STICK* inserted_position = find_the_position_where_inserting_the_free_bbma_block(left_divided_child, bbma_size);
-    spy_insert_chain_block(inserted_position, left_divided_child);
-    spy_insert_chain_block(left_divided_child , right_divided_child);
+    spy_insert_chain_block(left_divided_child);
+    spy_insert_chain_block(right_divided_child);
     // spin_unlock(&bbma_lock[bbma_size - FIND_BBMA_OFFSET]);
 }
 
@@ -221,51 +223,17 @@ void bbma_init(void* start, void* end) {
     }
 }
 
-BUDDY_BLOCK_STICK* find_the_position_where_inserting_the_free_bbma_block(BUDDY_BLOCK_STICK* inserted_bbma_block_stick, BUDDY_BLOCK_SIZE bbma_block_size) {
-    BUDDY_BLOCK_STICK* the_cur_bbma_block = buddy_blocks[bbma_block_size - FIND_BBMA_OFFSET];
-    while (the_cur_bbma_block != NULL) {
-        if (the_cur_bbma_block < inserted_bbma_block_stick) {
-            if (the_cur_bbma_block->next == NULL) {
-                return the_cur_bbma_block;
-            } else {
-                the_cur_bbma_block = the_cur_bbma_block->next;
-            }
-        } else {
-            if (the_cur_bbma_block->prev == NULL) {
-                return NULL;
-            } else {
-                return the_cur_bbma_block->prev;
-            }
-        }
-    }
-    return NULL;
-}
-
-bool judge_if_can_merge(BUDDY_BLOCK_STICK* inserted_bbma_block_stick, BUDDY_BLOCK_STICK* the_begin_bbma_block, BUDDY_BLOCK_STICK* the_position_where_inserting_the_free_bbma_block, BUDDY_BLOCK_STICK* the_cur_bbma_expected_neighbor_block) {
+bool judge_if_can_merge(BUDDY_BLOCK_STICK* inserted_bbma_block_stick, BUDDY_BLOCK_STICK* the_cur_bbma_expected_neighbor_block) {
     if (inserted_bbma_block_stick->alloc_spaces == S_16M) {
         return false;
     }
-    bool where_is_the_neighbor = the_cur_bbma_expected_neighbor_block < inserted_bbma_block_stick;
-    if (where_is_the_neighbor) {
-        if (the_position_where_inserting_the_free_bbma_block == NULL) {
-            return false;
-        } else {
-            if (the_cur_bbma_expected_neighbor_block == the_position_where_inserting_the_free_bbma_block) {
-                return true;
-            } 
-        }
-    } else {
-        if (the_position_where_inserting_the_free_bbma_block == NULL) {
-            if (the_cur_bbma_expected_neighbor_block == the_begin_bbma_block) {
-                return true;
-            } 
-        } else {
-            if (the_cur_bbma_expected_neighbor_block == the_position_where_inserting_the_free_bbma_block->next) {
-                return true;
-            } 
-        }
+    if (the_cur_bbma_expected_neighbor_block->alloc_spaces != inserted_bbma_block_stick->alloc_spaces) {
+        return false;
     }
-    return false;
+    if (!the_cur_bbma_expected_neighbor_block->is_free) {
+        return false;
+    }
+    return true;
 }
 
 BUDDY_BLOCK_STICK* merge_the_block(BUDDY_BLOCK_STICK* inserted_bbma_block_stick, BUDDY_BLOCK_STICK* the_cur_bbma_expected_neighbor_block, bool where_is_the_neighbor) {
@@ -278,11 +246,13 @@ BUDDY_BLOCK_STICK* merge_the_block(BUDDY_BLOCK_STICK* inserted_bbma_block_stick,
         merged_block = the_cur_bbma_expected_neighbor_block;
         merged_block->next = NULL;
         merged_block->prev = NULL;
+        merged_block->is_free = false;
         merged_block->alloc_spaces = the_cur_bbma_expected_neighbor_block->alloc_spaces + 1;
     } else {
         merged_block = inserted_bbma_block_stick;
         merged_block->next = NULL;
         merged_block->prev = NULL;
+        merged_block->is_free = false;
         merged_block->alloc_spaces = inserted_bbma_block_stick->alloc_spaces + 1;
     }
     return merged_block;
@@ -298,16 +268,15 @@ void insert_free_bbma_block_into_bbma_system(BUDDY_BLOCK_STICK* inserted_bbma_bl
     inserted_bbma_block_stick->prev = NULL;
     BUDDY_BLOCK_STICK* the_begin_bbma_block_stick = buddy_blocks[bbma_block_size - FIND_BBMA_OFFSET];
     BUDDY_BLOCK_STICK* the_cur_bbma_expected_neighbor_block_stick = convert_addr_to_index(bbma_align_to_larger_block(convert_index_to_addr(inserted_bbma_block_stick), bbma_block_size + 1));
-    BUDDY_BLOCK_STICK* the_position_where_inserting_the_free_bbma_block_stick = find_the_position_where_inserting_the_free_bbma_block(inserted_bbma_block_stick, bbma_block_size);
     bool where_is_the_neighbor = the_cur_bbma_expected_neighbor_block_stick < inserted_bbma_block_stick;
 
     if (the_begin_bbma_block_stick == NULL) {
-        spy_insert_chain_block(NULL, inserted_bbma_block_stick);
+        spy_insert_chain_block(inserted_bbma_block_stick);
         // spin_unlock(&bbma_lock[bbma_block_size - FIND_BBMA_OFFSET]);
         return;
     }
 
-    if (judge_if_can_merge(inserted_bbma_block_stick, the_begin_bbma_block_stick, the_position_where_inserting_the_free_bbma_block_stick, the_cur_bbma_expected_neighbor_block_stick)) {
+    if (judge_if_can_merge(inserted_bbma_block_stick, the_cur_bbma_expected_neighbor_block_stick)) {
 #ifdef TEST
         file = fopen(origin_logg, "a");
         fprintf(file, "Inserted ptr: %p, Neighbor ptr: %p ", inserted_bbma_block_stick, the_cur_bbma_expected_neighbor_block_stick);
@@ -325,28 +294,20 @@ void insert_free_bbma_block_into_bbma_system(BUDDY_BLOCK_STICK* inserted_bbma_bl
         return;
     }
     // deal with the situation that the inserted block is the first block in the list
-    spy_insert_chain_block(the_position_where_inserting_the_free_bbma_block_stick, inserted_bbma_block_stick);
+    spy_insert_chain_block(inserted_bbma_block_stick);
     // spin_unlock(&bbma_lock[bbma_block_size - FIND_BBMA_OFFSET]);
 }
 
-void spy_insert_chain_block(BUDDY_BLOCK_STICK* position, BUDDY_BLOCK_STICK* item) {
+void spy_insert_chain_block(BUDDY_BLOCK_STICK* item) {
 #ifdef TEST
     assert(item != NULL);
 #endif
-    if (position == NULL) {
-        BUDDY_BLOCK_SIZE insert_size = item->alloc_spaces;
-        item->prev = NULL;
-        item ->next = buddy_blocks[insert_size - FIND_BBMA_OFFSET];
-        if (buddy_blocks[insert_size - FIND_BBMA_OFFSET] != NULL)
-            buddy_blocks[insert_size - FIND_BBMA_OFFSET]->prev = item;
-        buddy_blocks[insert_size - FIND_BBMA_OFFSET] = item;
-    } else {
-        item->prev = position;
-        item->next = position->next;
-        if (position->next != NULL)
-            position->next->prev = item;
-        position->next = item;
+    item->prev = NULL;
+    item->next = buddy_blocks[item->alloc_spaces - FIND_BBMA_OFFSET];
+    if (buddy_blocks[item->alloc_spaces - FIND_BBMA_OFFSET] != NULL) {
+        buddy_blocks[item->alloc_spaces - FIND_BBMA_OFFSET]->prev = item;
     }
+    buddy_blocks[item->alloc_spaces - FIND_BBMA_OFFSET] = item;
 }
 
 void bbma_free(void* ptr) {
