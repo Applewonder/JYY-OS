@@ -212,7 +212,7 @@ void bbma_init(void* start, void* end) {
     
     while(cur_buddy_block_addr + bbma_init_block_size <= end) {
         cur_bbma_block_stick->alloc_spaces = S_16M;
-        spy_insert_chain_block(prev_bbma_block_stick, cur_bbma_block_stick);
+        spy_insert_chain_block(cur_bbma_block_stick);
         prev_bbma_block_stick = cur_bbma_block_stick;
         if (cur_buddy_block_addr + 2 * bbma_init_block_size <= end) {
             cur_bbma_block_stick = ((void*)cur_bbma_block_stick) + bbma_init_block_stick_gap;
@@ -302,6 +302,7 @@ void spy_insert_chain_block(BUDDY_BLOCK_STICK* item) {
 #ifdef TEST
     assert(item != NULL);
 #endif
+    item->is_free = true;
     item->prev = NULL;
     item->next = buddy_blocks[item->alloc_spaces - FIND_BBMA_OFFSET];
     if (buddy_blocks[item->alloc_spaces - FIND_BBMA_OFFSET] != NULL) {
