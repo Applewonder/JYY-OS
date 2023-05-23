@@ -1,7 +1,7 @@
 #include "slab.h"
 #include <assert.h>
 #include <cbma.h>
-#include <stdio.h>、
+#include <stdio.h>
 #include "threads.h"
 
 static void* real_start_addr;
