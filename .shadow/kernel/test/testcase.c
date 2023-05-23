@@ -291,10 +291,10 @@ static void entry_6(int tid) {
         fclose(file);
       } else {
         write_in_file(ptr, size, true, 6);
+        already_alloc[end_index] = ptr;
+        end_index ++;
       }
       mutex_unlock(&mutex);
-      already_alloc[end_index] = ptr;
-      end_index ++;
     }
     round_cnt ++;
   }
