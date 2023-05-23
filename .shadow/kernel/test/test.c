@@ -112,7 +112,7 @@ void judger_for_alloc_and_free(int test_id) {
             int size_start_index = end_index + 7;
             strcpy(destinationArray, &line[size_start_index]);
             unsigned long alloc_size = strtoul(destinationArray, NULL, 10);
-            if (judge_if_have_duplicate_alloc(alloc_address, alloc_address + alloc_size)) {
+            if (judge_if_have_duplicate_alloc(alloc_address, alloc_address + alloc_size, line_num)) {
               printf("\033[31m Error: Duplicate alloc: %p\n\033[0m", (void*)alloc_address);
               exit(1);
             }
