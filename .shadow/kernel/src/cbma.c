@@ -52,6 +52,7 @@ BUDDY_BLOCK_SIZE determine_bbma_size(size_t size) {
 void* get_the_free_space_by_dividing(BUDDY_BLOCK_SIZE bbma_size) {
     BUDDY_BLOCK_STICK* bbma_stick = divide_larger_bbma_block_from_bbma_system(bbma_size + 1);
     // spin_lock(&bbma_lock[bbma_size - FIND_BBMA_OFFSET]);
+    printf("Get the free space %p\n", bbma_stick);
     assert(bbma_stick != NULL);
     delete_a_free_block_in_bbma_system(bbma_stick);
     // spin_unlock(&bbma_lock[bbma_size - FIND_BBMA_OFFSET]);
@@ -150,6 +151,7 @@ BUDDY_BLOCK_STICK* divide_larger_bbma_block_from_bbma_system(BUDDY_BLOCK_SIZE bb
     insert_two_new_divided_child_into_bbma_system(left_divided_child, right_divided_child, bbma_size - 1);
     assert(left_divided_child != NULL);
     // spin_unlock(&bbma_lock[bbma_size - FIND_BBMA_OFFSET]);
+    printf("divide larger bbma block from bbma system: %p\n", left_divided_child);
     return left_divided_child;
 }
 
