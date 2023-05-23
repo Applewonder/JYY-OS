@@ -287,7 +287,8 @@ static void entry_6(int tid) {
       
       if (ptr == NULL) {
         file = fopen("/home/appletree/JYY-OS/kernel/test/testlog6.txt", "a");
-        fprintf(file, "Can not alloc\n");
+
+        fprintf(file, "Try to alloc Size: %d. Can not alloc\n", size);
         fclose(file);
       } else {
         write_in_file(ptr, size, true, 6);
