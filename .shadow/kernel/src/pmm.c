@@ -45,7 +45,9 @@ static void pmm_init() {
   printf("memset done\n");
   void* align_begin_address = (void*)align_to((uintptr_t)heap.start, 24);
   bbma_init(align_begin_address, heap.end);
+  printf("bbma_init done\n");
   slab_init();
+  printf("slab_init done\n");
 }
 #endif
 
