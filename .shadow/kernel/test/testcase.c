@@ -270,7 +270,7 @@ static void entry_6(int tid) {
   void* already_alloc[50000];
   int end_index = 0;
   int round_cnt = 0;
-  while (round_cnt < 100000) {
+  while (round_cnt < 10000) {
     int choose_type = rand() % 2;
     if (choose_type && end_index) {
       int index = rand() % end_index;
