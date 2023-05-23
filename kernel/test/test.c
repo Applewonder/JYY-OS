@@ -71,15 +71,15 @@ bool delete_alloc_block(void* alloc) {
   return false;
 }
 
-bool judge_if_have_duplicate_alloc(unsigned long start_alloc, unsigned long end_alloc) {
+bool judge_if_have_duplicate_alloc(unsigned long start_alloc, unsigned long end_alloc, int line_num) {
   TASK* cur = head;
   while (cur != NULL) {
     if ((unsigned long)cur->alloc >= end_alloc || (unsigned long)(cur->alloc + cur->size) <= start_alloc) {
       cur = cur->next;
       continue;
     } else {
-      printf("\033[31m Error: Duplicate alloc: %p, size: %ld\n\033[0m", cur->alloc, cur->size);
-      printf("\033[31m Error: Duplicate alloc: %p, size: %ld\n\033[0m", (void*)start_alloc, end_alloc - start_alloc);
+      printf("\033[31m Error: Duplicate alloc: %p, size: %ld, line:%d\n\033[0m", cur->alloc, cur->size, cur->line_num);
+      printf("\033[31m Error: Duplicate alloc: %p, size: %ld, line:%d\n\033[0m", (void*)start_alloc, end_alloc - start_alloc, line_num);
 
       return true;
     }
@@ -92,7 +92,7 @@ bool judge_if_has_bad_free(unsigned long start_free) {
 }
 
 void judger_for_alloc_and_free(int test_id) {
-    int line_num = 0;
+    int line_num = 1;
 
     char str[20];
     sprintf(str, "%d", test_id);
@@ -101,6 +101,7 @@ void judger_for_alloc_and_free(int test_id) {
     strcat(origin_log, ".txt");
 
     file = fopen(origin_log, "r");
+    int count_s = 0;
     while (fgets(line, sizeof(line), file) != NULL) {
         if (line[0] == 'A') {
             int start_index = 6;
@@ -112,7 +113,7 @@ void judger_for_alloc_and_free(int test_id) {
             int size_start_index = end_index + 7;
             strcpy(destinationArray, &line[size_start_index]);
             unsigned long alloc_size = strtoul(destinationArray, NULL, 10);
-            if (judge_if_have_duplicate_alloc(alloc_address, alloc_address + alloc_size)) {
+            if (judge_if_have_duplicate_alloc(alloc_address, alloc_address + alloc_size, line_num)) {
               printf("\033[31m Error: Duplicate alloc: %p\n\033[0m", (void*)alloc_address);
               exit(1);
             }
@@ -126,8 +127,14 @@ void judger_for_alloc_and_free(int test_id) {
               // print_chain();
               exit(1);
             }
+        } else if (line[0] == 'S'){
+          count_s ++;
         }
         line_num++;
+        if (count_s == 4) {
+          count_s = 0;
+          line_num ++;
+        }
     }
     fclose(file);
 }
