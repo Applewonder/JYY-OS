@@ -313,6 +313,9 @@ void insert_free_bbma_block_into_bbma_system(BUDDY_BLOCK_STICK* inserted_bbma_bl
         fprintf(file, "Merged ptr: %p\n", ready_to_insert);
         fclose(file);
 #endif
+        if (!where_is_the_neighbor) {
+            delete_a_free_block_in_bbma_system(the_cur_bbma_expected_neighbor_block_stick);
+        }
         insert_free_bbma_block_into_bbma_system(ready_to_insert, bbma_block_size + 1);
         // spin_unlock(&bbma_lock[bbma_block_size - FIND_BBMA_OFFSET]);
         return;
