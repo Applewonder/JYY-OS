@@ -232,23 +232,23 @@ static void entry_5(int tid) {
   }
 }
 
-void test_multi_alloc(int test_id) {
-    char str[20];
-    sprintf(str, "%d", test_id);
-    char origin_log[200] = "/home/appletree/JYY-OS/kernel/test/testlog";
-    strcat(origin_log, str);
-    strcat(origin_log, ".txt");
+// void test_multi_alloc(int test_id) {
+//     char str[20];
+//     sprintf(str, "%d", test_id);
+//     char origin_log[200] = "/home/appletree/JYY-OS/kernel/test/testlog";
+//     strcat(origin_log, str);
+//     strcat(origin_log, ".txt");
 
-    for (int i = 0; i < 3; i ++) {
-      for (int i = 0; i < 10000; i++)
-      {
-        pmm->alloc(1 << (5 + i % SLAB_NUM));
-        write_in_file(ptr, size, true, test_id);
+//     for (int i = 0; i < 3; i ++) {
+//       for (int i = 0; i < 10000; i++)
+//       {
+//         pmm->alloc(1 << (5 + i % SLAB_NUM));
+//         write_in_file(ptr, size, true, test_id);
 
-      }
+//       }
       
-    }
-}
+//     }
+// }
 
 
 
@@ -278,7 +278,7 @@ static void entry_6(int tid) {
       end_index --;
     } else {
       int size = rand() % 16 * 1024 * 1024;
-      mutex_lock(&mutex)
+      mutex_lock(&mutex);
       void* ptr = pmm->alloc(size);
       
       if (ptr == NULL) {
