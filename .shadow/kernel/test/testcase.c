@@ -47,11 +47,11 @@ void write_in_file(void* ptr, size_t size, bool is_alloc, int test_id) {
 
     if (is_alloc) {
         fprintf(file, "Alloc %p, Size %ld\n", ptr, size);
-        fprintf(file, "End Alloc\n");
+        fprintf(file, "\n");
         // print_bbma_chain(size);
     } else {
         fprintf(file, "Free %p\n", ptr);
-        fprintf(file, "End Free\n");
+        fprintf(file, "\n");
         // print_bbma_chain(size);
     }
     // fprintf(file, "\n");
@@ -317,6 +317,7 @@ static void entry_6(int tid) {
         write_in_file(ptr, size, true, 6);
         mutex_unlock(&mutex);
         print_chain_in_file(6, size);
+
         already_alloc[end_index] = ptr;
         end_index ++;
       }
