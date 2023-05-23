@@ -203,11 +203,11 @@ void bbma_init(void* start, void* end) {
 
     cur_bbma_block_stick->prev = NULL;
     cur_bbma_block_stick->next = NULL;
-    cur_bbma_block_stick->alloc_spaces = S_16M;
 
     BUDDY_BLOCK_STICK* prev_bbma_block_stick = buddy_blocks[S_16M - FIND_BBMA_OFFSET];
     
     while(cur_buddy_block_addr + bbma_init_block_size <= end) {
+        cur_bbma_block_stick->alloc_spaces = S_16M;
         spy_insert_chain_block(prev_bbma_block_stick, cur_bbma_block_stick);
         prev_bbma_block_stick = cur_bbma_block_stick;
         if (cur_buddy_block_addr + 2 * bbma_init_block_size <= end) {
