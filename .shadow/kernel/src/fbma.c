@@ -2,7 +2,7 @@
 #include <assert.h>
 #include <cbma.h>
 #include <stdio.h>
-#include "threads.h"
+// #include "threads.h"
 
 static void* real_start_addr;
 static void* begin_alloc_addr;
@@ -17,7 +17,7 @@ typedef pthread_mutex_t mutex_t;
 BUDDY_BLOCK_STICK* buddy_blocks[BBMA_NUM];
 // spinlock_t bbma_lock[BBMA_NUM];
 spinlock_t bbma_lock;
-extern mutex_t mutex;
+// extern mutex_t mutex;
 
 BUDDY_BLOCK_SIZE determine_bbma_size(size_t size) {
     size_t real_size = size;
@@ -64,7 +64,7 @@ void* get_the_free_space_by_dividing(BUDDY_BLOCK_SIZE bbma_size) {
 }
 
 void* bbma_alloc(size_t size, bool is_from_slab) {
-    mutex_lock(&mutex);
+    spin_lock(&bbma_lock);
     BUDDY_BLOCK_SIZE bbma_size = BBMA_REFUSE;
     if (is_from_slab) {
         if (size != SLAB_REQUEST_SPACE) {
@@ -87,15 +87,15 @@ void* bbma_alloc(size_t size, bool is_from_slab) {
     }
     if (possible_bbma_addr != NULL) {
         // panic_on(true, "bbma alloc error");
-        // char* judger = possible_bbma_addr + (1 << 12) - 1;
-        // assert(*judger == 0);
-        // *judger = *judger + 1;
+        char* judger = possible_bbma_addr + (1 << 12) - 1;
+        assert(*judger == 0);
+        *judger = *judger + 1;
     }
 
 #ifdef TEST
     // assert()
 #endif
-    mutex_unlock(&mutex);
+    spin_unlock(&bbma_lock);
     return possible_bbma_addr;
 }
 
@@ -325,7 +325,7 @@ void spy_insert_chain_block(BUDDY_BLOCK_STICK* item) {
 }
 
 void bbma_free(void* ptr) {
-    mutex_lock(&mutex);
+    spin_lock(&bbma_lock);
     if (ptr == NULL) {
         return;
     }
@@ -334,8 +334,8 @@ void bbma_free(void* ptr) {
     cur_bbma_block_stick->prev = NULL;
     cur_bbma_block_stick->next = NULL;
     insert_free_bbma_block_into_bbma_system(cur_bbma_block_stick, cur_bbma_block_size);
-    // char* judger = ptr + (1 << 12) - 1;;
-    // assert(*judger == 1);
-    // *judger = 0;
-    mutex_unlock(&mutex);
+    char* judger = ptr + (1 << 12) - 1;;
+    assert(*judger == 1);
+    *judger = 0;
+    spin_unlock(&bbma_lock);
 }
