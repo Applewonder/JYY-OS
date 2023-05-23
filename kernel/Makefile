@@ -29,6 +29,9 @@ testall: test
 		@build/test 0
 		@build/test 1
 		@build/test 2
+		@build/test 3
+		@build/test 4
+		@build/test 5
 
 testcase0: test
 		@build/test 0
@@ -38,6 +41,15 @@ testcase1: test
 
 testcase2: test
 		@build/test 2
+
+testcase3: test
+		@build/test 3
+
+testcase4: test
+		@build/test 4
+
+testcase5: test
+		@build/test 5
 
 debug: 
 	./debug.sh
