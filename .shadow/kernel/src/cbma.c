@@ -98,6 +98,7 @@ void* convert_addr_to_index(void* addr) {
 }
 
 void delete_a_free_block_in_bbma_system(BUDDY_BLOCK_STICK* bbma_stick) {
+    assert(bbma_stick != NULL);
     if (bbma_stick->prev == NULL) {
         BUDDY_BLOCK_SIZE bbma_size = bbma_stick->alloc_spaces;
         buddy_blocks[bbma_size - FIND_BBMA_OFFSET] = bbma_stick->next;
