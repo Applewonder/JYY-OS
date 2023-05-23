@@ -274,15 +274,12 @@ static void entry_6(int tid) {
     int choose_type = rand() % 2;
     if (choose_type && end_index) {
       int index = rand() % end_index;
-      mutex_lock(&mutex);
       pmm->free(already_alloc[index]);
       write_in_file(already_alloc[index], 0, false, 6);
-      mutex_unlock(&mutex);
       already_alloc[index] = already_alloc[end_index - 1];
       end_index --;
     } else {
       int size = (rand() % 16 * 1024 * 1024) + 1;
-      mutex_lock(&mutex);
       void* ptr = pmm->alloc(size);
       
       if (ptr == NULL) {
@@ -295,7 +292,6 @@ static void entry_6(int tid) {
         already_alloc[end_index] = ptr;
         end_index ++;
       }
-      mutex_unlock(&mutex);
     }
     round_cnt ++;
   }
