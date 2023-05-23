@@ -341,8 +341,8 @@ void do_test_4() {
 }
 
 void do_test_5() {
-    printf("\033[32m Test 4 begin\n\033[0m");
-    file = fopen("/home/appletree/JYY-OS/kernel/test/testlog4.txt", "w");
+    printf("\033[32m Test 5 begin\n\033[0m");
+    file = fopen("/home/appletree/JYY-OS/kernel/test/testlog5.txt", "w");
     fclose(file);
     pmm->init();
     for (int i = 0; i < 6; i++){
