@@ -65,8 +65,8 @@ void* get_the_free_space_by_dividing(BUDDY_BLOCK_SIZE bbma_size) {
 }
 
 void* bbma_alloc(size_t size, bool is_from_slab) {
-    // mutex_lock(&mutex);
-    spin_lock(&bbma_lock);
+    mutex_lock(&mutex);
+    // spin_lock(&bbma_lock);
     BUDDY_BLOCK_SIZE bbma_size = BBMA_REFUSE;
     if (is_from_slab) {
         if (size != SLAB_REQUEST_SPACE) {
@@ -97,8 +97,8 @@ void* bbma_alloc(size_t size, bool is_from_slab) {
 #ifdef TEST
     // assert()
 #endif
-    spin_unlock(&bbma_lock);
-    // mutex_unlock(&mutex);
+    // spin_unlock(&bbma_lock);
+    mutex_unlock(&mutex);
     return possible_bbma_addr;
 }
 
@@ -328,8 +328,8 @@ void spy_insert_chain_block(BUDDY_BLOCK_STICK* item) {
 }
 
 void bbma_free(void* ptr) {
-    // mutex_lock(&mutex);
-    spin_lock(&bbma_lock);
+    mutex_lock(&mutex);
+    // spin_lock(&bbma_lock);
     if (ptr == NULL) {
         return;
     }
@@ -341,6 +341,6 @@ void bbma_free(void* ptr) {
     char* judger = ptr + (1 << 12) - 1;;
     assert(*judger == 1);
     *judger = 0;
-    spin_unlock(&bbma_lock);
-    // mutex_unlock(&mutex);
+    // spin_unlock(&bbma_lock);
+    mutex_unlock(&mutex);
 }
