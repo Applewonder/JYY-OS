@@ -116,11 +116,11 @@ void delete_a_free_block_in_bbma_system(BUDDY_BLOCK_STICK* bbma_stick) {
 }
 
 void* bbma_align_to_larger_block(void* ptr, BUDDY_BLOCK_SIZE bbma_size) {
-    unsigned long mask = (1 << bbma_size) - 1;
-    if (!((unsigned long)ptr & mask)) {
-        return (void*)((unsigned long)ptr & (~mask)) + (1 << (bbma_size - 1));
+    uintptr_t mask = (1 << bbma_size) - 1;
+    if (!((uintptr_t)ptr & mask)) {
+        return (void*)((uintptr_t)ptr & (~mask)) + (1 << (bbma_size - 1));
     }
-    return (void*)((unsigned long)ptr & (~mask));
+    return (void*)((uintptr_t)ptr & (~mask));
 }
 
 BUDDY_BLOCK_STICK* divide_larger_bbma_block_from_bbma_system(BUDDY_BLOCK_SIZE bbma_size) {
