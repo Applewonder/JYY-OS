@@ -1,7 +1,8 @@
 #include "slab.h"
 #include <assert.h>
 #include <cbma.h>
-#include <stdio.h>
+#include <stdio.h>、
+#include "threads.h"
 
 static void* real_start_addr;
 static void* begin_alloc_addr;
@@ -11,9 +12,12 @@ extern FILE* file;
 char origin_logg[200] = "/home/appletree/JYY-OS/kernel/test/testlog1.txt";
 #endif
 
+typedef pthread_mutex_t mutex_t;
+
 BUDDY_BLOCK_STICK* buddy_blocks[BBMA_NUM];
 // spinlock_t bbma_lock[BBMA_NUM];
 spinlock_t bbma_lock;
+mutex_t mutex = MUTEX_INIT();
 
 BUDDY_BLOCK_SIZE determine_bbma_size(size_t size) {
     size_t real_size = size;
@@ -60,7 +64,7 @@ void* get_the_free_space_by_dividing(BUDDY_BLOCK_SIZE bbma_size) {
 }
 
 void* bbma_alloc(size_t size, bool is_from_slab) {
-    spin_lock(&bbma_lock);
+    mutex_lock(&mutex);
     BUDDY_BLOCK_SIZE bbma_size = BBMA_REFUSE;
     if (is_from_slab) {
         if (size != SLAB_REQUEST_SPACE) {
@@ -81,7 +85,7 @@ void* bbma_alloc(size_t size, bool is_from_slab) {
     if (possible_bbma_addr == NULL) {
         possible_bbma_addr = get_the_free_space_by_dividing(bbma_size);
     }
-    spin_unlock(&bbma_lock);
+    mutex_unlock(&mutex);
     return possible_bbma_addr;
 }
 
@@ -311,7 +315,7 @@ void spy_insert_chain_block(BUDDY_BLOCK_STICK* item) {
 }
 
 void bbma_free(void* ptr) {
-    spin_lock(&bbma_lock);
+    mutex_lock(&mutex);
     if (ptr == NULL) {
         return;
     }
@@ -320,5 +324,5 @@ void bbma_free(void* ptr) {
     cur_bbma_block_stick->prev = NULL;
     cur_bbma_block_stick->next = NULL;
     insert_free_bbma_block_into_bbma_system(cur_bbma_block_stick, cur_bbma_block_size);
-    spin_unlock(&bbma_lock);
+    mutex_unlock(&mutex);
 }
