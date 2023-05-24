@@ -57,34 +57,34 @@ void write_in_file(void* ptr, size_t size, bool is_alloc, int test_id) {
 }
 
 void test_alloc_and_free(size_t size, int test_id) {
-    mutex_lock(&mutex);
-    char str[20];
-    sprintf(str, "%d", test_id);
-    char origin_log[200] = "/home/appletree/JYY-OS/kernel/test/testlog";
-    strcat(origin_log, str);
-    strcat(origin_log, ".txt");
-    file = fopen(origin_log, "a");
-    fprintf(file, "Before Alloc\n");
-    print_bbma_chain(size);
+    // mutex_lock(&mutex);
+    // char str[20];
+    // sprintf(str, "%d", test_id);
+    // char origin_log[200] = "/home/appletree/JYY-OS/kernel/test/testlog";
+    // strcat(origin_log, str);
+    // strcat(origin_log, ".txt");
+    // file = fopen(origin_log, "a");
+    // fprintf(file, "Before Alloc\n");
+    // print_bbma_chain(size);
 
     void* ptr = pmm->alloc(size);
     if (ptr == NULL) {
         fprintf(file, "Failed to alloc\n");
     }
-    fclose(file);
-    write_in_file(ptr, size, true, test_id);
+    // fclose(file);
+    // write_in_file(ptr, size, true, test_id);
 
 
-    mutex_unlock(&mutex);
+    // mutex_unlock(&mutex);
 
-    mutex_lock(&mutex);
-    file = fopen(origin_log, "a");
-    fprintf(file, "Before Free\n");
-    print_bbma_chain(size);
-    fclose(file);
+    // mutex_lock(&mutex);
+    // file = fopen(origin_log, "a");
+    // fprintf(file, "Before Free\n");
+    // print_bbma_chain(size);
+    // fclose(file);
     pmm->free(ptr);
-    write_in_file(ptr, size, false, test_id);
-    mutex_unlock(&mutex);
+    // write_in_file(ptr, size, false, test_id);
+    // mutex_unlock(&mutex);
 }
 
 void once_slab_alloc(SLAB_SIZE size, char origin_log[], int test_id) {
