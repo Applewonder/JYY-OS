@@ -48,7 +48,7 @@ void* slab_alloc(int cpu_num, size_t size) {
 
 void* find_the_avaliable_page_in_slab(int cpu_num, SLAB_SIZE slab_size) {
     // find the avaliable page in the slab
-    
+    assert (cpu_num <= 6);
     void* slab_addr = cpu_own_area[cpu_num][slab_size - CPU_FIND_SLAB_OFFSET];
     if (slab_addr == NULL) {
         return NULL;
