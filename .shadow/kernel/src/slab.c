@@ -38,7 +38,7 @@ void* slab_alloc(int cpu_num, size_t size) {
     }
 #ifdef TEST
     if (possible_slab_addr != NULL) {
-        int* judger = (int*)(possible_slab_addr + 4);
+        int* judger = (int*)(possible_slab_addr + 8);
         assert(*judger == 0);
         *judger = *judger + 1;
     }
@@ -122,7 +122,7 @@ void* slab_align_to_4kb(void* ptr) {
 void slab_free(void* ptr) {
 #ifdef TEST
     if (ptr != NULL) {
-        int* judger = (int*)ptr;
+        int* judger = (int*)(ptr + 8);
         assert(*judger == 1);
         *judger = *judger - 1;
     }
