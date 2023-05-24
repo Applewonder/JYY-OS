@@ -181,7 +181,7 @@ static void entry_0(int tid) {
 //   printf("thread_id[%d]: %ld\n", cur_cpu, thread_id[cur_cpu]);
   for (int i = 0; i < 10000; i++)
   {
-    int choose_type = i % SLAB_NUM;
+    int choose_type = i % (SLAB_NUM - 1) + 1;
     test_alloc_and_free(1 << (5 + choose_type), 0);
   }
 }
