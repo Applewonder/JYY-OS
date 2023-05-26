@@ -3,7 +3,7 @@
 #include <assert.h>
 #include <cbma.h>
 #include <stdio.h>
-// #include "threads.h"
+#include "threads.h"
 
 static void* real_start_addr;
 static void* begin_alloc_addr;
@@ -13,12 +13,12 @@ extern FILE* file;
 char origin_logg[200] = "/home/appletree/JYY-OS/kernel/test/testlog1.txt";
 #endif
 
-// typedef pthread_mutex_t mutex_t;
+typedef pthread_mutex_t mutex_t;
 
 BUDDY_BLOCK_STICK* buddy_blocks[BBMA_NUM];
 // spinlock_t bbma_lock[BBMA_NUM];
 spinlock_t bbma_lock = SPIN_LOCK_INIT;
-// extern mutex_t mutex;
+extern mutex_t mutex;
 
 BUDDY_BLOCK_SIZE determine_bbma_size(size_t size) {
     size_t real_size = size;
@@ -65,8 +65,8 @@ void* get_the_free_space_by_dividing(BUDDY_BLOCK_SIZE bbma_size) {
 }
 int ente_cnt = 0;
 void* bbma_alloc(size_t size, bool is_from_slab) {
-    // mutex_lock(&mutex);
-    spin_lock(&bbma_lock);
+    mutex_lock(&mutex);
+    // spin_lock(&bbma_lock);
 
     // assert(ente_cnt++==0);
     BUDDY_BLOCK_SIZE bbma_size = BBMA_REFUSE;
@@ -74,9 +74,9 @@ void* bbma_alloc(size_t size, bool is_from_slab) {
         if (size != SLAB_REQUEST_SPACE) {
             // panic_on(true, "slab size error");
             // assert(--ente_cnt==0);
-            spin_unlock(&bbma_lock);
+            // spin_unlock(&bbma_lock);
             
-            // mutex_unlock(&mutex);
+            mutex_unlock(&mutex);
             return NULL;
         }
         bbma_size = S_4K;
@@ -85,9 +85,9 @@ void* bbma_alloc(size_t size, bool is_from_slab) {
         if (bbma_size == BBMA_REFUSE) {
             // panic_on(true, "bbma size error");
             // assert(--ente_cnt==0);
-            spin_unlock(&bbma_lock);
+            // spin_unlock(&bbma_lock);
             
-            // mutex_unlock(&mutex);
+            mutex_unlock(&mutex);
             return NULL;
         }
     }
@@ -106,10 +106,10 @@ void* bbma_alloc(size_t size, bool is_from_slab) {
     // assert()
 #endif
     // assert(--ente_cnt==0);
-    spin_unlock(&bbma_lock);
+    // spin_unlock(&bbma_lock);
 
     
-    // mutex_unlock(&mutex);
+    mutex_unlock(&mutex);
     
     return possible_bbma_addr;
 }
