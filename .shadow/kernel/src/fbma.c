@@ -67,7 +67,7 @@ void* get_the_free_space_by_dividing(BUDDY_BLOCK_SIZE bbma_size) {
 int ente_cnt = 0;
 void* bbma_alloc(size_t size, bool is_from_slab) {
     // mutex_lock(&mutex);
-    printf("%d", aa++);
+    printf("%d\n", aa++);
     spin_lock(&bbma_lock);
 
     // assert(ente_cnt++==0);
