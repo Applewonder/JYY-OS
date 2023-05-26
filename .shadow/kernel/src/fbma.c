@@ -18,7 +18,6 @@ char origin_logg[200] = "/home/appletree/JYY-OS/kernel/test/testlog1.txt";
 BUDDY_BLOCK_STICK* buddy_blocks[BBMA_NUM];
 // spinlock_t bbma_lock[BBMA_NUM];
 spinlock_t bbma_lock = SPIN_LOCK_INIT;
-int aa = 0;
 // extern mutex_t mutex;
 
 BUDDY_BLOCK_SIZE determine_bbma_size(size_t size) {
@@ -67,7 +66,6 @@ void* get_the_free_space_by_dividing(BUDDY_BLOCK_SIZE bbma_size) {
 int ente_cnt = 0;
 void* bbma_alloc(size_t size, bool is_from_slab) {
     // mutex_lock(&mutex);
-    printf("%d\n", aa++);
     spin_lock(&bbma_lock);
 
     // assert(ente_cnt++==0);
