@@ -65,18 +65,18 @@ void* get_the_free_space_by_dividing(BUDDY_BLOCK_SIZE bbma_size) {
 }
 int ente_cnt = 0;
 void* bbma_alloc(size_t size, bool is_from_slab) {
-    mutex_lock(&mutex);
-    // spin_lock(&bbma_lock);
+    // mutex_lock(&mutex);
+    spin_lock(&bbma_lock);
 
-    // assert(ente_cnt++==0);
+    assert(ente_cnt++==0);
     BUDDY_BLOCK_SIZE bbma_size = BBMA_REFUSE;
     if (is_from_slab) {
         if (size != SLAB_REQUEST_SPACE) {
             // panic_on(true, "slab size error");
-            // assert(--ente_cnt==0);
-            // spin_unlock(&bbma_lock);
+            assert(--ente_cnt==0);
+            spin_unlock(&bbma_lock);
             
-            mutex_unlock(&mutex);
+            // mutex_unlock(&mutex);
             return NULL;
         }
         bbma_size = S_4K;
@@ -84,10 +84,10 @@ void* bbma_alloc(size_t size, bool is_from_slab) {
         bbma_size = determine_bbma_size(size);
         if (bbma_size == BBMA_REFUSE) {
             // panic_on(true, "bbma size error");
-            // assert(--ente_cnt==0);
-            // spin_unlock(&bbma_lock);
+            assert(--ente_cnt==0);
+            spin_unlock(&bbma_lock);
             
-            mutex_unlock(&mutex);
+            // mutex_unlock(&mutex);
             return NULL;
         }
     }
@@ -105,11 +105,11 @@ void* bbma_alloc(size_t size, bool is_from_slab) {
 #ifdef TEST
     // assert()
 #endif
-    // assert(--ente_cnt==0);
-    // spin_unlock(&bbma_lock);
+    assert(--ente_cnt==0);
+    spin_unlock(&bbma_lock);
 
     
-    mutex_unlock(&mutex);
+    // mutex_unlock(&mutex);
     
     return possible_bbma_addr;
 }
