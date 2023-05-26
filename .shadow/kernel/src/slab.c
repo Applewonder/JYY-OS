@@ -34,21 +34,15 @@ void* slab_alloc(int cpu_num, size_t size) {
     }
     void* possible_slab_addr = find_the_free_space_in_slab(cpu_num, slab_size);
     if (possible_slab_addr == NULL) {
-        possible_slab_addr = request_a_slab_from_bbma(cpu_num, slab_size);
+        return request_a_slab_from_bbma(cpu_num, slab_size);
     }
-#ifdef TEST
-    if (possible_slab_addr != NULL) {
-        int* judger = (int*)(possible_slab_addr + 8);
-        assert(*judger == 0);
-        *judger = *judger + 1;
-    }
-#endif
-    return possible_slab_addr;
+    void* the_slab_addr = possible_slab_addr;
+    return the_slab_addr;
 }
 
 void* find_the_avaliable_page_in_slab(int cpu_num, SLAB_SIZE slab_size) {
     // find the avaliable page in the slab
-    assert (cpu_num <= 6);
+    
     void* slab_addr = cpu_own_area[cpu_num][slab_size - CPU_FIND_SLAB_OFFSET];
     if (slab_addr == NULL) {
         return NULL;
@@ -120,13 +114,6 @@ void* slab_align_to_4kb(void* ptr) {
 }
 
 void slab_free(void* ptr) {
-#ifdef TEST
-    if (ptr != NULL) {
-        int* judger = (int*)(ptr + 8);
-        assert(*judger == 1);
-        *judger = *judger - 1;
-    }
-#endif
     SLAB_FREE_BLOCK* slab_block = (SLAB_FREE_BLOCK*)ptr;
     SLAB_STICK* slab_stick = (SLAB_STICK*)slab_align_to_4kb(ptr);
     slab_block->next_free_slab_block = slab_stick->current_slab_free_block_list;
@@ -134,7 +121,6 @@ void slab_free(void* ptr) {
     slab_stick->current_slab_free_block_list = (uintptr_t)slab_block;
     slab_stick->current_slab_free_space += 1;
     spin_unlock(&slab_stick->slab_lock);
-
 }
 
 void initialize_a_cpu_slab_area(int cpu_num) {

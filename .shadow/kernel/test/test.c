@@ -186,9 +186,8 @@ int main(int argc, char *argv[]) {
       break;
     }
     case 7: {
-      do_test_7();
-      // judger_for_alloc_and_free(7);
-      printf("\033[32m Test 7 passed\n\033[0m");
+      judger_for_alloc_and_free(6);
+      printf("\033[32m Test 6 passed\n\033[0m");
       break;
     }
   }

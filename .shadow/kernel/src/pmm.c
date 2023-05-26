@@ -4,7 +4,7 @@
 #include <slab.h>
 #include <string.h>
 
-#define HEAP_SIZE 512 * 1024 * 1024
+#define HEAP_SIZE 128 * 1024 * 1024
 
 #ifdef TEST
 struct {
@@ -41,7 +41,7 @@ static void pmm_init() {
   heap.start = ptr;
   heap.end   = ptr + HEAP_SIZE;
   printf("Got %d MiB heap: [%p, %p)\n", HEAP_SIZE >> 20, heap.start, heap.end);
-  memset(ptr, 0, HEAP_SIZE);
+  // memset(ptr, 0, HEAP_SIZE);
   printf("memset done\n");
   void* align_begin_address = (void*)align_to((uintptr_t)heap.start, 24);
   bbma_init(align_begin_address, heap.end);
