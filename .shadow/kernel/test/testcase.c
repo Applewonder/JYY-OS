@@ -435,7 +435,7 @@ void do_test_7() {
     fclose(file);
     pmm->init();
     printf("init done\n");
-    for (int i = 0; i < 1; i++){
+    for (int i = 0; i < CPU_NUM; i++){
         create(entry_7);
     }
     join();
