@@ -21,7 +21,7 @@ static void *kalloc(size_t size) {
   return slab_alloc(cpu_num, size);
 #else
   void* ptr = slab_alloc(cpu_num, size);
-  
+  return ptr;
 #endif
 }
 
