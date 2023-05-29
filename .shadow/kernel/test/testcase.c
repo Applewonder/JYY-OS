@@ -268,7 +268,7 @@ void print_chain_in_file(int test_id, int size, bool is_end) {
     if (size > 2 *1024) {
       int log_size = determine_bbma_size(size);
       fprintf(file, "Size: %dKB\n", 1 << (log_size - 10));
-      print_bbma_chain(size);
+      // print_bbma_chain(size);
     } else {
       int log_size = determine_slab_size(size);
       fprintf(file, "Slab alloc: %dB\n", 1 << log_size);
