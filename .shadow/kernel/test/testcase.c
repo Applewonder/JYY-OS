@@ -8,6 +8,9 @@ FILE *file;
 void* already_alloc[500000];
 int remain_cap = 512 * 1024 * 1024;
 extern unsigned long thread_id[];
+extern int tree_num;
+extern Tree all_trees[];
+extern int calculate_addr_helper[];
 // extern BUDDY_BLOCK_STICK* buddy_blocks[];
 
 // void print_bbma_chain(size_t size) {
@@ -331,6 +334,88 @@ static void entry_6(int tid) {
   }
 }
 
+char* turn_num_into_size(char bma_size) {
+  // switch (bma_size){
+  //   case S_4K:
+  //     return "4K";
+  // }
+  switch (bma_size)
+  {
+  case S_4K:
+    return "4K  ";
+    break;
+  case S_8K:
+    return "8K  ";
+    break;
+  case S_16K:
+    return "16K ";
+    break;
+  case S_32K:
+    return "32K ";
+    break;
+  case S_64K:
+    return "64K ";
+    break;
+  case S_128K: 
+    return "128K";
+    break;
+  case S_256K:
+    return "256K";
+    break;
+  case S_512K:
+    return "512K";
+    break;
+  case S_1M:
+    return "1M  ";
+    break;
+  case S_2M:
+    return "2M  ";
+    break;
+  case S_4M:
+    return "4M  ";
+    break;
+  case S_8M:
+    return "8M  ";
+    break;
+  case S_16M:
+    return "16M ";
+    break;
+  case 1:
+    return "DEPA";
+    break;
+  case 0:
+    return "USED";
+    break;
+  }
+  return NULL;
+}
+
+void print_tree_status() {
+  file = fopen("/home/appletree/JYY-OS/kernel/test/testlog7.txt", "a");
+  fprintf(file, "Remain cap: %d\n", remain_cap);
+  for (int i = 1; i <= tree_num; i ++) {
+    Tree tree = all_trees[i];
+    fprintf(file, "Tree %d\n", i);
+    int cur_stand = 1;
+    int next_stand = 2;
+    for (int j = 0; j < 13; j ++) {
+      cur_stand = calculate_addr_helper[j];
+      if (j == 12) {
+        next_stand = 8192;
+      } else {
+        next_stand = calculate_addr_helper[j + 1];
+      }
+      for (int k = cur_stand; k < next_stand; k++)
+      {
+        fprintf(file, "%s ", turn_num_into_size(tree[k]));
+      }
+      fprintf(file, "\n");
+    }
+    fprintf(file, "\n");
+  }
+  fclose(file);
+}
+
 static void entry_7(int tid) { 
   printf("entry_7\n");
   int cur_cpu = tid - 1;
@@ -356,8 +441,9 @@ static void entry_7(int tid) {
       if (ptr == NULL) {
         file = fopen("/home/appletree/JYY-OS/kernel/test/testlog7.txt", "a");
         fprintf(file, "Try to alloc Size: %d, remain capacity %d, round %d. Can not alloc\n", size, remain_cap, round_cnt);
-        break;
         fclose(file);
+        print_tree_status();
+        break;
       } else {
         already_alloc[end_index] = ptr;
         end_index ++;
