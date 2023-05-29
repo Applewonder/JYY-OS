@@ -442,8 +442,10 @@ static void entry_7(int tid) {
         file = fopen("/home/appletree/JYY-OS/kernel/test/testlog7.txt", "a");
         fprintf(file, "Try to alloc Size: %d, remain capacity %d, round %d. Can not alloc\n", size, remain_cap, round_cnt);
         fclose(file);
-        print_tree_status();
-        // break;
+        if (cpu_current() == 0) {
+          print_tree_status();
+        }
+        break;
       } else {
         already_alloc[end_index] = ptr;
         end_index ++;
