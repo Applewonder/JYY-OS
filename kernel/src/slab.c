@@ -3,6 +3,7 @@
 
 SLAB_STICK* cpu_own_area[MAX_CPU][SLAB_NUM];
 
+
 SLAB_SIZE determine_slab_size(size_t size) {
     // give a size, return the slab size
     if (size <= 32) {
@@ -30,7 +31,7 @@ void* slab_alloc(int cpu_num, size_t size) {
     }
     SLAB_SIZE slab_size = determine_slab_size(size);
     if (slab_size == SLAB_REFUSE) {
-        return bbma_alloc(size, false);
+        return bbma_alloc(size);
     }
     void* possible_slab_addr = find_the_free_space_in_slab(cpu_num, slab_size);
     if (possible_slab_addr == NULL) {
@@ -40,7 +41,7 @@ void* slab_alloc(int cpu_num, size_t size) {
     return the_slab_addr;
 }
 
-void* find_the_avaliable_page_in_slab(int cpu_num, SLAB_SIZE slab_size) {
+void* find_the_avaliable_page_in_slab_and_lock(int cpu_num, SLAB_SIZE slab_size) {
     // find the avaliable page in the slab
     
     void* slab_addr = cpu_own_area[cpu_num][slab_size - CPU_FIND_SLAB_OFFSET];
@@ -49,8 +50,10 @@ void* find_the_avaliable_page_in_slab(int cpu_num, SLAB_SIZE slab_size) {
     }
     SLAB_STICK* free_space = slab_addr;
     while (free_space != NULL) {
+        spin_lock(&free_space->slab_lock);
         if (free_space->current_slab_free_space == 0) {
             free_space = (SLAB_STICK*)free_space->next_slab_stick;
+            spin_unlock(&free_space->slab_lock);
             continue;
         }
         void* page_addr = (void*)free_space;
@@ -62,11 +65,13 @@ void* find_the_avaliable_page_in_slab(int cpu_num, SLAB_SIZE slab_size) {
 
 void* find_the_free_space_in_slab(int cpu_num, SLAB_SIZE slab_size) {
     // find the free space in the slab
-    SLAB_STICK* free_space = find_the_avaliable_page_in_slab(cpu_num, slab_size);
+    SLAB_STICK* free_space = find_the_avaliable_page_in_slab_and_lock(cpu_num, slab_size);
+    
     if (free_space == NULL) {
         return NULL;
     }
-    spin_lock(&free_space->slab_lock);
+    assert(free_space->current_slab_free_space > 0);
+    assert((SLAB_FREE_BLOCK*)free_space->current_slab_free_block_list != NULL);
     SLAB_FREE_BLOCK* avaliable_slab_block = (SLAB_FREE_BLOCK*)free_space->current_slab_free_block_list;
     free_space->current_slab_free_block_list = avaliable_slab_block->next_free_slab_block;
     free_space->current_slab_free_space -= 1;
@@ -96,11 +101,14 @@ long align_to_slab(void* addr, SLAB_SIZE slab_size) {
 
 void* request_a_slab_from_bbma(int cpu_num, SLAB_SIZE slab_size) {
     // request a slab from bbma
-    void* slab_addr = bbma_alloc(SLAB_REQUEST_SPACE, true);
+    void* slab_addr = bbma_alloc(SLAB_REQUEST_SPACE);
+    assert(((intptr_t)slab_addr & (SLAB_REQUEST_SPACE - 1)) == 0);
     if (slab_addr == NULL) {
         return NULL;
     }
     SLAB_STICK* free_space = slab_addr;
+
+    //TODO: maybe need lock
     free_space->next_slab_stick = cpu_own_area[cpu_num][slab_size - CPU_FIND_SLAB_OFFSET];
     cpu_own_area[cpu_num][slab_size - CPU_FIND_SLAB_OFFSET] = free_space;
     initialize_a_slab_new_page(cpu_num, slab_size, free_space);
@@ -109,13 +117,14 @@ void* request_a_slab_from_bbma(int cpu_num, SLAB_SIZE slab_size) {
 
 void* slab_align_to_4kb(void* ptr) {
     // align the ptr to 4kb
-    long mask = (1 << 12) - 1;
-    return (void*)((long)ptr & (~mask));
+    intptr_t mask = (1 << 12) - 1;
+    return (void*)((intptr_t)ptr & (~mask));
 }
 
 void slab_free(void* ptr) {
     SLAB_FREE_BLOCK* slab_block = (SLAB_FREE_BLOCK*)ptr;
     SLAB_STICK* slab_stick = (SLAB_STICK*)slab_align_to_4kb(ptr);
+    assert(((intptr_t)slab_stick & (SLAB_REQUEST_SPACE - 1)) == 0);
     slab_block->next_free_slab_block = slab_stick->current_slab_free_block_list;
     spin_lock(&slab_stick->slab_lock);
     slab_stick->current_slab_free_block_list = (uintptr_t)slab_block;

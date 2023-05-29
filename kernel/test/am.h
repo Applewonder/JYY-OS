@@ -22,8 +22,9 @@ int cpu_current();
 int atomic_xchg(volatile int *addr, int newval);
 void spin_lock(int *lk);
 void spin_unlock(int *lk);
+bool try_lock(int *lk);
 
-long align_to(long n, unsigned int align);
+unsigned long align_to(unsigned long n, unsigned long align);
 
 bool is_align_to(void *ptr, unsigned int align);
 

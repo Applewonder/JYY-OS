@@ -7,26 +7,26 @@ mutex_t mutex = MUTEX_INIT();
 FILE *file;
 
 extern unsigned long thread_id[];
-extern BUDDY_BLOCK_STICK* buddy_blocks[];
+// extern BUDDY_BLOCK_STICK* buddy_blocks[];
 
-void print_bbma_chain(size_t size) {
-    BUDDY_BLOCK_SIZE bbma_size = determine_bbma_size(size);
-    BUDDY_BLOCK_STICK* cur_stick = buddy_blocks[bbma_size - FIND_BBMA_OFFSET];
-    assert(cur_stick != (void*)0x00000000000e);
-    fprintf(file, "Size: %ld ", size);
-    long print_count = 0;
-    while (cur_stick != NULL)
-    {
-      // assert(0);
-      assert(print_count < 10000);
-      print_count++;
-      assert(cur_stick != (void*)0x00000000000e);
-      assert(cur_stick->next != (void*)0x00000000000e);
-      fprintf(file, "%p -> ", convert_index_to_addr(cur_stick));
-      cur_stick = cur_stick->next;
-    }
-    fprintf(file, "\n");
-}
+// void print_bbma_chain(size_t size) {
+//     BUDDY_BLOCK_SIZE bbma_size = determine_bbma_size(size);
+//     BUDDY_BLOCK_STICK* cur_stick = buddy_blocks[bbma_size - FIND_BBMA_OFFSET];
+//     assert(cur_stick != (void*)0x00000000000e);
+//     fprintf(file, "Size: %ld ", size);
+//     long print_count = 0;
+//     while (cur_stick != NULL)
+//     {
+//       // assert(0);
+//       assert(print_count < 10000);
+//       print_count++;
+//       assert(cur_stick != (void*)0x00000000000e);
+//       assert(cur_stick->next != (void*)0x00000000000e);
+//       fprintf(file, "%p -> ", convert_index_to_addr(cur_stick));
+//       cur_stick = cur_stick->next;
+//     }
+//     fprintf(file, "\n");
+// }
 
 void write_in_file(void* ptr, size_t size, bool is_alloc, int test_id) {
     char str[20];
@@ -65,7 +65,7 @@ void test_alloc_and_free(size_t size, int test_id) {
     strcat(origin_log, ".txt");
     file = fopen(origin_log, "a");
     fprintf(file, "Before Alloc\n");
-    print_bbma_chain(size);
+    // print_bbma_chain(size);
 
     void* ptr = pmm->alloc(size);
     if (ptr == NULL) {
@@ -80,7 +80,7 @@ void test_alloc_and_free(size_t size, int test_id) {
     mutex_lock(&mutex);
     file = fopen(origin_log, "a");
     fprintf(file, "Before Free\n");
-    print_bbma_chain(size);
+    // print_bbma_chain(size);
     fclose(file);
     pmm->free(ptr);
     write_in_file(ptr, size, false, test_id);
@@ -92,7 +92,7 @@ void once_slab_alloc(SLAB_SIZE size, char origin_log[], int test_id) {
     mutex_lock(&mutex);
     file = fopen(origin_log, "a");
     fprintf(file, "Before Alloc\n");
-    print_bbma_chain(real_size);
+    // print_bbma_chain(real_size);
 
     void* ptr = pmm->alloc(real_size);
     if (ptr == NULL) {
@@ -108,7 +108,7 @@ void once_bbma_alloc(BUDDY_BLOCK_SIZE size, char origin_log[], int test_id) {
     mutex_lock(&mutex);
     file = fopen(origin_log, "a");
     fprintf(file, "Before Alloc\n");
-    print_bbma_chain(real_size);
+    // print_bbma_chain(real_size);
 
     void* ptr = pmm->alloc(real_size);
     if (ptr == NULL) {
@@ -127,7 +127,7 @@ void once_bbma_free(void* ptr, BUDDY_BLOCK_SIZE size, char origin_log[], int tes
     mutex_lock(&mutex);
     file = fopen(origin_log, "a");
     fprintf(file, "Before Free\n");
-    print_bbma_chain(real_size);
+    // print_bbma_chain(real_size);
     fclose(file);
     pmm->free(ptr);
     write_in_file(ptr, real_size, false, test_id);
@@ -166,13 +166,13 @@ void test_multi_bbma_alloc_and_free(int test_id) {
     SLAB_SIZE size_2 = rand() % SLAB_NUM;
     SLAB_SIZE size_3 = rand() % SLAB_NUM;
 
-    once_bbma_alloc(size_1, origin_log, test_id);
-    once_bbma_alloc(size_2, origin_log, test_id);
-    once_bbma_alloc(size_3, origin_log, test_id);
+    // once_bbma_alloc(size_1, origin_log, test_id);
+    // once_bbma_alloc(size_2, origin_log, test_id);
+    // once_bbma_alloc(size_3, origin_log, test_id);
 
-    once_bbma_free(NULL, size_3, origin_log, test_id);
-    once_bbma_free(NULL, size_2, origin_log, test_id);
-    once_bbma_free(NULL, size_1, origin_log, test_id);
+    // once_bbma_free(NULL, size_3, origin_log, test_id);
+    // once_bbma_free(NULL, size_2, origin_log, test_id);
+    // once_bbma_free(NULL, size_1, origin_log, test_id);
 }
 
 static void entry_0(int tid) { 
@@ -268,7 +268,7 @@ void print_chain_in_file(int test_id, int size, bool is_end) {
     if (size > 2 *1024) {
       int log_size = determine_bbma_size(size);
       fprintf(file, "Size: %dKB\n", 1 << (log_size - 10));
-      print_bbma_chain(size);
+      // print_bbma_chain(size);
     } else {
       int log_size = determine_slab_size(size);
       fprintf(file, "Slab alloc: %dB\n", 1 << log_size);
@@ -293,8 +293,8 @@ static void entry_6(int tid) {
     int choose_type = rand() % 2;
     if (choose_type && end_index) {
       int index = rand() % end_index;
-      BUDDY_BLOCK_STICK* stick_addr =convert_addr_to_index(already_alloc[index]);
-      int size = 1 << stick_addr->alloc_spaces;
+      // BUDDY_BLOCK_STICK* stick_addr =convert_addr_to_index(already_alloc[index]);
+      // int size = 1 << stick_addr->alloc_spaces;
       // mutex_lock(&mutex);
       // print_chain_in_file(6, size, false);
       // mutex_unlock(&mutex);

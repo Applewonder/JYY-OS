@@ -14,7 +14,9 @@ void spin_lock(int *lk);
 
 void spin_unlock(int *lk);
 
-long align_to(long n, unsigned int align);
+bool try_lock(int *lk);
+
+unsigned long align_to(unsigned long n, unsigned long align);
 
 bool is_align_to(void *ptr, unsigned int align);
 
