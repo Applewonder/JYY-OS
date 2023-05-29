@@ -192,7 +192,7 @@ void bbma_init(void* start, void* end) {
     intptr_t cur_tree_addr = (intptr_t)start;
     begin_alloc_addr = start + mem_gap;
     intptr_t cur_mem_addr = (intptr_t)begin_alloc_addr;
-    int tree_cnt = 0;
+    int tree_cnt = 1;
     while (cur_mem_addr + mem_gap <= (intptr_t)end)
     {
         Tree tree = (Tree)cur_tree_addr;
@@ -202,7 +202,7 @@ void bbma_init(void* start, void* end) {
         cur_mem_addr += mem_gap;
         cur_tree_addr += tree_size;
     }
-    tree_num = tree_cnt;
+    tree_num = tree_cnt - 1;
     distribute_tree(tree_cnt);
 }
 
