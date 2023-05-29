@@ -11,6 +11,7 @@ Tree_Index cpu_trees[MAX_CPU][MAX_TREE];//for slab;
 spinlock_t tree_locks[MAX_TREE];
 static void* real_start_addr;
 static void* begin_alloc_addr;
+static int tree_num = 0;
 
 
 BUDDY_BLOCK_SIZE determine_bbma_size(size_t size) {
@@ -56,7 +57,7 @@ void* bbma_alloc(size_t size) {
 }
 
 Tree_Index find_available_tree(BUDDY_BLOCK_SIZE bbma_size) {
-    for (int i = 1; i <= MAX_TREE; i++)
+    for (int i = 1; i <= tree_num; i++)
     {
         if (try_lock(&tree_locks[i])) {
             if (*all_trees[i] < bbma_size) {
@@ -201,6 +202,7 @@ void bbma_init(void* start, void* end) {
         cur_mem_addr += mem_gap;
         cur_tree_addr += tree_size;
     }
+    tree_num = tree_cnt;
     distribute_tree(tree_cnt);
 }
 
