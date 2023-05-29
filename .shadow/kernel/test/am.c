@@ -41,10 +41,10 @@ void spin_unlock(int *lk) {
   atomic_xchg(lk, 0);
 }
 
-long align_to(long n, unsigned int align) {
+unsigned long align_to(unsigned long n, unsigned long align) {
     
-    long align_number = 1 << align;
-    long mask = align_number - 1;
+    unsigned long align_number = 1 << align;
+    unsigned long mask = align_number - 1;
     if ((align_number & mask) != 0) {
         printf("align: %x\n", align);
         printf("align_number: %lx\n", align_number);

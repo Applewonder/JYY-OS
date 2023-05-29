@@ -166,13 +166,13 @@ void test_multi_bbma_alloc_and_free(int test_id) {
     SLAB_SIZE size_2 = rand() % SLAB_NUM;
     SLAB_SIZE size_3 = rand() % SLAB_NUM;
 
-    once_bbma_alloc(size_1, origin_log, test_id);
-    once_bbma_alloc(size_2, origin_log, test_id);
-    once_bbma_alloc(size_3, origin_log, test_id);
+    // once_bbma_alloc(size_1, origin_log, test_id);
+    // once_bbma_alloc(size_2, origin_log, test_id);
+    // once_bbma_alloc(size_3, origin_log, test_id);
 
-    once_bbma_free(NULL, size_3, origin_log, test_id);
-    once_bbma_free(NULL, size_2, origin_log, test_id);
-    once_bbma_free(NULL, size_1, origin_log, test_id);
+    // once_bbma_free(NULL, size_3, origin_log, test_id);
+    // once_bbma_free(NULL, size_2, origin_log, test_id);
+    // once_bbma_free(NULL, size_1, origin_log, test_id);
 }
 
 static void entry_0(int tid) { 

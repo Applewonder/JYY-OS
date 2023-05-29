@@ -41,7 +41,7 @@ SLAB_SIZE determine_slab_size(size_t size);
 void* slab_alloc(int cpu_num, size_t size);
 void* find_the_free_space_in_slab(int cpu_num, SLAB_SIZE slab_size);
 void* request_a_slab_from_bbma(int cpu_num, SLAB_SIZE slab_size);
-void* find_the_avaliable_page_in_slab(int cpu_num, SLAB_SIZE slab_size);
+void* find_the_avaliable_page_in_slab_and_lock(int cpu_num, SLAB_SIZE slab_size);
 void* slab_align_to_4kb(void* ptr);
 void slab_free(void* ptr);
 void slab_init();
