@@ -358,11 +358,11 @@ static void entry_7(int tid) {
         fprintf(file, "Try to alloc Size: %d, remain capacity %d, round %d. Can not alloc\n", size, remain_cap, round_cnt);
         break;
         fclose(file);
-      } else {
-        already_alloc[end_index] = ptr;
-        end_index ++;
-      }
-    // }
+      // } else {
+      //   already_alloc[end_index] = ptr;
+      //   end_index ++;
+      // }
+    }
     round_cnt ++;
   }
 }
