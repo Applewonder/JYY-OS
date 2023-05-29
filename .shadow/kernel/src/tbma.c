@@ -100,6 +100,10 @@ void* get_the_free_space_in_tree(Tree tree, int index, BUDDY_BLOCK_SIZE cur_size
 
     void* ptr = NULL;
 
+    if (tree[index] < req_size) {
+        return NULL;
+    }
+
     if (cur_size == req_size) {
         if (tree[index] == req_size) {
             ptr = convert_index_to_addr(tree, index, cur_size);
@@ -108,10 +112,6 @@ void* get_the_free_space_in_tree(Tree tree, int index, BUDDY_BLOCK_SIZE cur_size
             return NULL;
         }
     } 
-
-    if (tree[index] < req_size) {
-        return NULL;
-    }
 
     int left_index = left_child(index);
     int right_index = right_child(index);
