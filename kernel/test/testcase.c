@@ -330,6 +330,39 @@ static void entry_6(int tid) {
   }
 }
 
+static void entry_7(int tid) { 
+  printf("entry_7\n");
+  int cur_cpu = tid - 1;
+  thread_id[cur_cpu] = pthread_self();
+//   printf("thread_id[%d]: %ld\n", cur_cpu, thread_id[cur_cpu]);
+
+  void* already_alloc[50000];
+  int end_index = 0;
+  int round_cnt = 0;
+  while (1) {
+    // printf("round_cnt: %d\n", round_cnt);
+    int choose_type = rand() % 2;
+    if (choose_type && end_index) {
+      int index = rand() % end_index;
+      pmm->free(already_alloc[index]);
+      already_alloc[index] = already_alloc[end_index - 1];
+      end_index --;
+    } else {
+      int size = 16 * 1024 * 1024;
+      void* ptr = pmm->alloc(size);
+      if (ptr == NULL) {
+        file = fopen("/home/appletree/JYY-OS/kernel/test/testlog7.txt", "a");
+        fprintf(file, "Try to alloc Size: %d. Can not alloc\n", size);
+        fclose(file);
+      } else {
+        already_alloc[end_index] = ptr;
+        end_index ++;
+      }
+    }
+    round_cnt ++;
+  }
+}
+
 void do_test_0() {
     printf("\033[32m Test 0 begin\n\033[0m");
     file = fopen("/home/appletree/JYY-OS/kernel/test/testlog0.txt", "w");
@@ -396,14 +429,14 @@ void do_test_5() {
     join();
 }
 
-void do_test_6() {
-    printf("\033[32m Test 6 begin\n\033[0m");
-    file = fopen("/home/appletree/JYY-OS/kernel/test/testlog6.txt", "w");
+void do_test_7() {
+    printf("\033[32m Test 7 begin\n\033[0m");
+    file = fopen("/home/appletree/JYY-OS/kernel/test/testlog7.txt", "w");
     fclose(file);
     pmm->init();
     printf("init done\n");
-    for (int i = 0; i < 2; i++){
-        create(entry_6);
+    for (int i = 0; i < CPU_NUM; i++){
+        create(entry_7);
     }
     join();
 }
