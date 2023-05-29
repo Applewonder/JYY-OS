@@ -10,6 +10,9 @@
 struct {
   void *start, *end;
 } heap;
+
+extern void* already_alloc[50000];
+
 #endif
 
 static void *kalloc(size_t size) {

@@ -5,7 +5,8 @@
 
 mutex_t mutex = MUTEX_INIT();
 FILE *file;
-
+void* already_alloc[50000];
+int remain_cap = 512 * 1024 * 1024;
 extern unsigned long thread_id[];
 // extern BUDDY_BLOCK_STICK* buddy_blocks[];
 
@@ -336,7 +337,7 @@ static void entry_7(int tid) {
   thread_id[cur_cpu] = pthread_self();
 //   printf("thread_id[%d]: %ld\n", cur_cpu, thread_id[cur_cpu]);
 
-  void* already_alloc[50000];
+
   int end_index = 0;
   int round_cnt = 0;
   while (1) {
@@ -348,11 +349,12 @@ static void entry_7(int tid) {
       already_alloc[index] = already_alloc[end_index - 1];
       end_index --;
     } else {
-      int size = (rand() % 16 * 1024 * 1024) + 1;
+      int size = 4 * 1024;
       void* ptr = pmm->alloc(size);
+      remain_cap -= size;
       if (ptr == NULL) {
         file = fopen("/home/appletree/JYY-OS/kernel/test/testlog7.txt", "a");
-        fprintf(file, "Try to alloc Size: %d. Can not alloc\n", size);
+        fprintf(file, "Try to alloc Size: %d, remain capacity %d, Can not alloc\n", size, remain_cap);
         fclose(file);
       } else {
         already_alloc[end_index] = ptr;
