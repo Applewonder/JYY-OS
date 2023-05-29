@@ -11,7 +11,7 @@ Tree_Index cpu_trees[MAX_CPU][MAX_TREE];//for slab;
 spinlock_t tree_locks[MAX_TREE];
 static void* real_start_addr;
 static void* begin_alloc_addr;
-static int tree_num = 0;
+int tree_num = 0;
 
 
 BUDDY_BLOCK_SIZE determine_bbma_size(size_t size) {
