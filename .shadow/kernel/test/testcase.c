@@ -5,7 +5,7 @@
 
 mutex_t mutex = MUTEX_INIT();
 FILE *file;
-void* already_alloc[50000];
+void* already_alloc[500000];
 int remain_cap = 512 * 1024 * 1024;
 extern unsigned long thread_id[];
 // extern BUDDY_BLOCK_STICK* buddy_blocks[];
@@ -343,13 +343,13 @@ static void entry_7(int tid) {
   while (1) {
     // printf("round_cnt: %d\n", round_cnt);
     int choose_type = rand() % 2;
-    // if (choose_type && end_index) {
-    //   int index = rand() % end_index;
-    //   pmm->free(already_alloc[index]);
-    //   remain_cap += 4096;
-    //   already_alloc[index] = already_alloc[end_index - 1];
-    //   end_index --;
-    // } else {
+    if (choose_type && end_index) {
+      int index = rand() % end_index;
+      pmm->free(already_alloc[index]);
+      remain_cap += 4096;
+      already_alloc[index] = already_alloc[end_index - 1];
+      end_index --;
+    } else {
       int size = 4 * 1024;
       void* ptr = pmm->alloc(size);
       remain_cap -= size;
@@ -358,10 +358,10 @@ static void entry_7(int tid) {
         fprintf(file, "Try to alloc Size: %d, remain capacity %d, round %d. Can not alloc\n", size, remain_cap, round_cnt);
         break;
         fclose(file);
-      // } else {
-      //   already_alloc[end_index] = ptr;
-      //   end_index ++;
-      // }
+      } else {
+        already_alloc[end_index] = ptr;
+        end_index ++;
+      }
     }
     round_cnt ++;
   }
