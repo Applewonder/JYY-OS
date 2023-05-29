@@ -346,6 +346,7 @@ static void entry_7(int tid) {
     if (choose_type && end_index) {
       int index = rand() % end_index;
       pmm->free(already_alloc[index]);
+      remain_cap += 4096;
       already_alloc[index] = already_alloc[end_index - 1];
       end_index --;
     } else {
@@ -355,6 +356,7 @@ static void entry_7(int tid) {
       if (ptr == NULL) {
         file = fopen("/home/appletree/JYY-OS/kernel/test/testlog7.txt", "a");
         fprintf(file, "Try to alloc Size: %d, remain capacity %d, Can not alloc\n", size, remain_cap);
+        break;
         fclose(file);
       } else {
         already_alloc[end_index] = ptr;
