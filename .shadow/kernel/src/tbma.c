@@ -232,8 +232,13 @@ void free_tree_ptr(Tree tree, int index, void* ptr, BUDDY_BLOCK_SIZE cur_size) {
     } else {
         free_tree_ptr(tree, right_child(index), ptr, cur_size - 1);
     }
-
-    tree[index] = tree[left_child(index)] >= tree[right_child(index)] ? tree[left_child(index)] : tree[right_child(index)];
+    int left_index = left_child(index);
+    int right_index = right_child(index);
+    if (tree[left_index] == cur_size - 1 && tree[right_index] == cur_size - 1) {
+        tree[index] = cur_size;
+    } else {
+        tree[index] = tree[left_index] >= tree[right_index] ? tree[left_index] : tree[right_index];
+    } 
     assert(tree[index] != GET_DEPARTED);
     assert(tree[index] != FULL_USED);
     return;

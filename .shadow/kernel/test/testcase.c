@@ -425,16 +425,16 @@ static void entry_7(int tid) {
 
   int end_index = 0;
   int round_cnt = 0;
-  // while (1) {
+  while (1) {
     // printf("round_cnt: %d\n", round_cnt);
     int choose_type = rand() % 2;
-    // if (choose_type && end_index) {
-    //   int index = rand() % end_index;
-    //   pmm->free(already_alloc[index]);
-    //   remain_cap += 4096;
-    //   already_alloc[index] = already_alloc[end_index - 1];
-    //   end_index --;
-    // } else {
+    if (choose_type && end_index) {
+      int index = rand() % end_index;
+      pmm->free(already_alloc[index]);
+      remain_cap += 4096;
+      already_alloc[index] = already_alloc[end_index - 1];
+      end_index --;
+    } else {
       int size = 4 * 1024;
       void* ptr = pmm->alloc(size);
       remain_cap -= size;
@@ -448,10 +448,10 @@ static void entry_7(int tid) {
         already_alloc[end_index] = ptr;
         end_index ++;
       }
-    // }
-    print_tree_status();
+    }
+    // print_tree_status();
     round_cnt ++;
-  // }
+  }
 }
 
 void do_test_0() {
