@@ -4,17 +4,25 @@
 #include <slab.h>
 #include <string.h>
 
-#define HEAP_SIZE 128 * 1024 * 1024
+#define HEAP_SIZE 512 * 1024 * 1024
 
 #ifdef TEST
 struct {
   void *start, *end;
 } heap;
+
+extern void* already_alloc[50000];
+
 #endif
 
 static void *kalloc(size_t size) {
   int cpu_num = cpu_current();
+#ifndef TEST
   return slab_alloc(cpu_num, size);
+#else
+  void* ptr = slab_alloc(cpu_num, size);
+  return ptr;
+#endif
 }
 
 static void kfree(void *ptr) {

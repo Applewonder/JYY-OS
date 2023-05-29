@@ -11,7 +11,7 @@ Tree_Index cpu_trees[MAX_CPU][MAX_TREE];//for slab;
 spinlock_t tree_locks[MAX_TREE];
 static void* real_start_addr;
 static void* begin_alloc_addr;
-static int tree_num = 0;
+int tree_num = 0;
 
 
 BUDDY_BLOCK_SIZE determine_bbma_size(size_t size) {
@@ -96,7 +96,7 @@ void* get_the_free_space_in_tree(Tree tree, int index, BUDDY_BLOCK_SIZE cur_size
     assert(req_size != BBMA_REFUSE);
     assert(cur_size >= req_size);
     assert(tree[index] <= cur_size);
-    // assert(tree[index] >= req_size);
+    assert(tree[index] >= req_size);
 
     void* ptr = NULL;
 
@@ -232,8 +232,13 @@ void free_tree_ptr(Tree tree, int index, void* ptr, BUDDY_BLOCK_SIZE cur_size) {
     } else {
         free_tree_ptr(tree, right_child(index), ptr, cur_size - 1);
     }
-
-    tree[index] = tree[left_child(index)] >= tree[right_child(index)] ? tree[left_child(index)] : tree[right_child(index)];
+    int left_index = left_child(index);
+    int right_index = right_child(index);
+    if (tree[left_index] == cur_size - 1 && tree[right_index] == cur_size - 1) {
+        tree[index] = cur_size;
+    } else {
+        tree[index] = tree[left_index] >= tree[right_index] ? tree[left_index] : tree[right_index];
+    } 
     assert(tree[index] != GET_DEPARTED);
     assert(tree[index] != FULL_USED);
     return;
