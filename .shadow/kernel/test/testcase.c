@@ -80,7 +80,7 @@ void test_alloc_and_free(size_t size, int test_id) {
     mutex_lock(&mutex);
     file = fopen(origin_log, "a");
     fprintf(file, "Before Free\n");
-    print_bbma_chain(size);
+    // print_bbma_chain(size);
     fclose(file);
     pmm->free(ptr);
     write_in_file(ptr, size, false, test_id);
@@ -92,7 +92,7 @@ void once_slab_alloc(SLAB_SIZE size, char origin_log[], int test_id) {
     mutex_lock(&mutex);
     file = fopen(origin_log, "a");
     fprintf(file, "Before Alloc\n");
-    print_bbma_chain(real_size);
+    // print_bbma_chain(real_size);
 
     void* ptr = pmm->alloc(real_size);
     if (ptr == NULL) {
@@ -108,7 +108,7 @@ void once_bbma_alloc(BUDDY_BLOCK_SIZE size, char origin_log[], int test_id) {
     mutex_lock(&mutex);
     file = fopen(origin_log, "a");
     fprintf(file, "Before Alloc\n");
-    print_bbma_chain(real_size);
+    // print_bbma_chain(real_size);
 
     void* ptr = pmm->alloc(real_size);
     if (ptr == NULL) {
@@ -127,7 +127,7 @@ void once_bbma_free(void* ptr, BUDDY_BLOCK_SIZE size, char origin_log[], int tes
     mutex_lock(&mutex);
     file = fopen(origin_log, "a");
     fprintf(file, "Before Free\n");
-    print_bbma_chain(real_size);
+    // print_bbma_chain(real_size);
     fclose(file);
     pmm->free(ptr);
     write_in_file(ptr, real_size, false, test_id);
