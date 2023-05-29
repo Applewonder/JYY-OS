@@ -18,7 +18,7 @@ inline bool try_lock(int *lk) {
   return !atomic_xchg(lk, 1);
 }
 
-long align_to(unsigned long n, unsigned long align) {
+unsigned long align_to(unsigned long n, unsigned long align) {
     
     unsigned long align_number = 1 << align;
     unsigned long mask = align_number - 1;

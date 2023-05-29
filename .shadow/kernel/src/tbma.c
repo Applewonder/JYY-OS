@@ -1,6 +1,6 @@
 #include "slab.h"
 #include "threads.h"
-#include <assert.h>
+// #include <assert.h>
 #include <cbma.h>
 #include <stdio.h>
 
@@ -56,8 +56,7 @@ void* bbma_alloc(size_t size) {
 }
 
 Tree_Index find_available_tree(BUDDY_BLOCK_SIZE bbma_size) {
-    int cpu_id = cpu_current();
-    for (Tree_Index i = 1; i <= MAX_TREE; i++)
+    for (int i = 1; i <= MAX_TREE; i++)
     {
         if (try_lock(&tree_locks[i])) {
             if (*all_trees[i] < bbma_size) {
@@ -67,7 +66,7 @@ Tree_Index find_available_tree(BUDDY_BLOCK_SIZE bbma_size) {
             return i;
         }
     }
-    return NULL;
+    return -1;
 }
 
 inline int left_child(int index) {
@@ -146,26 +145,22 @@ void* find_the_free_space_in_bbma_system(BUDDY_BLOCK_SIZE bbma_size) {
 }
 
 void initialize_tree(Tree tree) {
-    int cur_start = 0;
-    int next_start = 1;
     int cur_stand = 0;
     int next_stand = 1;
     BUDDY_BLOCK_SIZE cur_size = S_16M;
     for (int i = 0; i < 13; i++)
     {
-        for (int i = cur_start; i < next_start; i++)
+        cur_stand = calculate_addr_helper[i];
+        if (i == 12) {
+            next_stand = 8192;
+        } else {
+            next_stand = calculate_addr_helper[i + 1];
+        }
+        for (int i = cur_stand; i < next_stand; i++)
         {
             tree[i] = cur_size;
         }
         cur_size --;
-        cur_start ++;
-        cur_stand = calculate_addr_helper[cur_start];
-        if (cur_start == 12) {
-            next_stand = 8192;
-        } else {
-            next_start ++;
-            next_stand = calculate_addr_helper[next_start];
-        }
     }
 }
 

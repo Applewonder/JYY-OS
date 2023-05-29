@@ -16,7 +16,7 @@ typedef struct buddy_block_ BUDDY_BLOCK_STICK;
 typedef enum BLOCK_SIZE_ BUDDY_BLOCK_SIZE;
 typedef char Tree_node;
 typedef char* Tree;
-typedef char Tree_Index;
+typedef int Tree_Index;
 
 enum BLOCK_SIZE_{
     S_4K=12,
