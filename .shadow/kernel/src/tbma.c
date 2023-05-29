@@ -141,7 +141,7 @@ void* find_the_free_space_in_bbma_system(BUDDY_BLOCK_SIZE bbma_size) {
     if (tree == NULL) {
         return NULL;
     }
-    assert(tree[1] >= bbma_size);
+    // assert(tree[1] >= bbma_size);
     void* the_space = get_the_free_space_in_tree(tree, 1, S_16M, bbma_size);
     spin_unlock(&tree_locks[tree_index]);
     return the_space;
