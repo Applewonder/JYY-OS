@@ -9,7 +9,7 @@
 #include <stdbool.h>
 #include "am.h"
 
-typedef unsigned long intptr_t;
+// typedef unsigned long uintptr_t;
 
 #endif
 
