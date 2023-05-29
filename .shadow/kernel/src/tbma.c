@@ -211,7 +211,7 @@ Tree_Index determine_which_tree(void* ptr) {
     assert(ptr > begin_alloc_addr);
     intptr_t mask = (1 << S_16M) - 1;
     intptr_t mem_begin = (intptr_t)ptr & ~mask;
-    return ((mem_begin - (intptr_t)begin_alloc_addr) >> S_16M); 
+    return ((mem_begin - (intptr_t)begin_alloc_addr) >> S_16M) + 1; 
 }
 
 void free_tree_ptr(Tree tree, int index, void* ptr, BUDDY_BLOCK_SIZE cur_size) {
