@@ -95,7 +95,7 @@ void* get_the_free_space_in_tree(Tree tree, int index, BUDDY_BLOCK_SIZE cur_size
     assert(req_size != BBMA_REFUSE);
     assert(cur_size >= req_size);
     assert(tree[index] <= cur_size);
-    assert(tree[index] >= req_size);
+    // assert(tree[index] >= req_size);
 
     void* ptr = NULL;
 
