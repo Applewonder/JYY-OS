@@ -136,6 +136,7 @@ void* get_the_free_space_in_tree(Tree tree, int index, BUDDY_BLOCK_SIZE cur_size
 void* find_the_free_space_in_bbma_system(BUDDY_BLOCK_SIZE bbma_size) {
     assert(bbma_size != BBMA_REFUSE);
     Tree_Index tree_index = find_available_tree(bbma_size);
+    assert(tree_index <= tree_num);
     Tree tree = all_trees[tree_index];
     if (tree == NULL) {
         return NULL;
