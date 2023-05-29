@@ -86,7 +86,7 @@ void* convert_index_to_addr(Tree tree, int index, BUDDY_BLOCK_SIZE cur_size) {
     intptr_t mem_offset = tree_gap << S_16M;
     intptr_t real_mem_start = (intptr_t)begin_alloc_addr + mem_offset;
 
-    intptr_t node_offset = index - calculate_addr_helper[cur_size - FIND_ADDR_OFFSET];
+    intptr_t node_offset = index - calculate_addr_helper[S_16M- cur_size];
     intptr_t mem_node_offset = node_offset << cur_size;
 
     return (void*)(real_mem_start + mem_node_offset);
