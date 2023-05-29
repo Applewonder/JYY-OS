@@ -30,7 +30,7 @@ void* slab_alloc(int cpu_num, size_t size) {
     }
     SLAB_SIZE slab_size = determine_slab_size(size);
     if (slab_size == SLAB_REFUSE) {
-        return bbma_alloc(size, false);
+        return bbma_alloc(size);
     }
     void* possible_slab_addr = find_the_free_space_in_slab(cpu_num, slab_size);
     if (possible_slab_addr == NULL) {
@@ -96,7 +96,7 @@ long align_to_slab(void* addr, SLAB_SIZE slab_size) {
 
 void* request_a_slab_from_bbma(int cpu_num, SLAB_SIZE slab_size) {
     // request a slab from bbma
-    void* slab_addr = bbma_alloc(SLAB_REQUEST_SPACE, true);
+    void* slab_addr = bbma_alloc(SLAB_REQUEST_SPACE);
     if (slab_addr == NULL) {
         return NULL;
     }

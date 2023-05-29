@@ -33,6 +33,10 @@ void spin_lock(int *lk) {
   }
 }
 
+inline bool try_lock(int *lk) {
+  return !atomic_xchg(lk, 1);
+}
+
 void spin_unlock(int *lk) {
   atomic_xchg(lk, 0);
 }

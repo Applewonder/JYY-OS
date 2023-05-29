@@ -14,10 +14,14 @@ void spin_unlock(int *lk) {
   atomic_xchg(lk, 0);
 }
 
-long align_to(long n, unsigned int align) {
+inline bool try_lock(int *lk) {
+  return !atomic_xchg(lk, 1);
+}
+
+long align_to(unsigned long n, unsigned long align) {
     
-    unsigned int align_number = 1 << align;
-    unsigned int mask = align_number - 1;
+    unsigned long align_number = 1 << align;
+    unsigned long mask = align_number - 1;
     if ((align_number & mask) != 0) {
         printf("align: %x\n", align);
         printf("align_number: %x\n", align_number);
@@ -32,8 +36,8 @@ long align_to(long n, unsigned int align) {
 }
 
 bool is_align_to(void *ptr, unsigned int align) {
-  unsigned int align_number = 1 << align;
-  unsigned int mask = align_number - 1;
+  unsigned long align_number = 1 << align;
+  unsigned long mask = align_number - 1;
   if ((align_number & mask) != 0) {
     panic("align must be power of 2");
   }

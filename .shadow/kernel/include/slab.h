@@ -11,6 +11,10 @@
 
 typedef enum SLAB_SIZE_ SLAB_SIZE;
 typedef struct SLAB_STICK_ SLAB_STICK;
+
+//TODO: local and tread
+//TODO: try_lock
+
 enum SLAB_SIZE_{
     S_32B=5,
     S_64B,
