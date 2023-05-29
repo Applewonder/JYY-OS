@@ -65,7 +65,7 @@ void test_alloc_and_free(size_t size, int test_id) {
     strcat(origin_log, ".txt");
     file = fopen(origin_log, "a");
     fprintf(file, "Before Alloc\n");
-    print_bbma_chain(size);
+    // print_bbma_chain(size);
 
     void* ptr = pmm->alloc(size);
     if (ptr == NULL) {
@@ -293,8 +293,8 @@ static void entry_6(int tid) {
     int choose_type = rand() % 2;
     if (choose_type && end_index) {
       int index = rand() % end_index;
-      BUDDY_BLOCK_STICK* stick_addr =convert_addr_to_index(already_alloc[index]);
-      int size = 1 << stick_addr->alloc_spaces;
+      // BUDDY_BLOCK_STICK* stick_addr =convert_addr_to_index(already_alloc[index]);
+      // int size = 1 << stick_addr->alloc_spaces;
       // mutex_lock(&mutex);
       // print_chain_in_file(6, size, false);
       // mutex_unlock(&mutex);
