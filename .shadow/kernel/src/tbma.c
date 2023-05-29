@@ -7,6 +7,9 @@
 int calculate_addr_helper[] = {1, 2, 4, 8, 16, 32, 64, 128, 256, 512,
                                1024, 2048, 4096};
 Tree all_trees[MAX_TREE + 1];//tree index begin from 1
+#ifdef TEST
+    int all_trees_cnt[MAX_TREE + 1];
+#endif
 Tree_Index cpu_trees[MAX_CPU][MAX_TREE];//for slab;
 spinlock_t tree_locks[MAX_TREE];
 static void* real_start_addr;

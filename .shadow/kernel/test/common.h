@@ -10,6 +10,7 @@
 #include "am.h"
 
 // typedef unsigned long uintptr_t;
+#define
 
 #endif
 
