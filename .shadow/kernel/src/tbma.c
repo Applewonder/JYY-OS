@@ -4,8 +4,8 @@
 #include <cbma.h>
 #include <stdio.h>
 
-int calculate_addr_helper[] = {0, 1, 3, 7, 15, 31, 63, 127, 255, 511,
-                               1023, 2047, 4095};
+int calculate_addr_helper[] = {1, 2, 4, 8, 16, 32, 64, 128, 256, 512,
+                               1024, 2048, 4096};
 Tree all_trees[MAX_TREE + 1];//tree index begin from 1
 Tree_Index cpu_trees[MAX_CPU][MAX_TREE];//for slab;
 spinlock_t tree_locks[MAX_TREE];
@@ -71,11 +71,11 @@ Tree_Index find_available_tree(BUDDY_BLOCK_SIZE bbma_size) {
 }
 
 inline int left_child(int index) {
-    return index * 2 + 1;
+    return index * 2;
 }
 
 inline int right_child(int index) {
-    return index * 2 + 2;
+    return index * 2;
 }
 
 void* convert_index_to_addr(Tree tree, int index, BUDDY_BLOCK_SIZE cur_size) {
@@ -108,6 +108,7 @@ void* get_the_free_space_in_tree(Tree tree, int index, BUDDY_BLOCK_SIZE cur_size
         if (tree[index] == req_size) {
             ptr = convert_index_to_addr(tree, index, cur_size);
             tree[index] = FULL_USED;
+            return ptr;
         } else {
             return NULL;
         }
