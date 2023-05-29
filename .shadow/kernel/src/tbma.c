@@ -79,7 +79,7 @@ inline int right_child(int index) {
 }
 
 void* convert_index_to_addr(Tree tree, int index, BUDDY_BLOCK_SIZE cur_size) {
-    assert(index < MAX_NODE);
+    assert(index <= MAX_NODE);
     assert(cur_size != BBMA_REFUSE);
     intptr_t tree_offset = (intptr_t)tree - (intptr_t)real_start_addr;
     int tree_gap = tree_offset / (sizeof(Tree_node) * MAX_NODE);
@@ -215,7 +215,7 @@ Tree_Index determine_which_tree(void* ptr) {
 }
 
 void free_tree_ptr(Tree tree, int index, void* ptr, BUDDY_BLOCK_SIZE cur_size) {
-    assert(index < MAX_NODE);
+    assert(index <= MAX_NODE);
     assert(tree[index] <= cur_size);
 
     void* cur_addr = convert_index_to_addr(tree, index, cur_size);
