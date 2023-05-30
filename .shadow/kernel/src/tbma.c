@@ -107,13 +107,13 @@ inline int right_child(int index) {
 void* convert_index_to_addr(Tree tree, int index, BUDDY_BLOCK_SIZE cur_size) {
     assert(index <= MAX_NODE);
     assert(cur_size != BBMA_REFUSE);
-    intptr_t tree_offset = (intptr_t)tree - (intptr_t)real_start_addr;
+    uintptr_t tree_offset = (uintptr_t)tree - (uintptr_t)real_start_addr;
     int tree_gap = tree_offset / (sizeof(Tree_node) * MAX_NODE);
-    intptr_t mem_offset = tree_gap << S_16M;
-    intptr_t real_mem_start = (intptr_t)begin_alloc_addr + mem_offset;
+    uintptr_t mem_offset = tree_gap << S_16M;
+    uintptr_t real_mem_start = (uintptr_t)begin_alloc_addr + mem_offset;
 
-    intptr_t node_offset = index - calculate_addr_helper[S_16M- cur_size];
-    intptr_t mem_node_offset = node_offset << cur_size;
+    uintptr_t node_offset = index - calculate_addr_helper[S_16M- cur_size];
+    uintptr_t mem_node_offset = node_offset << cur_size;
 
     return (void*)(real_mem_start + mem_node_offset);
 }
@@ -236,13 +236,13 @@ void distribute_tree(int tree_count) {
 
 void bbma_init(void* start, void* end) {
     real_start_addr = start;
-    intptr_t tree_size = sizeof(Tree_node) * MAX_NODE;
-    intptr_t mem_gap = 1 << S_16M;
-    intptr_t cur_tree_addr = (intptr_t)start;
+    uintptr_t tree_size = sizeof(Tree_node) * MAX_NODE;
+    uintptr_t mem_gap = 1 << S_16M;
+    uintptr_t cur_tree_addr = (uintptr_t)start;
     begin_alloc_addr = start + mem_gap;
-    intptr_t cur_mem_addr = (intptr_t)begin_alloc_addr;
+    uintptr_t cur_mem_addr = (uintptr_t)begin_alloc_addr;
     int tree_cnt = 1;
-    while (cur_mem_addr + mem_gap <= (intptr_t)end)
+    while (cur_mem_addr + mem_gap <= (uintptr_t)end)
     {
         Tree tree = (Tree)cur_tree_addr;
         all_trees[tree_cnt] = tree;
@@ -263,9 +263,9 @@ void bbma_init(void* start, void* end) {
 
 Tree_Index determine_which_tree(void* ptr) {
     assert(ptr > begin_alloc_addr);
-    intptr_t mask = (1 << S_16M) - 1;
-    intptr_t mem_begin = (intptr_t)ptr & ~mask;
-    return ((mem_begin - (intptr_t)begin_alloc_addr) >> S_16M) + 1; 
+    uintptr_t mask = (1 << S_16M) - 1;
+    uintptr_t mem_begin = (uintptr_t)ptr & ~mask;
+    return ((mem_begin - (uintptr_t)begin_alloc_addr) >> S_16M) + 1; 
 }
 
 void free_tree_ptr(Tree tree, int index, void* ptr, BUDDY_BLOCK_SIZE cur_size) {
