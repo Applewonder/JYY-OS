@@ -51,16 +51,24 @@ BUDDY_BLOCK_SIZE determine_bbma_size(size_t size) {
 }
 
 void* bbma_alloc(size_t size) {
-    ENTER_FUNC;
+#ifdef TEST
+    ENTER_FUNC();
+#endif
     BUDDY_BLOCK_SIZE bbma_size = determine_bbma_size(size);
     if (bbma_size == BBMA_REFUSE) {
         return NULL;
     }
     void* ptr = find_the_free_space_in_bbma_system(bbma_size);
+#ifdef TEST
+    LEAVE_FUNC();
+#endif
     return ptr;
 }
 
 Tree_Index find_available_tree(BUDDY_BLOCK_SIZE bbma_size) {
+#ifdef TEST
+    ENTER_FUNC();
+#endif
     for (int i = 1; i <= tree_num; i++)
     {
         if (try_lock(&tree_locks[i])) {
@@ -71,6 +79,9 @@ Tree_Index find_available_tree(BUDDY_BLOCK_SIZE bbma_size) {
             return i;
         }
     }
+#ifdef TEST
+    LEAVE_FUNC();
+#endif
     return -1;
 }
 
@@ -138,8 +149,14 @@ void* get_the_free_space_in_tree(Tree tree, int index, BUDDY_BLOCK_SIZE cur_size
 }
 
 void* find_the_free_space_in_bbma_system(BUDDY_BLOCK_SIZE bbma_size) {
+#ifdef TEST
+    ENTER_FUNC();
+#endif
     assert(bbma_size != BBMA_REFUSE);
     Tree_Index tree_index = find_available_tree(bbma_size);
+    if (tree_index == -1) {
+        return NULL;
+    }
     assert(tree_index <= tree_num);
     Tree tree = all_trees[tree_index];
     if (tree == NULL) {
@@ -147,7 +164,13 @@ void* find_the_free_space_in_bbma_system(BUDDY_BLOCK_SIZE bbma_size) {
     }
     assert(tree[1] >= bbma_size);
     void* the_space = get_the_free_space_in_tree(tree, 1, S_16M, bbma_size);
+#ifdef TEST
+    SPIN_UNLOCK();
+#endif
     spin_unlock(&tree_locks[tree_index]);
+#ifdef TEST
+    LEAVE_FUNC();
+#endif
     return the_space;
 }
 
