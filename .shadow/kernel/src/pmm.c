@@ -10,9 +10,6 @@
 struct {
   void *start, *end;
 } heap;
-extern Tree all_trees[];
-extern void* already_alloc[50000];
-extern int tree_num;
 #endif
 
 static void *kalloc(size_t size) {

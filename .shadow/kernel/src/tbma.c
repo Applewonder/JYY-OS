@@ -72,7 +72,13 @@ Tree_Index find_available_tree(BUDDY_BLOCK_SIZE bbma_size) {
     for (int i = 1; i <= tree_num; i++)
     {
         if (try_lock(&tree_locks[i])) {
+#ifdef TEST
+            SPIN_LOCK();
+#endif
             if (all_trees[i][1] < bbma_size) {
+#ifdef TEST
+                SPIN_UNLOCK();
+#endif
                 spin_unlock(&tree_locks[i]);
                 continue;
             }
@@ -108,6 +114,9 @@ void* convert_index_to_addr(Tree tree, int index, BUDDY_BLOCK_SIZE cur_size) {
 }
 
 void* get_the_free_space_in_tree(Tree tree, int index, BUDDY_BLOCK_SIZE cur_size, BUDDY_BLOCK_SIZE req_size) {
+#ifdef TEST
+            ENTER_FUNC();
+#endif
     assert(req_size != BBMA_REFUSE);
     assert(cur_size >= req_size);
     assert(tree[index] <= cur_size);
@@ -144,7 +153,9 @@ void* get_the_free_space_in_tree(Tree tree, int index, BUDDY_BLOCK_SIZE cur_size
             tree[index] = tree[left_index] >= tree[right_index] ? tree[left_index] : tree[right_index];
         }
     }
-
+#ifdef TEST
+            LEAVE_FUNC();
+#endif
     return ptr;
 }
 
