@@ -51,6 +51,7 @@ BUDDY_BLOCK_SIZE determine_bbma_size(size_t size) {
 }
 
 void* bbma_alloc(size_t size) {
+    ENTER_FUNC;
     BUDDY_BLOCK_SIZE bbma_size = determine_bbma_size(size);
     if (bbma_size == BBMA_REFUSE) {
         return NULL;
