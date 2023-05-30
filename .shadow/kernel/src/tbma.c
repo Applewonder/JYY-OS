@@ -255,7 +255,7 @@ void bbma_init(void* start, void* end) {
 #ifdef TEST
     for (int i = 1; i <= tree_num; i++)
     {
-        mutex_tree_locks[i] = MUTEX_INIT();
+        pthread_mutex_init(&mutex_tree_locks[i], NULL);
     }
 #endif 
     distribute_tree(tree_cnt);
