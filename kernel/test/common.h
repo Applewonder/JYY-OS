@@ -10,6 +10,21 @@
 #include "am.h"
 
 // typedef unsigned long uintptr_t;
+#ifdef TEST
+    #define ENTER_FUNC(format, ...) \
+        printf("\033[32mTHREAD: #%d, ENTER FUNCTION: %s, LINE %d, FILE: %s\n\033[0m"format, cpu_current(), __func__, __LINE__, __FILE__, ##__VA_ARGS__)
+    #define SPIN_LOCK(format, ...) \
+        printf("\033[34mTHREAD: #%d, LOCK IN FUNCTION: %s, LINE %d, FILE: %s\n\033[0m"format, cpu_current(), __func__, __LINE__, __FILE__, ##__VA_ARGS__)
+    #define LEAVE_FUNC(format, ...) \
+        printf("\033[32mTHREAD: #%d, LEAVE FUNCTION: %s, LINE %d, FILE: %s\n\033[0m"format, cpu_current(), __func__, __LINE__, __FILE__, ##__VA_ARGS__)
+    #define SPIN_UNLOCK(format, ...) \
+        printf("\033[34mTHREAD: #%d, UNLOCK IN FUNCTION: %s, LINE %d, FILE: %s\n\033[0m"format, cpu_current(), __func__, __LINE__, __FILE__, ##__VA_ARGS__)
+#else
+    #define ENTER_FUNC(format, ...)
+    #define SPIN_LOCK(format, ...)
+    #define LEAVE_FUNC(format, ...)
+    #define SPIN_UNLOCK(format, ...)
+#endif
 
 #endif
 

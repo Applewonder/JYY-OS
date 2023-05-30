@@ -426,15 +426,15 @@ static void entry_7(int tid) {
   int end_index = 0;
   int round_cnt = 0;
   while (1) {
-    // printf("round_cnt: %d\n", round_cnt);
-    int choose_type = rand() % 2;
-    if (choose_type && end_index) {
-      int index = rand() % end_index;
-      pmm->free(already_alloc[index]);
-      remain_cap += 4096;
-      already_alloc[index] = already_alloc[end_index - 1];
-      end_index --;
-    } else {
+  //   // printf("round_cnt: %d\n", round_cnt);
+  //   int choose_type = rand() % 2;
+  //   if (choose_type && end_index) {
+  //     int index = rand() % end_index;
+  //     pmm->free(already_alloc[index]);
+  //     remain_cap += 4096;
+  //     already_alloc[index] = already_alloc[end_index - 1];
+  //     end_index --;
+  //   } else {
       int size = 4 * 1024;
       void* ptr = pmm->alloc(size);
       remain_cap -= size;
@@ -442,13 +442,15 @@ static void entry_7(int tid) {
         file = fopen("/home/appletree/JYY-OS/kernel/test/testlog7.txt", "a");
         fprintf(file, "Try to alloc Size: %d, remain capacity %d, round %d. Can not alloc\n", size, remain_cap, round_cnt);
         fclose(file);
-        print_tree_status();
-        // break;
+        if (cpu_current() == 0) {
+          print_tree_status();
+        }
+        break;
       } else {
         already_alloc[end_index] = ptr;
         end_index ++;
       }
-    }
+    // }
     // print_tree_status();
     round_cnt ++;
   }

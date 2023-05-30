@@ -10,9 +10,6 @@
 struct {
   void *start, *end;
 } heap;
-
-extern void* already_alloc[50000];
-
 #endif
 
 static void *kalloc(size_t size) {
@@ -53,6 +50,12 @@ static void pmm_init() {
   printf("memset done\n");
   void* align_begin_address = (void*)align_to((uintptr_t)heap.start, 24);
   bbma_init(align_begin_address, heap.end);
+  for (int i = 1; i <= tree_num; i++)
+  {
+    char* tree_node = align_begin_address + (i - 1) * (sizeof(Tree_node) * 8192) + 1;
+    assert(*tree_node == S_16M);
+  }
+  
   printf("bbma_init done\n");
   slab_init();
   printf("slab_init done\n");
