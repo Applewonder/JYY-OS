@@ -10,7 +10,7 @@
 #include "am.h"
 
 // typedef unsigned long uintptr_t;
-#ifdef __DEBUG
+#ifdef TEST
     #define ENTER_FUNC(format, ...) \
         printf("\033[32mTHREAD: #%d, ENTER FUNCTION: %s, LINE %d, FILE: %s\n\033[0m"format, cpu_current(), __func__, __LINE__, __FILE__, ##__VA_ARGS__)
     #define SPIN_LOCK(format, ...) \
