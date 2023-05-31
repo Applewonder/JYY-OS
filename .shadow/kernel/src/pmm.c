@@ -4,7 +4,7 @@
 #include <slab.h>
 #include <string.h>
 
-#define HEAP_SIZE 512 * 1024 * 1024
+#define HEAP_SIZE 128 * 1024 * 1024
 
 #ifdef TEST
 struct {

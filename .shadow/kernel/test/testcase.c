@@ -6,7 +6,7 @@
 mutex_t mutex = MUTEX_INIT();
 FILE *file;
 void* already_alloc[500000];
-int remain_cap = 512 * 1024 * 1024;
+int remain_cap = 128 * 1024 * 1024;
 extern unsigned long thread_id[];
 extern int tree_num;
 extern Tree all_trees[];
@@ -447,11 +447,11 @@ static void entry_7(int tid) {
         fclose(file);
         
         break;
-      } else {
-        already_alloc[end_index] = ptr;
-        end_index ++;
-      }
-    // }
+      // } else {
+      //   already_alloc[end_index] = ptr;
+      //   end_index ++;
+      // }
+    }
     // print_tree_status();
     round_cnt ++;
   }
