@@ -37,12 +37,17 @@ static void *kalloc(size_t size) {
 
 static void kfree(void *ptr) {
   if (is_align_to(ptr, 12)) {
-    bbma_free(ptr);
-  } else {
 #ifdef TEST
     int* mark = (ptr + sizeof(SLAB_STICK) + 8);
     assert(*mark == 1);
-    *mark -= 1;
+    *mark += 1;
+#endif
+    bbma_free(ptr);
+  } else {
+#ifdef TEST
+    int* mark = (ptr + 8);
+    assert(*mark == 1);
+    *mark += 1;
 #endif
     slab_free(ptr);
   }
