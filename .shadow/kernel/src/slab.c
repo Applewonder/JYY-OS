@@ -26,6 +26,9 @@ SLAB_SIZE determine_slab_size(size_t size) {
 }
 
 void* slab_alloc(int cpu_num, size_t size) {
+#ifdef TEST
+    ENTER_FUNC();
+#endif
     if (size == 0) {
         return NULL;
     }
@@ -41,6 +44,9 @@ void* slab_alloc(int cpu_num, size_t size) {
     }
     void* the_slab_addr = possible_slab_addr;
     assert(is_align_to(the_slab_addr, slab_size));
+#ifdef TEST
+    LEAVE_FUNC();
+#endif
     return the_slab_addr;
 }
 
@@ -78,6 +84,9 @@ void* find_the_avaliable_page_in_slab_and_lock(int cpu_num, SLAB_SIZE slab_size)
 
 void* find_the_free_space_in_slab(int cpu_num, SLAB_SIZE slab_size) {
     // find the free space in the slab
+#ifdef TEST
+    ENTER_FUNC();
+#endif
     SLAB_STICK* free_space = find_the_avaliable_page_in_slab_and_lock(cpu_num, slab_size);
     assert(free_space == NULL || free_space->current_slab_free_space > 0);
     if (free_space == NULL) {
@@ -93,6 +102,9 @@ void* find_the_free_space_in_slab(int cpu_num, SLAB_SIZE slab_size) {
     spin_unlock(&free_space->slab_lock);
 #else
     mutex_unlock(&free_space->slab_lock);
+#endif
+#ifdef TEST
+    LEAVE_FUNC();
 #endif
     return avaliable_slab_block;
 }
