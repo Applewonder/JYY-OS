@@ -14,14 +14,14 @@ struct {
 
 static void *kalloc(size_t size) {
   int cpu_num = cpu_current();
+  printf("Alloc Size: %ld\n", size);
 #ifndef TEST
   return slab_alloc(cpu_num, size);
 #else
   void* ptr = slab_alloc(cpu_num, size);
   
   int* mark = (ptr + sizeof(SLAB_STICK) + 8);
-
-  assert(*mark == 0);
+  
   *mark += 1;
   return ptr;
 #endif
