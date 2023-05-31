@@ -56,12 +56,14 @@ void* find_the_avaliable_page_in_slab_and_lock(int cpu_num, SLAB_SIZE slab_size)
         mutex_lock(&free_space->slab_lock);
 #endif
         if (free_space->current_slab_free_space == 0) {
+            SLAB_STICK* need_unlock = free_space;
             free_space = (SLAB_STICK*)free_space->next_slab_stick;
 #ifndef TEST
-            spin_unlock(&free_space->slab_lock);
+            spin_unlock(&need_unlock->slab_lock);
 #else
-            mutex_unlock(&free_space->slab_lock);
+            mutex_unlock(&need_unlock->slab_lock);
 #endif
+            
             continue;
         }
         void* page_addr = (void*)free_space;
