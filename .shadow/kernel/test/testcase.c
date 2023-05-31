@@ -427,7 +427,7 @@ static void entry_7(int tid) {
   int round_cnt = 0;
   while (1) {
   //   // printf("round_cnt: %d\n", round_cnt);
-  //   int choose_type = rand() % 2;
+    int choose_type = rand() % 2;
   //   if (choose_type && end_index) {
   //     int index = rand() % end_index;
   //     pmm->free(already_alloc[index]);
@@ -437,6 +437,9 @@ static void entry_7(int tid) {
   //   } else {
       int size = (rand() % SLAB_NUM) + CPU_FIND_SLAB_OFFSET;
       int real_size = 1 << size;
+      if (choose_type) {
+        real_size = 1 << S_4K;
+      }
       void* ptr = pmm->alloc(real_size);
       mutex_lock(&mutex);
       remain_cap -= real_size;
