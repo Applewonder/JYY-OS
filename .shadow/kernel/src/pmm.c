@@ -19,6 +19,7 @@ static void *kalloc(size_t size) {
   return slab_alloc(cpu_num, size);
 #else
   void* ptr = slab_alloc(cpu_num, size);
+  printf("Slab_ptr: %p\n", ptr);
   if (ptr != NULL) {
     if (size > 2048) {
       int* mark = (ptr + sizeof(SLAB_STICK) + 8);
@@ -30,7 +31,6 @@ static void *kalloc(size_t size) {
       *mark += 1;
     }
   }
-  printf("Slab_ptr: %p\n", ptr);
   return ptr;
 #endif
 }
