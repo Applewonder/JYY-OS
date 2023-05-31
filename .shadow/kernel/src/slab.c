@@ -30,14 +30,14 @@ void* slab_alloc(int cpu_num, size_t size) {
     ENTER_FUNC();
 #endif
     if (size == 0) {
-#ifdef TEST
+#if defined TEST && LOG
     LEAVE_FUNC();
 #endif
         return NULL;
     }
     SLAB_SIZE slab_size = determine_slab_size(size);
     if (slab_size == SLAB_REFUSE) {
-#ifdef TEST
+#if defined TEST && LOG
     LEAVE_FUNC();
 #endif
         return bbma_alloc(size);
