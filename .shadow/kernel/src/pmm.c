@@ -32,7 +32,7 @@ static void kfree(void *ptr) {
 #ifdef TEST
     int* mark = (ptr + 6);
     assert(*mark == 1);
-    *mark -= 1;
+    *mark += 1;
 #endif
     slab_free(ptr);
   }
