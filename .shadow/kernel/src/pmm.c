@@ -30,12 +30,13 @@ static void *kalloc(size_t size) {
       *mark += 1;
     }
   }
-  
+  printf("Slab_ptr: %p\n", ptr);
   return ptr;
 #endif
 }
 
 static void kfree(void *ptr) {
+  printf("Free ptr: %p\n", ptr);
   if (is_align_to(ptr, 12)) {
 #ifdef TEST
     int* mark = (ptr + sizeof(SLAB_STICK) + 8);
