@@ -50,10 +50,20 @@ void* find_the_avaliable_page_in_slab_and_lock(int cpu_num, SLAB_SIZE slab_size)
     }
     SLAB_STICK* free_space = slab_addr;
     while (free_space != NULL) {
+#ifndef TEST
         spin_lock(&free_space->slab_lock);
+#else
+        mutex_lock(&free_space->slab_lock);
+#endif
         if (free_space->current_slab_free_space == 0) {
+            SLAB_STICK* need_unlock = free_space;
             free_space = (SLAB_STICK*)free_space->next_slab_stick;
-            spin_unlock(&free_space->slab_lock);
+#ifndef TEST
+            spin_unlock(&need_unlock->slab_lock);
+#else
+            mutex_unlock(&need_unlock->slab_lock);
+#endif
+            
             continue;
         }
         void* page_addr = (void*)free_space;
@@ -75,7 +85,11 @@ void* find_the_free_space_in_slab(int cpu_num, SLAB_SIZE slab_size) {
     SLAB_FREE_BLOCK* avaliable_slab_block = (SLAB_FREE_BLOCK*)free_space->current_slab_free_block_list;
     free_space->current_slab_free_block_list = avaliable_slab_block->next_free_slab_block;
     free_space->current_slab_free_space -= 1;
+#ifndef TEST
     spin_unlock(&free_space->slab_lock);
+#else
+    mutex_unlock(&free_space->slab_lock);
+#endif
     return avaliable_slab_block;
 }
 
@@ -126,10 +140,18 @@ void slab_free(void* ptr) {
     SLAB_STICK* slab_stick = (SLAB_STICK*)slab_align_to_4kb(ptr);
     assert(((intptr_t)slab_stick & (SLAB_REQUEST_SPACE - 1)) == 0);
     slab_block->next_free_slab_block = slab_stick->current_slab_free_block_list;
+#ifndef TEST
     spin_lock(&slab_stick->slab_lock);
+#else
+    mutex_lock(&slab_stick->slab_lock);
+#endif
     slab_stick->current_slab_free_block_list = (uintptr_t)slab_block;
     slab_stick->current_slab_free_space += 1;
+#ifndef TEST
     spin_unlock(&slab_stick->slab_lock);
+#else
+    mutex_unlock(&slab_stick->slab_lock);
+#endif
 }
 
 void initialize_a_cpu_slab_area(int cpu_num) {

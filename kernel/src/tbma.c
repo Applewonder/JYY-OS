@@ -9,9 +9,10 @@ int calculate_addr_helper[] = {1, 2, 4, 8, 16, 32, 64, 128, 256, 512,
 Tree all_trees[MAX_TREE + 1];//tree index begin from 1
 #ifdef TEST
     int all_trees_cnt[MAX_TREE + 1];
+    mutex_t mutex_tree_locks[MAX_TREE + 1];
 #endif
-Tree_Index cpu_trees[MAX_CPU][MAX_TREE];//for slab;
-spinlock_t tree_locks[MAX_TREE];
+Tree_Index cpu_trees[MAX_CPU][MAX_TREE + 1];//for slab;
+spinlock_t tree_locks[MAX_TREE + 1];
 static void* real_start_addr;
 static void* begin_alloc_addr;
 int tree_num = 0;
@@ -51,43 +52,47 @@ BUDDY_BLOCK_SIZE determine_bbma_size(size_t size) {
 }
 
 void* bbma_alloc(size_t size) {
-#ifdef TEST
-    ENTER_FUNC();
-#endif
+// #ifdef TEST
+//     ENTER_FUNC();
+// #endif
     BUDDY_BLOCK_SIZE bbma_size = determine_bbma_size(size);
     if (bbma_size == BBMA_REFUSE) {
         return NULL;
     }
     void* ptr = find_the_free_space_in_bbma_system(bbma_size);
-#ifdef TEST
-    LEAVE_FUNC();
-#endif
+// #ifdef TEST
+//     LEAVE_FUNC();
+// #endif
     return ptr;
 }
 
 Tree_Index find_available_tree(BUDDY_BLOCK_SIZE bbma_size) {
-#ifdef TEST
-    ENTER_FUNC();
-#endif
+// #ifdef TEST
+//     ENTER_FUNC();
+// #endif
     for (int i = 1; i <= tree_num; i++)
     {
+#ifndef TEST
         if (try_lock(&tree_locks[i])) {
-#ifdef TEST
-            SPIN_LOCK();
-#endif
             if (all_trees[i][1] < bbma_size) {
-#ifdef TEST
-                SPIN_UNLOCK();
-#endif
                 spin_unlock(&tree_locks[i]);
                 continue;
             }
             return i;
         }
+#else
+        if (mutex_trylock(&mutex_tree_locks[i])) {
+            if (all_trees[i][1] < bbma_size) {
+                mutex_unlock(&mutex_tree_locks[i]);
+                continue;
+            }
+            return i;
+        }
     }
-#ifdef TEST
-    LEAVE_FUNC();
 #endif
+// #ifdef TEST
+//     LEAVE_FUNC();
+// #endif
     return -1;
 }
 
@@ -102,21 +107,21 @@ inline int right_child(int index) {
 void* convert_index_to_addr(Tree tree, int index, BUDDY_BLOCK_SIZE cur_size) {
     assert(index <= MAX_NODE);
     assert(cur_size != BBMA_REFUSE);
-    intptr_t tree_offset = (intptr_t)tree - (intptr_t)real_start_addr;
+    uintptr_t tree_offset = (uintptr_t)tree - (uintptr_t)real_start_addr;
     int tree_gap = tree_offset / (sizeof(Tree_node) * MAX_NODE);
-    intptr_t mem_offset = tree_gap << S_16M;
-    intptr_t real_mem_start = (intptr_t)begin_alloc_addr + mem_offset;
+    uintptr_t mem_offset = tree_gap << S_16M;
+    uintptr_t real_mem_start = (uintptr_t)begin_alloc_addr + mem_offset;
 
-    intptr_t node_offset = index - calculate_addr_helper[S_16M- cur_size];
-    intptr_t mem_node_offset = node_offset << cur_size;
+    uintptr_t node_offset = index - calculate_addr_helper[S_16M- cur_size];
+    uintptr_t mem_node_offset = node_offset << cur_size;
 
     return (void*)(real_mem_start + mem_node_offset);
 }
 
 void* get_the_free_space_in_tree(Tree tree, int index, BUDDY_BLOCK_SIZE cur_size, BUDDY_BLOCK_SIZE req_size) {
-#ifdef TEST
-            ENTER_FUNC();
-#endif
+// #ifdef TEST
+//             ENTER_FUNC();
+// #endif
     assert(req_size != BBMA_REFUSE);
     assert(cur_size >= req_size);
     assert(tree[index] <= cur_size);
@@ -153,16 +158,16 @@ void* get_the_free_space_in_tree(Tree tree, int index, BUDDY_BLOCK_SIZE cur_size
             tree[index] = tree[left_index] >= tree[right_index] ? tree[left_index] : tree[right_index];
         }
     }
-#ifdef TEST
-            LEAVE_FUNC();
-#endif
+// #ifdef TEST
+//             LEAVE_FUNC();
+// #endif
     return ptr;
 }
 
 void* find_the_free_space_in_bbma_system(BUDDY_BLOCK_SIZE bbma_size) {
-#ifdef TEST
-    ENTER_FUNC();
-#endif
+// #ifdef TEST
+//     ENTER_FUNC();
+// #endif
     assert(bbma_size != BBMA_REFUSE);
     Tree_Index tree_index = find_available_tree(bbma_size);
     if (tree_index == -1) {
@@ -175,13 +180,17 @@ void* find_the_free_space_in_bbma_system(BUDDY_BLOCK_SIZE bbma_size) {
     }
     assert(tree[1] >= bbma_size);
     void* the_space = get_the_free_space_in_tree(tree, 1, S_16M, bbma_size);
-#ifdef TEST
-    SPIN_UNLOCK();
-#endif
+// #ifdef TEST
+//     SPIN_UNLOCK();
+// #endif
+#ifndef TEST
     spin_unlock(&tree_locks[tree_index]);
-#ifdef TEST
-    LEAVE_FUNC();
+#else
+    mutex_unlock(&mutex_tree_locks[tree_index]);
 #endif
+// #ifdef TEST
+//     LEAVE_FUNC();
+// #endif
     return the_space;
 }
 
@@ -227,13 +236,13 @@ void distribute_tree(int tree_count) {
 
 void bbma_init(void* start, void* end) {
     real_start_addr = start;
-    intptr_t tree_size = sizeof(Tree_node) * MAX_NODE;
-    intptr_t mem_gap = 1 << S_16M;
-    intptr_t cur_tree_addr = (intptr_t)start;
+    uintptr_t tree_size = sizeof(Tree_node) * MAX_NODE;
+    uintptr_t mem_gap = 1 << S_16M;
+    uintptr_t cur_tree_addr = (uintptr_t)start;
     begin_alloc_addr = start + mem_gap;
-    intptr_t cur_mem_addr = (intptr_t)begin_alloc_addr;
+    uintptr_t cur_mem_addr = (uintptr_t)begin_alloc_addr;
     int tree_cnt = 1;
-    while (cur_mem_addr + mem_gap <= (intptr_t)end)
+    while (cur_mem_addr + mem_gap <= (uintptr_t)end)
     {
         Tree tree = (Tree)cur_tree_addr;
         all_trees[tree_cnt] = tree;
@@ -243,14 +252,20 @@ void bbma_init(void* start, void* end) {
         cur_tree_addr += tree_size;
     }
     tree_num = tree_cnt - 1;
+#ifdef TEST
+    for (int i = 1; i <= tree_num; i++)
+    {
+        pthread_mutex_init(&mutex_tree_locks[i], NULL);
+    }
+#endif 
     distribute_tree(tree_cnt);
 }
 
 Tree_Index determine_which_tree(void* ptr) {
     assert(ptr > begin_alloc_addr);
-    intptr_t mask = (1 << S_16M) - 1;
-    intptr_t mem_begin = (intptr_t)ptr & ~mask;
-    return ((mem_begin - (intptr_t)begin_alloc_addr) >> S_16M) + 1; 
+    uintptr_t mask = (1 << S_16M) - 1;
+    uintptr_t mem_begin = (uintptr_t)ptr & ~mask;
+    return ((mem_begin - (uintptr_t)begin_alloc_addr) >> S_16M) + 1; 
 }
 
 void free_tree_ptr(Tree tree, int index, void* ptr, BUDDY_BLOCK_SIZE cur_size) {
@@ -290,7 +305,15 @@ void bbma_free(void* ptr) {
     Tree_Index tree_index = determine_which_tree(ptr);
     Tree tree = all_trees[tree_index];
     assert(tree != NULL);
+#ifndef TEST
     spin_lock(&tree_locks[tree_index]);
+#else
+    mutex_lock(&mutex_tree_locks[tree_index]);
+#endif
     free_tree_ptr(tree, 1, ptr, S_16M);
+#ifndef TEST
     spin_unlock(&tree_locks[tree_index]);
+#else
+    mutex_unlock(&mutex_tree_locks[tree_index]);
+#endif
 }

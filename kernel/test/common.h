@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <stdbool.h>
+#include "threads.h"
 #include "am.h"
 
 // typedef unsigned long uintptr_t;

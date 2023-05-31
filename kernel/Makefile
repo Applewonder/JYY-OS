@@ -18,6 +18,7 @@ image: git
 test: git
 		@gcc $(shell find src/ -name "*.c")  \
 				$(shell find test/ -name "*.c") \
+				-fsanitize=thread \
 				-g\
 				-Iframework -Itest -Iinclude -DTEST -lpthread\
 				-o build/test

@@ -35,3 +35,8 @@ __attribute__((destructor)) void cleanup() {
 
 void mutex_lock(mutex_t *lk)   { pthread_mutex_lock(lk); }
 void mutex_unlock(mutex_t *lk) { pthread_mutex_unlock(lk); }
+int mutex_trylock(mutex_t *lk) {
+  int status = pthread_mutex_trylock(lk); 
+  if (status == 0) return 1;
+  else return 0;
+}

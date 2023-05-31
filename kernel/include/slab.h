@@ -29,7 +29,11 @@ enum SLAB_SIZE_{
 };
 
 struct SLAB_STICK_{
+#ifndef TEST
     spinlock_t slab_lock;
+#else
+    mutex_t slab_lock;
+#endif
     uintptr_t current_slab_free_block_list;
     SLAB_STICK* next_slab_stick;
     unsigned int current_slab_free_space; 

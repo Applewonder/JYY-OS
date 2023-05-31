@@ -6,7 +6,7 @@
 mutex_t mutex = MUTEX_INIT();
 FILE *file;
 void* already_alloc[500000];
-int remain_cap = 512 * 1024 * 1024;
+int remain_cap = 128 * 1024 * 1024;
 extern unsigned long thread_id[];
 extern int tree_num;
 extern Tree all_trees[];
@@ -435,22 +435,23 @@ static void entry_7(int tid) {
   //     already_alloc[index] = already_alloc[end_index - 1];
   //     end_index --;
   //   } else {
-      int size = 4 * 1024;
-      void* ptr = pmm->alloc(size);
-      remain_cap -= size;
+      int size = rand() % (SLAB_NUM) + CPU_FIND_SLAB_OFFSET;
+      int real_size = 1 << size;
+      void* ptr = pmm->alloc(real_size);
+      mutex_lock(&mutex);
+      remain_cap -= real_size;
+      mutex_unlock(&mutex);
       if (ptr == NULL) {
         file = fopen("/home/appletree/JYY-OS/kernel/test/testlog7.txt", "a");
         fprintf(file, "Try to alloc Size: %d, remain capacity %d, round %d. Can not alloc\n", size, remain_cap, round_cnt);
         fclose(file);
-        if (cpu_current() == 0) {
-          print_tree_status();
-        }
+        
         break;
-      } else {
-        already_alloc[end_index] = ptr;
-        end_index ++;
-      }
-    // }
+      // } else {
+      //   already_alloc[end_index] = ptr;
+      //   end_index ++;
+      // }
+    }
     // print_tree_status();
     round_cnt ++;
   }
@@ -532,4 +533,7 @@ void do_test_7() {
         create(entry_7);
     }
     join();
+    
+    print_tree_status();
+        
 }
