@@ -435,7 +435,7 @@ static void entry_7(int tid) {
   //     already_alloc[index] = already_alloc[end_index - 1];
   //     end_index --;
   //   } else {
-      int size = rand() % SLAB_NUM;
+      int size = (rand() % SLAB_NUM) + CPU_FIND_SLAB_OFFSET;
       int real_size = 1 << size;
       void* ptr = pmm->alloc(real_size);
       mutex_lock(&mutex);
