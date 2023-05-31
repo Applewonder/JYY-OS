@@ -173,12 +173,21 @@ void* request_a_slab_from_bbma(int cpu_num, SLAB_SIZE slab_size) {
 }
 
 void* slab_align_to_4kb(void* ptr) {
+#if defined TEST && LOG
+    ENTER_FUNC();
+#endif
     // align the ptr to 4kb
     uintptr_t mask = (1 << 12) - 1;
     return (void*)((uintptr_t)ptr & (~mask));
+#if defined TEST && LOG
+    LEAVE_FUNC();
+#endif
 }
 
 void slab_free(void* ptr) {
+#if defined TEST && LOG
+    ENTER_FUNC();
+#endif
     assert(((uintptr_t)ptr & (SLAB_REQUEST_SPACE - 1)) != 0);
     SLAB_FREE_BLOCK* slab_block = (SLAB_FREE_BLOCK*)ptr;
     SLAB_STICK* slab_stick = (SLAB_STICK*)slab_align_to_4kb(ptr);
@@ -196,6 +205,9 @@ void slab_free(void* ptr) {
     spin_unlock(&slab_stick->slab_lock);
 #else
     mutex_unlock(&slab_stick->slab_lock);
+#endif
+#if defined TEST && LOG
+    LEAVE_FUNC();
 #endif
 }
 
