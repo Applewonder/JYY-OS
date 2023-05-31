@@ -10,7 +10,7 @@
 
 #define SPIN_LOCK_INIT 0
 
-#define CPU_NUM 6
+#define CPU_NUM 1
 
 typedef unsigned long uintptr_t;
 typedef int spinlock_t;
