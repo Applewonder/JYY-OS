@@ -30,10 +30,16 @@ void* slab_alloc(int cpu_num, size_t size) {
     ENTER_FUNC();
 #endif
     if (size == 0) {
+#ifdef TEST
+    LEAVE_FUNC();
+#endif
         return NULL;
     }
     SLAB_SIZE slab_size = determine_slab_size(size);
     if (slab_size == SLAB_REFUSE) {
+#ifdef TEST
+    LEAVE_FUNC();
+#endif
         return bbma_alloc(size);
     }
     assert(slab_size >= S_32B && slab_size <= S_2KB);
@@ -52,9 +58,14 @@ void* slab_alloc(int cpu_num, size_t size) {
 
 void* find_the_avaliable_page_in_slab_and_lock(int cpu_num, SLAB_SIZE slab_size) {
     // find the avaliable page in the slab
-    
+#ifdef TEST
+    ENTER_FUNC();
+#endif
     void* slab_addr = cpu_own_area[cpu_num][slab_size - CPU_FIND_SLAB_OFFSET];
     if (slab_addr == NULL) {
+#ifdef TEST
+    LEAVE_FUNC();
+#endif
         return NULL;
     }
     SLAB_STICK* free_space = slab_addr;
@@ -76,9 +87,14 @@ void* find_the_avaliable_page_in_slab_and_lock(int cpu_num, SLAB_SIZE slab_size)
             continue;
         }
         void* page_addr = (void*)free_space;
+#ifdef TEST
+    LEAVE_FUNC();
+#endif
         return page_addr;
     }
-
+#ifdef TEST
+    LEAVE_FUNC();
+#endif
     return NULL;
 }
 
@@ -90,6 +106,9 @@ void* find_the_free_space_in_slab(int cpu_num, SLAB_SIZE slab_size) {
     SLAB_STICK* free_space = find_the_avaliable_page_in_slab_and_lock(cpu_num, slab_size);
     assert(free_space == NULL || free_space->current_slab_free_space > 0);
     if (free_space == NULL) {
+#ifdef TEST
+    LEAVE_FUNC();
+#endif
         return NULL;
     }
     // assert((void*)free_space->current_slab_free_block_list != NULL && free_space->current_slab_free_space > 0);
