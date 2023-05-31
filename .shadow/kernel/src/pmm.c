@@ -20,9 +20,9 @@ static void *kalloc(size_t size) {
 #else
   void* ptr = slab_alloc(cpu_num, size);
   
-  int* mark = (ptr + sizeof(SLAB_STICK) + 8);
+  // int* mark = (ptr + sizeof(SLAB_STICK) + 8);
   
-  *mark += 1;
+  // *mark += 1;
   return ptr;
 #endif
 }
