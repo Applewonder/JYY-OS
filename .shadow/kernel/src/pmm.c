@@ -18,7 +18,7 @@ static void *kalloc(size_t size) {
   return slab_alloc(cpu_num, size);
 #else
   void* ptr = slab_alloc(cpu_num, size);
-  int* mark = (ptr + 8);
+  int* mark = (ptr + 6);
   assert(*mark == 0);
   *mark += 1;
   return ptr;
@@ -30,7 +30,7 @@ static void kfree(void *ptr) {
     bbma_free(ptr);
   } else {
 #ifdef TEST
-    int* mark = (ptr + 8);
+    int* mark = (ptr + 6);
     assert(*mark == 1);
     *mark -= 1;
 #endif
