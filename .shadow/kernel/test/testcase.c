@@ -437,6 +437,7 @@ static void entry_7(int tid) {
         int index = rand() % end_index;
         
         void* addr = already_alloc[index][0];
+        printf("Free Size: %ld\n", (uintptr_t)already_alloc[index][1]);
         remain_cap += (uintptr_t)already_alloc[index][1];
         already_alloc[index][0] = already_alloc[end_index - 1][0];
         already_alloc[index][1] = already_alloc[end_index - 1][1];
