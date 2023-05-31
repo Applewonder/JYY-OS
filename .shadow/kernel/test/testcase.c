@@ -451,7 +451,8 @@ static void entry_7(int tid) {
       //   already_alloc[end_index] = ptr;
       //   end_index ++;
       // }
-    }
+      }
+      pmm->free(ptr);
     // print_tree_status();
     round_cnt ++;
   }
