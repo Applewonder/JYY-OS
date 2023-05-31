@@ -431,16 +431,21 @@ static void entry_7(int tid) {
   while (1) {
   //   // printf("round_cnt: %d\n", round_cnt);
     int choose_type = rand() % 2;
-    if (choose_type && end_index) {
-      int index = rand() % end_index;
+    if (choose_type) {
       mutex_lock(&record_addr);
-      void* addr = already_alloc[index][0];
-      remain_cap += (uintptr_t)already_alloc[index][1];
-      already_alloc[index][0] = already_alloc[end_index - 1][0];
-      already_alloc[index][1] = already_alloc[end_index - 1][1];
-      end_index --;
-      mutex_unlock(&record_addr);
-      pmm->free(addr);
+      if (end_index) {
+        int index = rand() % end_index;
+        
+        void* addr = already_alloc[index][0];
+        remain_cap += (uintptr_t)already_alloc[index][1];
+        already_alloc[index][0] = already_alloc[end_index - 1][0];
+        already_alloc[index][1] = already_alloc[end_index - 1][1];
+        end_index --;
+        mutex_unlock(&record_addr);
+        pmm->free(addr);
+      } else {
+        mutex_unlock(&record_addr);
+      }
     } else {
       int size = (rand() % SLAB_NUM) + CPU_FIND_SLAB_OFFSET;
       uintptr_t real_size = 1 << size;
