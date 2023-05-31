@@ -73,6 +73,7 @@ void* find_the_avaliable_page_in_slab_and_lock(int cpu_num, SLAB_SIZE slab_size)
 #ifndef TEST
         spin_lock(&free_space->slab_lock);
 #else
+        
         mutex_lock(&free_space->slab_lock);
 #endif
         if (free_space->current_slab_free_space == 0) {
@@ -138,7 +139,9 @@ void initialize_a_slab_new_page(int cpu_num, SLAB_SIZE slab_size, SLAB_STICK* sl
     slab_page->current_slab_free_block_list = (uintptr_t)NULL;
     unsigned int slab_free_space = slab_page->current_slab_free_space;
     uintptr_t slab_block_addr = (uintptr_t)slab_page + slab_stick_size;
+#ifdef TEST
     pthread_mutex_init(&slab_page->slab_lock, NULL);
+#endif
     while (slab_free_space > 0) {
         SLAB_FREE_BLOCK* free_block = (SLAB_FREE_BLOCK*)slab_block_addr;
         free_block->next_free_slab_block = slab_page->current_slab_free_block_list;
