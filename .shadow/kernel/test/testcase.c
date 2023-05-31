@@ -436,7 +436,7 @@ static void entry_7(int tid) {
   //     end_index --;
   //   } else {
       int size = rand() % SLAB_NUM;
-      int real_size = 1 << 6;
+      int real_size = 1 << size;
       void* ptr = pmm->alloc(real_size);
       mutex_lock(&mutex);
       remain_cap -= real_size;
