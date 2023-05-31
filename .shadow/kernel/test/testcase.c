@@ -430,7 +430,7 @@ static void entry_7(int tid) {
   int round_cnt = 0;
   while (1) {
   //   // printf("round_cnt: %d\n", round_cnt);
-    int choose_type = rand() % 2;
+    int choose_type = 0;
     if (choose_type) {
       mutex_lock(&record_addr);
       if (end_index) {
