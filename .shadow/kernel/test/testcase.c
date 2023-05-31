@@ -458,7 +458,7 @@ static void entry_7(int tid) {
         already_alloc[end_index][0] = ptr;
         already_alloc[end_index][1] = (void*)real_size;
         end_index ++;
-        mutex_unlock(&mutex);
+        mutex_unlock(&record_addr);
       }
     }
       // pmm->free(ptr);
