@@ -20,7 +20,7 @@ test: git
 				$(shell find test/ -name "*.c") \
 				-fsanitize=thread \
 				-g\
-				-Iframework -Itest -Iinclude -DTEST -lpthread\
+				-Iframework -Itest -Iinclude -DTEST -DLOG -lpthread\
 				-o build/test
 runtest: 
 		@build/test

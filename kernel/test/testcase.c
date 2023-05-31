@@ -1,12 +1,15 @@
 #include "testcase.h"
 #include "cbma.h"
 #include "slab.h"
+#include <stdlib.h>
 #include <time.h>
 
 mutex_t mutex = MUTEX_INIT();
+mutex_t record_addr = MUTEX_INIT();
 FILE *file;
-void* already_alloc[500000];
+void* already_alloc[500000][2];
 int remain_cap = 128 * 1024 * 1024;
+int end_index = 0;
 extern unsigned long thread_id[];
 extern int tree_num;
 extern Tree all_trees[];
@@ -423,35 +426,48 @@ static void entry_7(int tid) {
 //   printf("thread_id[%d]: %ld\n", cur_cpu, thread_id[cur_cpu]);
 
 
-  int end_index = 0;
+
   int round_cnt = 0;
   while (1) {
   //   // printf("round_cnt: %d\n", round_cnt);
-  //   int choose_type = rand() % 2;
-  //   if (choose_type && end_index) {
-  //     int index = rand() % end_index;
-  //     pmm->free(already_alloc[index]);
-  //     remain_cap += 4096;
-  //     already_alloc[index] = already_alloc[end_index - 1];
-  //     end_index --;
-  //   } else {
-      int size = rand() % (SLAB_NUM) + CPU_FIND_SLAB_OFFSET;
-      int real_size = 1 << size;
+    int choose_type = rand() % 2;
+    if (choose_type) {
+      mutex_lock(&record_addr);
+      if (end_index) {
+        int index = rand() % end_index;
+        
+        void* addr = already_alloc[index][0];
+        printf("Free Size: %ld\n", (uintptr_t)already_alloc[index][1]);
+        remain_cap += (uintptr_t)already_alloc[index][1];
+        already_alloc[index][0] = already_alloc[end_index - 1][0];
+        already_alloc[index][1] = already_alloc[end_index - 1][1];
+        end_index --;
+        mutex_unlock(&record_addr);
+        pmm->free(addr);
+      } else {
+        mutex_unlock(&record_addr);
+      }
+    } else {
+      int size = (rand() % SLAB_NUM) + CPU_FIND_SLAB_OFFSET;
+      uintptr_t real_size = 1 << size;
+      int choose_size = 0;
+      if (choose_size) {
+        real_size = 1 << S_4K;
+      }
       void* ptr = pmm->alloc(real_size);
-      mutex_lock(&mutex);
-      remain_cap -= real_size;
-      mutex_unlock(&mutex);
       if (ptr == NULL) {
-        file = fopen("/home/appletree/JYY-OS/kernel/test/testlog7.txt", "a");
-        fprintf(file, "Try to alloc Size: %d, remain capacity %d, round %d. Can not alloc\n", size, remain_cap, round_cnt);
-        fclose(file);
         
         break;
-      // } else {
-      //   already_alloc[end_index] = ptr;
-      //   end_index ++;
-      // }
+      } else {
+        mutex_lock(&record_addr);
+        remain_cap -= real_size;
+        already_alloc[end_index][0] = ptr;
+        already_alloc[end_index][1] = (void*)real_size;
+        end_index ++;
+        mutex_unlock(&record_addr);
+      }
     }
+      // pmm->free(ptr);
     // print_tree_status();
     round_cnt ++;
   }
@@ -533,7 +549,9 @@ void do_test_7() {
         create(entry_7);
     }
     join();
-    
+    file = fopen("/home/appletree/JYY-OS/kernel/test/testlog7.txt", "a");
+    fprintf(file, "Try to alloc Failed, remain capacity %d. Can not alloc\n", remain_cap);
+    fclose(file);
     print_tree_status();
         
 }

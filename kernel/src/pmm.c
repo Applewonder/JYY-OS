@@ -14,18 +14,42 @@ struct {
 
 static void *kalloc(size_t size) {
   int cpu_num = cpu_current();
+  printf("Alloc Size: %ld\n", size);
 #ifndef TEST
   return slab_alloc(cpu_num, size);
 #else
   void* ptr = slab_alloc(cpu_num, size);
+  printf("Slab_ptr: %p\n", ptr);
+  if (ptr != NULL) {
+    if (size > 2048) {
+      int* mark = (ptr + sizeof(SLAB_STICK) + 8);
+      assert(*mark == 0);
+      *mark += 1;
+    } else {
+      int* mark = (ptr + 8);
+      assert(*mark == 0);
+      *mark += 1;
+    }
+  }
   return ptr;
 #endif
 }
 
 static void kfree(void *ptr) {
+  printf("Free ptr: %p\n", ptr);
   if (is_align_to(ptr, 12)) {
+#ifdef TEST
+    int* mark = (ptr + sizeof(SLAB_STICK) + 8);
+    assert(*mark == 1);
+    *mark -= 1;
+#endif
     bbma_free(ptr);
   } else {
+#ifdef TEST
+    int* mark = (ptr + 8);
+    assert(*mark == 1);
+    *mark -= 1;
+#endif
     slab_free(ptr);
   }
 }
