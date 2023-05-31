@@ -18,6 +18,9 @@ static void *kalloc(size_t size) {
   return slab_alloc(cpu_num, size);
 #else
   void* ptr = slab_alloc(cpu_num, size);
+  int* mark = ptr;
+  assert(*mark == 0);
+  *mark += 1;
   return ptr;
 #endif
 }
@@ -26,6 +29,11 @@ static void kfree(void *ptr) {
   if (is_align_to(ptr, 12)) {
     bbma_free(ptr);
   } else {
+#ifdef TEST
+    int* mark = ptr;
+    assert(*mark == 1);
+    *mark -= 1;
+#endif
     slab_free(ptr);
   }
 }
