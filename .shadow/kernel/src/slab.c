@@ -193,6 +193,7 @@ void slab_free(void* ptr) {
     SLAB_STICK* slab_stick = (SLAB_STICK*)slab_align_to_4kb(ptr);
     assert(((uintptr_t)slab_stick & (SLAB_REQUEST_SPACE - 1)) == 0);
     assert((uintptr_t)slab_stick < (uintptr_t)ptr);
+    assert(((uintptr_t)ptr - (uintptr_t)slab_stick) < (1 << 12));
     slab_block->next_free_slab_block = slab_stick->current_slab_free_block_list;
 #ifndef TEST
     spin_lock(&slab_stick->slab_lock);
