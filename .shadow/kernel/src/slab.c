@@ -194,12 +194,12 @@ void slab_free(void* ptr) {
     assert(((uintptr_t)slab_stick & (SLAB_REQUEST_SPACE - 1)) == 0);
     assert((uintptr_t)slab_stick < (uintptr_t)ptr);
     assert(((uintptr_t)ptr - (uintptr_t)slab_stick) < (1 << 12));
-    slab_block->next_free_slab_block = slab_stick->current_slab_free_block_list;
 #ifndef TEST
     spin_lock(&slab_stick->slab_lock);
 #else
     mutex_lock(&slab_stick->slab_lock);
 #endif
+    slab_block->next_free_slab_block = slab_stick->current_slab_free_block_list;
     slab_stick->current_slab_free_block_list = (uintptr_t)slab_block;
     slab_stick->current_slab_free_space += 1;
 #ifndef TEST
