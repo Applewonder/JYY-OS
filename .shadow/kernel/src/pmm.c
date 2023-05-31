@@ -18,7 +18,9 @@ static void *kalloc(size_t size) {
   return slab_alloc(cpu_num, size);
 #else
   void* ptr = slab_alloc(cpu_num, size);
+  
   int* mark = (ptr + 6);
+
   assert(*mark == 0);
   *mark += 1;
   return ptr;

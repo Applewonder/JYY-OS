@@ -37,9 +37,10 @@ void* slab_alloc(int cpu_num, size_t size) {
     void* possible_slab_addr = find_the_free_space_in_slab(cpu_num, slab_size);
     assert(possible_slab_addr == NULL || is_align_to(possible_slab_addr, slab_size));
     if (possible_slab_addr == NULL) {
-        return request_a_slab_from_bbma(cpu_num, slab_size);
+        possible_slab_addr = request_a_slab_from_bbma(cpu_num, slab_size);
     }
     void* the_slab_addr = possible_slab_addr;
+    assert(is_align_to(the_slab_addr, slab_size));
     return the_slab_addr;
 }
 

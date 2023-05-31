@@ -63,6 +63,7 @@ void* bbma_alloc(size_t size) {
 // #ifdef TEST
 //     LEAVE_FUNC();
 // #endif
+    assert(is_align_to(ptr, bbma_size));
     return ptr;
 }
 
