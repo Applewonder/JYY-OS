@@ -19,10 +19,16 @@ static void *kalloc(size_t size) {
   return slab_alloc(cpu_num, size);
 #else
   void* ptr = slab_alloc(cpu_num, size);
+  if (size > 2048 && ptr != NULL) {
+    int* mark = (ptr + sizeof(SLAB_STICK) + 8);
+    assert(*mark == 0);
+    *mark += 1;
+  } else {
+    int* mark = (ptr + 8);
+    assert(*mark == 0);
+    *mark += 1;
+  }
   
-  // int* mark = (ptr + sizeof(SLAB_STICK) + 8);
-  
-  // *mark += 1;
   return ptr;
 #endif
 }
