@@ -14,7 +14,7 @@ struct {
 
 static void *kalloc(size_t size) {
   int cpu_num = cpu_current();
-  printf("Alloc Size: %ld\n", size);
+  // printf("Alloc Size: %ld\n", size);
 #ifndef TEST
   return slab_alloc(cpu_num, size);
 #else
@@ -36,7 +36,7 @@ static void *kalloc(size_t size) {
 }
 
 static void kfree(void *ptr) {
-  printf("Free ptr: %p\n", ptr);
+  // printf("Free ptr: %p\n", ptr);
   if (is_align_to(ptr, 12)) {
 #ifdef TEST
     int* mark = (ptr + sizeof(SLAB_STICK) + 8);
