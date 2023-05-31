@@ -40,7 +40,6 @@ enum BLOCK_SIZE_{
 BUDDY_BLOCK_SIZE determine_bbma_size(size_t size);
 void* bbma_alloc(size_t size);
 void* find_the_free_space_in_bbma_system(BUDDY_BLOCK_SIZE bbma_size);
-BUDDY_BLOCK_STICK* divide_larger_bbma_block_from_bbma_system(BUDDY_BLOCK_SIZE bbma_size);
 // BUDDY_BLOCK_STICK* find_the_position_where_inserting_the_free_bbma_block(BUDDY_BLOCK_STICK* inserted_bbma_block_stick, BUDDY_BLOCK_SIZE bbma_block_size);
 void bbma_free(void* ptr);
 void bbma_init(void* start, void* end);

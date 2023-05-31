@@ -88,8 +88,8 @@ Tree_Index find_available_tree(BUDDY_BLOCK_SIZE bbma_size) {
             }
             return i;
         }
-    }
 #endif
+    }
 // #ifdef TEST
 //     LEAVE_FUNC();
 // #endif
