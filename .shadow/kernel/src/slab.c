@@ -26,7 +26,7 @@ SLAB_SIZE determine_slab_size(size_t size) {
 }
 
 void* slab_alloc(int cpu_num, size_t size) {
-#ifdef TEST
+#if defined TEST && LOG
     ENTER_FUNC();
 #endif
     if (size == 0) {
@@ -50,7 +50,7 @@ void* slab_alloc(int cpu_num, size_t size) {
     }
     void* the_slab_addr = possible_slab_addr;
     assert(is_align_to(the_slab_addr, slab_size));
-#ifdef TEST
+#if defined TEST && LOG
     LEAVE_FUNC();
 #endif
     return the_slab_addr;
@@ -58,12 +58,12 @@ void* slab_alloc(int cpu_num, size_t size) {
 
 void* find_the_avaliable_page_in_slab_and_lock(int cpu_num, SLAB_SIZE slab_size) {
     // find the avaliable page in the slab
-#ifdef TEST
+#if defined TEST && LOG
     ENTER_FUNC();
 #endif
     void* slab_addr = cpu_own_area[cpu_num][slab_size - CPU_FIND_SLAB_OFFSET];
     if (slab_addr == NULL) {
-#ifdef TEST
+#if defined TEST && LOG
     LEAVE_FUNC();
 #endif
         return NULL;
@@ -88,12 +88,12 @@ void* find_the_avaliable_page_in_slab_and_lock(int cpu_num, SLAB_SIZE slab_size)
             continue;
         }
         void* page_addr = (void*)free_space;
-#ifdef TEST
+#if defined TEST && LOG
     LEAVE_FUNC();
 #endif
         return page_addr;
     }
-#ifdef TEST
+#if defined TEST && LOG
     LEAVE_FUNC();
 #endif
     return NULL;
@@ -101,13 +101,13 @@ void* find_the_avaliable_page_in_slab_and_lock(int cpu_num, SLAB_SIZE slab_size)
 
 void* find_the_free_space_in_slab(int cpu_num, SLAB_SIZE slab_size) {
     // find the free space in the slab
-#ifdef TEST
+#if defined TEST && LOG
     ENTER_FUNC();
 #endif
     SLAB_STICK* free_space = find_the_avaliable_page_in_slab_and_lock(cpu_num, slab_size);
     assert(free_space == NULL || free_space->current_slab_free_space > 0);
     if (free_space == NULL) {
-#ifdef TEST
+#if defined TEST && LOG
     LEAVE_FUNC();
 #endif
         return NULL;
@@ -123,7 +123,7 @@ void* find_the_free_space_in_slab(int cpu_num, SLAB_SIZE slab_size) {
 #else
     mutex_unlock(&free_space->slab_lock);
 #endif
-#ifdef TEST
+#if defined TEST && LOG
     LEAVE_FUNC();
 #endif
     return avaliable_slab_block;
