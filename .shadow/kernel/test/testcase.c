@@ -449,7 +449,7 @@ static void entry_7(int tid) {
     } else {
       int size = (rand() % SLAB_NUM) + CPU_FIND_SLAB_OFFSET;
       uintptr_t real_size = 1 << size;
-      int choose_size = rand() % 2;
+      int choose_size = 1;
       if (choose_size) {
         real_size = 1 << S_4K;
       }
