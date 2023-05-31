@@ -47,7 +47,7 @@ static void kfree(void *ptr) {
 #ifdef TEST
     int* mark = (ptr + 8);
     assert(*mark == 1);
-    *mark += 1;
+    *mark -= 1;
 #endif
     slab_free(ptr);
   }
