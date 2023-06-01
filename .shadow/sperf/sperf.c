@@ -5,7 +5,8 @@
 int main(int argc, char *argv[]) {
   // char *exec_argv[] = { "strace", "ls", NULL, };
   // char *exec_envp[] = { "PATH=/bin", NULL, };
-  execve("yes", NULL, NULL);
+  char *exec_argv[] = {"yes", NULL};
+  execve("yes", exec_argv, NULL);
   perror("sperf");
   // execve("strace",          exec_argv, exec_envp);
   // execve("/bin/strace",     exec_argv, exec_envp);
