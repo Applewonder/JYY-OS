@@ -56,7 +56,7 @@ char** build_args(int argc, char* argv[], char* program) {
   args[2] = program;
 
   for (int i = 1; i < argc; i++) {
-      args[i + 1] = argv[i];
+      args[i + 2] = argv[i];
   }
   args[argc] = NULL;
   return args;
