@@ -198,7 +198,7 @@ int main(int argc, char *argv[]) {
 
       execve(exec_prog, args, envp);
 
-      perror("execvp");
+      // perror("execvp");
       exit(EXIT_FAILURE);
   } else {
       close(pipefd[1]);
