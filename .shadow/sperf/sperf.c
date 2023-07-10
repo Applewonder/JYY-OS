@@ -198,7 +198,7 @@ int main(int argc, char *argv[]) {
 
       dup2(pipefd[1], STDOUT_FILENO);
 
-      execve(exec_prog, args, envp);
+      execve(exec_strace, args, envp);
 
       // perror("execvp");
       exit(EXIT_FAILURE);
