@@ -66,6 +66,7 @@ char* get_prog_dir(char *command, bool need_dir) {
   if (need_dir) {
     char* program = command;
     char* path = getenv("PATH");
+    printf("%s", path);
     char* directory = strtok(path, ":");
     while(directory != NULL) {
         DIR* dir = opendir(directory);
