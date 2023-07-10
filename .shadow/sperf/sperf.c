@@ -55,10 +55,10 @@ char** build_args(int argc, char* argv[], char* program) {
   args[1] = "-T";
   args[2] = program;
 
-  for (int i = 1; i < argc; i++) {
-      args[i + 2] = argv[i];
+  for (int i = 2; i < argc; i++) {
+      args[i + 1] = argv[i];
   }
-  args[argc] = NULL;
+  args[argc + 1] = NULL;
   return args;
 }
 
@@ -164,15 +164,6 @@ void store_in_matrix(char* buffer) {
 }
 
 int main(int argc, char *argv[]) {
-  // char *exec_argv[] = { "strace", "ls", NULL, };
-  // char *exec_envp[] = { "PATH=/bin", NULL, };
-  // char *exec_argv[] = {"yes", NULL};
-
-  // execve("strace",          exec_argv, exec_envp);
-  // execve("/bin/strace",     exec_argv, exec_envp);
-  // execve("/usr/bin/strace", exec_argv, exec_envp);
-  // perror(argv[0]);
-  // exit(EXIT_FAILURE);
   char* exec_strace = get_exec_prog("strace");
   char* exec_prog = get_exec_prog(argv[1]);
   char** args = build_args(argc, argv, exec_prog);
