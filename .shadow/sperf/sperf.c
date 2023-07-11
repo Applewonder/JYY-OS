@@ -109,6 +109,7 @@ char* get_exec_prog(char* command) {
     need_dir = true;
   }
   char* prog_dir = get_prog_dir(command, need_dir);
+  assert(0);
   if (prog_dir != NULL) {
     size_t length = strlen(prog_dir) + strlen(command) + 10;
     char *result = malloc(sizeof(char) * length);
