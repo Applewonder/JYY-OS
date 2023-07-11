@@ -20,6 +20,7 @@ typedef struct {
 
 Syscall syscalls[MAX_SYSCALLS];
 int num_syscalls = 0;
+int time_cnt = 0;
 double total_time = 0;
 
 int compare(const void *a, const void *b) {
@@ -28,7 +29,7 @@ int compare(const void *a, const void *b) {
 }
 
 void parse_store_syscall(Syscall the_call) {
-  printf("%s, (%.2f%%)\n", the_call.name, (the_call.time_cnt / (float)(total_time) * 100));
+  printf("%s (%.2f%%)\n", the_call.name, (the_call.time_cnt / (float)(total_time) * 100));
 }
 
 void print_max_five_syscall() {
@@ -38,10 +39,13 @@ void print_max_five_syscall() {
   } else {
     print_count = 5;
   }
+  time_cnt ++;
+  printf("Time: %ds", time_cnt);
   for (int i = 0; i < print_count; i++)
   {
     parse_store_syscall(syscalls[i]);
   }
+  printf("====================");
 }
 
 void print_stats(int signum) {
