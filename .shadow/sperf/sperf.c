@@ -85,7 +85,9 @@ char* get_prog_dir(char *command, bool need_dir) {
   if (need_dir) {
     char* program = command;
     char* path = getenv("PATH");
+    printf("path: %s\n", path);
     char* the_path = strdup(path);
+    printf("after dup: %s", the_path);
     // printf("%s\n", path);
     assert(0);
     char* directory = strtok(the_path, ":");
