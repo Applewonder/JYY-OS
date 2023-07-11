@@ -231,7 +231,7 @@ int main(int argc, char *argv[]) {
 
       alarm(1);
       int status; 
-      char buffer[1024];
+      char buffer[8192];
       ssize_t count;
       while (fgets(buffer, sizeof(buffer), fdopen(pipefd[0], "r"))) {
           store_in_matrix(buffer);
