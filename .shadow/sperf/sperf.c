@@ -30,6 +30,7 @@ int compare(const void *a, const void *b) {
 
 void parse_store_syscall(Syscall the_call) {
   printf("%s (%.2f%%)\n", the_call.name, (the_call.time_cnt / (float)(total_time) * 100));
+  fflush(stdout);
 }
 
 void print_max_five_syscall() {
@@ -41,11 +42,13 @@ void print_max_five_syscall() {
   }
   time_cnt ++;
   printf("Time: %ds\n", time_cnt);
+  fflush(stdout);
   for (int i = 0; i < print_count; i++)
   {
     parse_store_syscall(syscalls[i]);
   }
   printf("====================\n");
+  fflush(stdout);
 }
 
 void print_stats(int signum) {
@@ -54,7 +57,7 @@ void print_stats(int signum) {
 }
 
 char** build_args(int argc, char* argv[], char* program) {
-  char** args = malloc((argc + 4) * sizeof(char*));
+  char** args = malloc((argc + 2) * sizeof(char*));
   args[0] = "strace";
   args[1] = "-T";
   args[2] = program;
@@ -62,9 +65,9 @@ char** build_args(int argc, char* argv[], char* program) {
   for (int i = 2; i < argc; i++) {
       args[i + 1] = argv[i];
   }
-  args[argc + 1] = ">";
-  args[argc + 2] = "/dev/null";
-  args[argc + 3] = NULL;
+  // args[argc + 1] = ">";
+  // args[argc + 2] = "/dev/null";
+  args[argc + 1] = NULL;
   return args;
 }
 
