@@ -50,7 +50,7 @@ void print_stats(int signum) {
 }
 
 char** build_args(int argc, char* argv[], char* program) {
-  char** args = malloc((argc + 2) * sizeof(char*));
+  char** args = malloc((argc + 4) * sizeof(char*));
   args[0] = "strace";
   args[1] = "-T";
   args[2] = program;
@@ -58,7 +58,9 @@ char** build_args(int argc, char* argv[], char* program) {
   for (int i = 2; i < argc; i++) {
       args[i + 1] = argv[i];
   }
-  args[argc + 1] = NULL;
+  args[argc + 1] = ">";
+  args[argc + 2] = "/dev/null";
+  args[argc + 3] = NULL;
   return args;
 }
 
@@ -205,7 +207,7 @@ int main(int argc, char *argv[]) {
         while ((count = read(pipefd[0], buffer, sizeof(buffer) - 1)) > 0) {
             buffer[count] = '\0';
             store_in_matrix(buffer);
-            printf("%s", buffer);
+            // printf("%s", buffer);
         }
       }
       wait(NULL);
