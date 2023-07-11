@@ -85,9 +85,11 @@ char* get_prog_dir(char *command, bool need_dir) {
   if (need_dir) {
     char* program = command;
     char* path = getenv("PATH");
+    printf("path: %s\n", path);
     char* the_path = strdup(path);
+    printf("after dup: %s\n", the_path);
     // printf("%s\n", path);
-    assert(0);
+    // assert(0);
     char* directory = strtok(the_path, ":");
     // assert(0);
     while(directory != NULL) {
@@ -185,6 +187,7 @@ void store_in_matrix(char* buffer) {
 }
 
 int main(int argc, char *argv[]) {
+  assert(0);
   char* exec_strace = get_exec_prog("strace");
   // printf("the strace: %s\n", exec_strace);
   assert(exec_strace[0] != 's');
