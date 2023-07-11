@@ -62,6 +62,7 @@ void print_max_five_syscall() {
 
 void print_stats(int signum) {
   print_max_five_syscall();
+  print_judge();
   alarm(1);
 }
 
