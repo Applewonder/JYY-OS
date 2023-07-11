@@ -204,8 +204,7 @@ int main(int argc, char *argv[]) {
       while (1) {
         char buffer[1024];
         ssize_t count;
-        while ((count = read(pipefd[0], buffer, sizeof(buffer) - 1)) > 0) {
-            buffer[count] = '\0';
+        while (fgets(buffer, sizeof(buffer), fdopen(pipefd[0], "r"))) {
             store_in_matrix(buffer);
             // printf("%s", buffer);
         }
