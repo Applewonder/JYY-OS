@@ -183,6 +183,7 @@ void store_in_matrix(char* buffer) {
 
 int main(int argc, char *argv[]) {
   char* exec_strace = get_exec_prog("strace");
+  assert(exec_strace[0] != 's');
   char* exec_prog = get_exec_prog(argv[1]);
   char** args = build_args(argc, argv, exec_prog);
   char* env_path = build_sub_path();
