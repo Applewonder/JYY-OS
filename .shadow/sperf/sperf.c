@@ -110,7 +110,6 @@ char* get_exec_prog(char* command) {
     need_dir = true;
   }
   char* prog_dir = get_prog_dir(command, need_dir);
-  assert(0);
   if (prog_dir != NULL) {
     size_t length = strlen(prog_dir) + strlen(command) + 10;
     char *result = malloc(sizeof(char) * length);
@@ -190,7 +189,7 @@ int main(int argc, char *argv[]) {
   assert(exec_strace[0] != 's');
   char* exec_prog = get_exec_prog(argv[1]);
   // printf("the prog: %s\n", exec_prog);
-  assert(0);
+  // assert(0);
   char** args = build_args(argc, argv, exec_prog);
   char* env_path = build_sub_path();
   int pipefd[2];
