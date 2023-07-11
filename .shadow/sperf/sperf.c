@@ -205,14 +205,14 @@ int main(int argc, char *argv[]) {
 
       alarm(1);
       int status;
-      while (waitpid(pid, &status, WNOHANG) == 0) {
+      do {
         char buffer[1024];
         ssize_t count;
         while (fgets(buffer, sizeof(buffer), fdopen(pipefd[0], "r"))) {
             store_in_matrix(buffer);
             // printf("%s", buffer);
         }
-      }
+      } while (waitpid(pid, &status, WNOHANG) == 0);
       wait(NULL);
   }
   return 0;
