@@ -204,15 +204,13 @@ int main(int argc, char *argv[]) {
       signal(SIGALRM, print_stats);
 
       alarm(1);
-      int status;
-      do {
-        char buffer[1024];
-        ssize_t count;
-        while (fgets(buffer, sizeof(buffer), fdopen(pipefd[0], "r"))) {
-            store_in_matrix(buffer);
-            // printf("%s", buffer);
-        }
-      } while (waitpid(pid, &status, WNOHANG) == 0);
+      int status; 
+      char buffer[1024];
+      ssize_t count;
+      while (fgets(buffer, sizeof(buffer), fdopen(pipefd[0], "r"))) {
+          store_in_matrix(buffer);
+          // printf("%s", buffer);
+      }
       wait(NULL);
   }
   return 0;
