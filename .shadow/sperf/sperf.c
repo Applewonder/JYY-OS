@@ -110,8 +110,8 @@ char* get_exec_prog(char* command) {
   }
   char* prog_dir = get_prog_dir(command, need_dir);
   if (prog_dir != NULL) {
-    size_t length = strlen(prog_dir) + strlen(command) + 2;
-    char *result = malloc(length);
+    size_t length = strlen(prog_dir) + strlen(command) + 10;
+    char *result = malloc(sizeof(char) * length);
     strcpy(result, prog_dir);
     strcat(result, "/");
     strcat(result, command);
@@ -122,7 +122,7 @@ char* get_exec_prog(char* command) {
 
 char* build_sub_path() {
   char* main_path = getenv("PATH");
-  char *path_env = malloc(strlen("PATH=") + strlen(main_path) + 1);
+  char *path_env = malloc(sizeof(char) * (strlen("PATH=") + strlen(main_path) + 1));
   strcpy(path_env, "PATH=");
   strcat(path_env, main_path);
   return path_env;
@@ -142,7 +142,7 @@ void store_in_matrix(char* buffer) {
   if (len <= 0) {
     return;
   }
-  char* time_used = malloc(sizeof(char*)*(len + 1));
+  char* time_used = malloc(sizeof(char) * (len + 1));
   strncpy(time_used, l_ptr + 1, len);
   time_used[len] = '\0';
   double call_time = atof(time_used);
@@ -154,9 +154,9 @@ void store_in_matrix(char* buffer) {
     return;
   }
   size_t name_len = name_l_ptr - buffer;
-  char* name = malloc(sizeof(char*)*(name_len + 1));
+  char* name = malloc(sizeof(char)*(name_len + 1));
   strncpy(name, buffer, name_len);
-  name[len] = '\0';
+  name[name_len] = '\0';
   bool stored = false;
   for (size_t i = 0; i < num_syscalls; i++)
   {
