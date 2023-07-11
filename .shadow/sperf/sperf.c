@@ -122,7 +122,7 @@ char* get_exec_prog(char* command) {
 
 char* build_sub_path() {
   char* main_path = getenv("PATH");
-  char *path_env = malloc(sizeof(char) * (strlen("PATH=") + strlen(main_path) + 1));
+  char *path_env = malloc(sizeof(char) * (strlen("PATH=") + strlen(main_path) + 10));
   strcpy(path_env, "PATH=");
   strcat(path_env, main_path);
   return path_env;
