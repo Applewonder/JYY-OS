@@ -88,7 +88,7 @@ char* get_prog_dir(char *command, bool need_dir) {
     char* the_path = strdup(path);
     // printf("%s\n", path);
     char* directory = strtok(the_path, ":");
-    assert(0);
+    // assert(0);
     while(directory != NULL) {
         DIR* dir = opendir(directory);
         struct dirent* entry;
