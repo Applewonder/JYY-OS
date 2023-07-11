@@ -86,7 +86,7 @@ char* get_prog_dir(char *command, bool need_dir) {
     char* program = command;
     char* path = getenv("PATH");
     char* the_path = strdup(path);
-    printf("%s\n", path);
+    // printf("%s\n", path);
     char* directory = strtok(the_path, ":");
     while(directory != NULL) {
         DIR* dir = opendir(directory);
@@ -184,10 +184,10 @@ void store_in_matrix(char* buffer) {
 
 int main(int argc, char *argv[]) {
   char* exec_strace = get_exec_prog("strace");
-  printf("the strace: %s\n", exec_strace);
+  // printf("the strace: %s\n", exec_strace);
   assert(exec_strace[0] != 's');
   char* exec_prog = get_exec_prog(argv[1]);
-  printf("the prog: %s\n", exec_prog);
+  // printf("the prog: %s\n", exec_prog);
   char** args = build_args(argc, argv, exec_prog);
   char* env_path = build_sub_path();
   int pipefd[2];
