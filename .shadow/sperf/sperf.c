@@ -104,7 +104,7 @@ char* get_prog_dir(char *command, bool need_dir) {
 
 char* get_exec_prog(char* command) {
   bool need_dir = false;
-  if (command[0] != SLASH) {
+  if (command[0] != SLASH && command[0] != '.') {
     need_dir = true;
   }
   char* prog_dir = get_prog_dir(command, need_dir);
