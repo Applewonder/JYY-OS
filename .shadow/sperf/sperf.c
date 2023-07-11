@@ -24,6 +24,14 @@ int num_syscalls = 0;
 int time_cnt = 0;
 double total_time = 0;
 
+void print_judge() {
+  for (int i = 0; i < 80; i++)
+  {
+    printf("\0");
+  }
+  
+}
+
 int compare(const void *a, const void *b) {
     double diff = ((Syscall*)b)->time_cnt - ((Syscall*)a)->time_cnt;
     return (diff > 0.0) - (diff < 0.0);
@@ -229,6 +237,7 @@ int main(int argc, char *argv[]) {
           // printf("%s", buffer);
       }
       print_stats(0);
+      print_judge();
       wait(NULL);
   }
   return 0;
