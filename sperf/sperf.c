@@ -87,8 +87,9 @@ char* get_prog_dir(char *command, bool need_dir) {
     char* path = getenv("PATH");
     char* the_path = strdup(path);
     // printf("%s\n", path);
-    char* directory = strtok(the_path, ":");
     assert(0);
+    char* directory = strtok(the_path, ":");
+    // assert(0);
     while(directory != NULL) {
         DIR* dir = opendir(directory);
         struct dirent* entry;
@@ -110,7 +111,6 @@ char* get_exec_prog(char* command) {
     need_dir = true;
   }
   char* prog_dir = get_prog_dir(command, need_dir);
-  assert(0);
   if (prog_dir != NULL) {
     size_t length = strlen(prog_dir) + strlen(command) + 10;
     char *result = malloc(sizeof(char) * length);
@@ -190,7 +190,7 @@ int main(int argc, char *argv[]) {
   assert(exec_strace[0] != 's');
   char* exec_prog = get_exec_prog(argv[1]);
   // printf("the prog: %s\n", exec_prog);
-  assert(0);
+  // assert(0);
   char** args = build_args(argc, argv, exec_prog);
   char* env_path = build_sub_path();
   int pipefd[2];
