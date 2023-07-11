@@ -40,7 +40,7 @@ void print_max_five_syscall() {
     print_count = 5;
   }
   time_cnt ++;
-  printf("Time: %ds", time_cnt);
+  printf("Time: %ds\n", time_cnt);
   for (int i = 0; i < print_count; i++)
   {
     parse_store_syscall(syscalls[i]);
