@@ -14,6 +14,8 @@
 #define SLASH 47
 #define MAX_SYSCALLS 256
 
+extern char **environ;
+
 typedef struct {
     char* name;
     double time_cnt;
@@ -197,9 +199,9 @@ int main(int argc, char *argv[]) {
   // printf("the prog: %s\n", exec_prog);
   // assert(0);
   char** args = build_args(argc, argv, exec_prog);
-  char* env_path = build_sub_path();
+  // char* env_path = build_sub_path();
   int pipefd[2];
-  char *envp[] = {env_path, NULL};
+  // char *envp[] = {env_path, NULL};
   pid_t pid = 0;
   
   // 创建一个管道
@@ -232,7 +234,7 @@ int main(int argc, char *argv[]) {
 
       dup2(pipefd[1], STDERR_FILENO);
 
-      execve(exec_strace, args, envp);
+      execve(exec_strace, args, environ);
 
       // perror("execvp");
       exit(EXIT_FAILURE);
