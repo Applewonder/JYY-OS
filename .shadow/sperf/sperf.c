@@ -188,12 +188,13 @@ int main(int argc, char *argv[]) {
   assert(exec_strace[0] != 's');
   char* exec_prog = get_exec_prog(argv[1]);
   // printf("the prog: %s\n", exec_prog);
+  assert(0);
   char** args = build_args(argc, argv, exec_prog);
   char* env_path = build_sub_path();
   int pipefd[2];
   char *envp[] = {env_path, NULL};
   pid_t pid = 0;
-  assert(0);
+  
   // 创建一个管道
   if (pipe(pipefd) == -1) {
       perror("pipe");
