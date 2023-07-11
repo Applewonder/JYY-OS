@@ -156,7 +156,7 @@ void store_in_matrix(char* buffer) {
   size_t name_len = name_l_ptr - buffer;
   char* name = malloc(sizeof(char)*(name_len + 1));
   strncpy(name, buffer, name_len);
-  name[len] = '\0';
+  name[name_len] = '\0';
   bool stored = false;
   for (size_t i = 0; i < num_syscalls; i++)
   {
