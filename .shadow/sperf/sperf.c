@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <signal.h>
 #include <assert.h>
+#include <fcntl.h>
 
 #define SLASH 47
 #define MAX_SYSCALLS 256
@@ -195,6 +196,19 @@ int main(int argc, char *argv[]) {
 
   if (pid == 0) {
       close(pipefd[0]);
+
+      int dev_null = open("/dev/null", O_WRONLY);
+      if (dev_null == -1) {
+          perror("open");
+          exit(EXIT_FAILURE);
+      }
+
+      if (dup2(dev_null, STDOUT_FILENO) == -1) {
+          perror("dup2");
+          exit(EXIT_FAILURE);
+      }
+
+      close(dev_null);
 
       dup2(pipefd[1], STDERR_FILENO);
 
