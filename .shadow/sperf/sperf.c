@@ -94,13 +94,15 @@ char* get_prog_dir(char *command, bool need_dir) {
     // assert(0);
     while(directory != NULL) {
         DIR* dir = opendir(directory);
-        struct dirent* entry;
-        while((entry = readdir(dir)) != NULL) {
-            if(strcmp(entry->d_name, program) == 0) {
-              return directory;
-            }
+        if (dir != NULL) {
+          struct dirent* entry;
+          while((entry = readdir(dir)) != NULL) {
+              if(strcmp(entry->d_name, program) == 0) {
+                return directory;
+              }
+          }
+          closedir(dir);
         }
-        closedir(dir);
         directory = strtok(NULL, ":");
     }
   }
@@ -187,7 +189,7 @@ void store_in_matrix(char* buffer) {
 }
 
 int main(int argc, char *argv[]) {
-  assert(0);
+  // assert(0);
   char* exec_strace = get_exec_prog("strace");
   // printf("the strace: %s\n", exec_strace);
   assert(exec_strace[0] != 's');
