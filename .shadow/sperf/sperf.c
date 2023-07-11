@@ -176,7 +176,7 @@ int main(int argc, char *argv[]) {
   char* env_path = build_sub_path();
   int pipefd[2];
   char *envp[] = {env_path, NULL};
-  pid_t pid;
+  pid_t pid = 0;
 
   // 创建一个管道
   if (pipe(pipefd) == -1) {
