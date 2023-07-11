@@ -38,7 +38,7 @@ int compare(const void *a, const void *b) {
 }
 
 void parse_store_syscall(Syscall the_call) {
-  printf("%s (%.2f%%)\n", the_call.name, (the_call.time_cnt / (float)(total_time) * 100));
+  printf("%s (%d%%)\n", the_call.name, (int)(the_call.time_cnt / ((float)total_time) * 100));
   fflush(stdout);
 }
 
@@ -62,6 +62,7 @@ void print_max_five_syscall() {
 
 void print_stats(int signum) {
   print_max_five_syscall();
+  print_judge();
   alarm(1);
 }
 
@@ -104,7 +105,7 @@ char* get_prog_dir(char *command, bool need_dir) {
 
 char* get_exec_prog(char* command) {
   bool need_dir = false;
-  if (command[0] != SLASH) {
+  if (command[0] != SLASH && command[0] != '.') {
     need_dir = true;
   }
   char* prog_dir = get_prog_dir(command, need_dir);
@@ -183,6 +184,7 @@ void store_in_matrix(char* buffer) {
 
 int main(int argc, char *argv[]) {
   char* exec_strace = get_exec_prog("strace");
+  assert(exec_strace[0] != 's');
   char* exec_prog = get_exec_prog(argv[1]);
   char** args = build_args(argc, argv, exec_prog);
   char* env_path = build_sub_path();
@@ -230,7 +232,7 @@ int main(int argc, char *argv[]) {
 
       alarm(1);
       int status; 
-      char buffer[1024];
+      char buffer[8192];
       ssize_t count;
       while (fgets(buffer, sizeof(buffer), fdopen(pipefd[0], "r"))) {
           store_in_matrix(buffer);
