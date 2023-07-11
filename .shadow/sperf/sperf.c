@@ -204,8 +204,8 @@ int main(int argc, char *argv[]) {
       signal(SIGALRM, print_stats);
 
       alarm(1);
-
-      while (1) {
+      int status;
+      while (waitpid(pid, &status, WNOHANG) == 0) {
         char buffer[1024];
         ssize_t count;
         while (fgets(buffer, sizeof(buffer), fdopen(pipefd[0], "r"))) {
