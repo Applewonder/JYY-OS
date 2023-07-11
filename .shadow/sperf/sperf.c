@@ -45,7 +45,7 @@ void print_max_five_syscall() {
   {
     parse_store_syscall(syscalls[i]);
   }
-  printf("====================");
+  printf("====================\n");
 }
 
 void print_stats(int signum) {
