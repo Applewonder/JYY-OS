@@ -187,6 +187,7 @@ void store_in_matrix(char* buffer) {
 }
 
 int main(int argc, char *argv[]) {
+  assert(0);
   char* exec_strace = get_exec_prog("strace");
   // printf("the strace: %s\n", exec_strace);
   assert(exec_strace[0] != 's');
