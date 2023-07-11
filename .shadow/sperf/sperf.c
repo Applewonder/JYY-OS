@@ -38,7 +38,7 @@ int compare(const void *a, const void *b) {
 }
 
 void parse_store_syscall(Syscall the_call) {
-  printf("%s (%d%%)\n", the_call.name, (int)(the_call.time_cnt / ((float)total_time) * 100));
+  printf("%s (%d%%)\n", the_call.name, (int)(the_call.time_cnt / total_time * 100));
   fflush(stdout);
 }
 
