@@ -240,7 +240,7 @@ int main(int argc, char *argv[]) {
           store_in_matrix(buffer);
           // printf("%s", buffer);
       }
-      print_stats(0);
+      print_stats(SIGALRM);
       wait(NULL);
   }
   return 0;
