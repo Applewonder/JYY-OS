@@ -27,7 +27,7 @@ double total_time = 0;
 void print_judge() {
   for (int i = 0; i < 80; i++)
   {
-    printf("\0");
+    printf("%c", '\0');
   }
   
 }
