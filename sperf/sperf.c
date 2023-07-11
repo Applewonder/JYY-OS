@@ -239,7 +239,6 @@ int main(int argc, char *argv[]) {
           // printf("%s", buffer);
       }
       print_stats(0);
-      print_judge();
       wait(NULL);
   }
   return 0;
