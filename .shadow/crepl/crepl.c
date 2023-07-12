@@ -148,7 +148,7 @@ int main(int argc, char *argv[]) {
       // bool is_eval = eval_judger(line);
       char* ready_to_eval = build_wrapper(line);
       char* dl_path = malloc(sizeof(char) * 256);
-      int* the_exp = NULL;
+      int* the_exp = malloc(sizeof(int));
       bool is_valid = try_compile(ready_to_eval, dl_path, the_exp, true);
       if (is_valid) {
         int res = get_exp_res(dl_path, *the_exp);
