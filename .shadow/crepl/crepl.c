@@ -94,7 +94,7 @@ int try_compile(char* line, char* dl_name, int* exp_num, bool is_exp) {
           if (!is_exp) {
             printf("OK\n");
           } else {
-            sprintf(dl_name, "%s", output_file);
+            sprintf(dl_name, "%s", so_filename);
             *exp_num = exp_cnt - 1;
           }
           return true;
