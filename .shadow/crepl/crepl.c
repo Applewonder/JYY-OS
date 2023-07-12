@@ -49,7 +49,7 @@ char* build_wrapper(char* line) {
 }
 
 int try_compile(char* line, char* dl_name, int* exp_num, bool is_exp) {
-    char template[] = "/tmp/tempfileXXXXXX";
+    char template[] = "/tmp/tempfileXXXXXX.c";
     int fd = mkstemp(template);
 
     char* output_file = malloc(sizeof(char) * 256);
