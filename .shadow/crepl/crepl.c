@@ -49,32 +49,34 @@ char* build_wrapper(char* line) {
 }
 
 int try_compile(char* line, char* dl_name, int* exp_num, bool is_exp) {
-    char template[] = "/tmp/tempfileXXXXXX.c";
-    char* temp_filename = mktemp(template);
+    char template[] = "/tmp/tempfileXXXXXX";
+    int fd = mkstemp(template);
 
-    if (temp_filename == NULL) {
-        perror("mktemp");
+    char* output_file = malloc(sizeof(char) * 256);
+    snprintf(output_file, 256, "%s.so", template);
+
+    if (fd == -1) {
+        perror("mkstemp");
         exit(EXIT_FAILURE);
     }
 
-    FILE* file = fopen(temp_filename, "w");
+    char new_filename[256];
+    snprintf(new_filename, sizeof(new_filename), "%s.c", template);
+
+    // Rename the file
+    if (rename(template, new_filename) == -1) {
+        perror("rename");
+        exit(EXIT_FAILURE);
+    }
+
+    FILE* file = fdopen(fd, "w");
     if (file == NULL) {
-        perror("fopen");
+        perror("fdopen");
         exit(EXIT_FAILURE);
     }
 
     fprintf(file, "%s", line);
     fclose(file);
-
-    char so_filename[sizeof(temp_filename)];
-
-    strncpy(so_filename, temp_filename, sizeof(so_filename));
-
-    char* extension = strrchr(so_filename, '.');
-
-    if (extension != NULL && strcmp(extension, ".c") == 0) {
-        snprintf(extension, sizeof(so_filename) - (extension - so_filename), ".so");
-    }
 
     pid_t pid = fork();
     if (pid == -1) {
@@ -83,7 +85,7 @@ int try_compile(char* line, char* dl_name, int* exp_num, bool is_exp) {
     } else if (pid == 0) {
         // Child process
         
-        execlp("gcc", "gcc", "-shared", "-o", so_filename, template, (char *) NULL);
+        execlp("gcc", "gcc", "-shared", "-o", output_file, new_filename, (char *) NULL);
         perror("execlp");  // execlp returns only on error
         exit(EXIT_FAILURE);
     } else {
@@ -94,7 +96,7 @@ int try_compile(char* line, char* dl_name, int* exp_num, bool is_exp) {
           if (!is_exp) {
             printf("OK\n");
           } else {
-            sprintf(dl_name, "%s", so_filename);
+            sprintf(dl_name, "%s", output_file);
             *exp_num = exp_cnt - 1;
           }
           return true;
