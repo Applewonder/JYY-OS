@@ -130,6 +130,7 @@ int main(int argc, char *argv[]) {
     if (!fgets(line, sizeof(line), stdin)) {
       break;
     }
+    line[strcspn(line, "\n")] = '\0';
     bool is_func = judge_eval_or_func(line);
     if (is_func) {
       //TODO: compile is to dl
