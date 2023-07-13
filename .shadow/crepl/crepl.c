@@ -144,7 +144,7 @@ int main(int argc, char *argv[]) {
     bool is_func = judge_eval_or_func(line);
     if (is_func) {
       //TODO: compile is to dl
-      char *tmp;
+      char *tmp = malloc(sizeof(char) * 256);
       try_compile(line, tmp, NULL, false);
       dlopen(tmp, RTLD_LAZY|RTLD_GLOBAL);
     } else {
