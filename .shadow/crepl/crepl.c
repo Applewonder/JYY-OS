@@ -112,7 +112,7 @@ int try_compile(char* line, char* dl_name, int* exp_num, bool is_exp) {
 }
 
 int get_exp_res(char* dl_path, int num) {
-  void* handle = dlopen(dl_path, RTLD_LAZY);
+  void* handle = dlopen(dl_path, RTLD_LAZY|RTLD_GLOBAL);
   if (!handle) {
       fprintf(stderr, "%s\n", dlerror());
       return 1;
