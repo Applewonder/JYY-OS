@@ -85,7 +85,7 @@ int try_compile(char* line, char* dl_name, int* exp_num, bool is_exp) {
     } else if (pid == 0) {
         // Child process
         
-        execlp("gcc", "gcc", "-w", "-fPIC", "-shared", "-o", output_file, new_filename, (char *) NULL);
+        execlp("gcc", "gcc", "-w", "-fPIC", "-shared", "-o", output_file, new_filename, "-L.", (char *) NULL);
         perror("execlp");  // execlp returns only on error
         exit(EXIT_FAILURE);
     } else {
