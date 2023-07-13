@@ -94,6 +94,7 @@ int try_compile(char* line, char* dl_name, int* exp_num, bool is_exp) {
         waitpid(pid, &status, 0);  // Wait for the child to finish
         if (WIFEXITED(status) && WEXITSTATUS(status) == 0) {
           if (!is_exp) {
+            sprintf(dl_name, "%s", output_file);
             printf("OK\n");
           } else {
             sprintf(dl_name, "%s", output_file);
@@ -143,7 +144,9 @@ int main(int argc, char *argv[]) {
     bool is_func = judge_eval_or_func(line);
     if (is_func) {
       //TODO: compile is to dl
-      try_compile(line, NULL, NULL, false);
+      char *tmp;
+      try_compile(line, tmp, NULL, false);
+      dlopen(tmp, RTLD_LAZY|RTLD_GLOBAL);
     } else {
       // bool is_eval = eval_judger(line);
       char* ready_to_eval = build_wrapper(line);
