@@ -84,8 +84,13 @@ int try_compile(char* line, char* dl_name, int* exp_num, bool is_exp) {
         exit(EXIT_FAILURE);
     } else if (pid == 0) {
         // Child process
+#if defined(__x86_64__) || defined(_M_X64)
+    execlp("gcc", "gcc", "-m64", "-w", "-fPIC", "-shared", "-o", output_file, new_filename, "-L.", (char *) NULL);
+#elif defined(__i386__) || defined(_M_IX86)
+    execlp("gcc", "gcc", "-m32", "-w", "-fPIC", "-shared", "-o", output_file, new_filename, "-L.", (char *) NULL);
+#endif
         
-        execlp("gcc", "gcc", "-w", "-fPIC", "-shared", "-o", output_file, new_filename, "-L.", (char *) NULL);
+        
         perror("execlp");  // execlp returns only on error
         exit(EXIT_FAILURE);
     } else {
