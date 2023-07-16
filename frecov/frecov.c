@@ -17,6 +17,8 @@ typedef struct BITMAPFILEHEADER BMFileHdr;
 typedef struct BITMAPINFOHEADER BMInfoHdr;
 typedef struct fat32dent Fat32Dent;
 typedef struct longentry LFN_ENTRY;
+typedef enum cluster_type Clu_Type;
+typedef struct dir_node Dir_Node;
 
 // Copied from the manual
 struct fat32hdr {
@@ -75,7 +77,12 @@ struct longentry{
   u16 name2[6];        
   u16 first_cluster;   
   u16 name3[2];        
-} __attribute__((packed));;
+} __attribute__((packed));
+
+struct dir_node {
+  u32 clu_num;
+  Dir_Node* nxt;
+};
 
 struct BITMAPFILEHEADER {
   u16 type;             // Magic identifier, must be 'BM'
@@ -99,9 +106,24 @@ struct BITMAPINFOHEADER {
   u32 importantcolours; // Important colors
 } __attribute__((packed));
 
+enum cluster_type {
+  DIR,
+  BMP_F,
+  BMP_I,
+  UNUSED
+};
+
 Fat32Hdr *hdr;
+Dir_Node* Dir_Begin;
 
 void *map_disk(const char *fname);
+void* Cluster_to_Addr(u32 n);
+u32 Addr_to_Cluster(void* addr);
+bool judge_if_dir(void* cluster);
+bool judge_if_unused(void* cluster);
+bool judge_if_bmp_hdr(void* cluster);
+Clu_Type decide_clu_type(void* cluster);
+void initialize_dir_begin();
 
 int main(int argc, char *argv[]) {
   if (argc < 2) {
@@ -115,12 +137,18 @@ int main(int argc, char *argv[]) {
 
   // map disk image to memory
   hdr = map_disk(argv[1]);
+  initialize_dir_begin();
 
   u32 DataSec = hdr->BPB_RsvdSecCnt + hdr->BPB_NumFATs * hdr->BPB_FATSz32;
-  u32 Clu_cnt = hdr->BPB_TotSec32 / hdr->BPB_SecPerClus;
-  for (u32 cluster = DataSec; i < ; i++)
+  u32 clu_cnt = hdr->BPB_TotSec32 / hdr->BPB_SecPerClus;
+
+  char* clu_table = malloc(clu_cnt);
+  char* dir_table = malloc(clu_cnt);
+  for (u32 clu_num = 2; clu_num < clu_cnt; clu_num++)
   {
-    /* code */
+    void* cluster = Cluster_to_Addr(clu_num);
+    Clu_Type the_type = decide_clu_type(cluster);
+    clu_table[clu_num] = the_type;
   }
   
 
@@ -128,8 +156,54 @@ int main(int argc, char *argv[]) {
   munmap(hdr, hdr->BPB_TotSec32 * hdr->BPB_BytsPerSec);
 }
 
-void* Cluster_to_addr(u32 n) {
-  u32 data_
+void initialize_dir_begin() {
+  Dir_Begin = malloc(sizeof(Dir_Node));
+  Dir_Begin->clu_num = 0;
+  Dir_Begin->nxt = NULL;
+}
+
+void process_the_cluster(void* cluster, Clu_Type clu_type) {
+  switch (clu_type){
+    case DIR: {
+      
+      break;
+    }
+    case BMP_F: {
+      break;
+    }
+    case BMP_I:
+    case UNUSED:
+      break;
+  }
+}
+
+
+
+Clu_Type decide_clu_type(void* cluster) {
+  if (judge_if_bmp_hdr(cluster)) {
+    return BMP_F;
+  }
+  if (judge_if_dir(cluster)) {
+    
+    return DIR;
+  }
+  if (judge_if_unused(cluster)) {
+    return UNUSED;
+  }
+  return BMP_I;
+}
+
+void* Cluster_to_Addr(u32 n) {
+  u32 data_sec = hdr->BPB_RsvdSecCnt + hdr->BPB_NumFATs * hdr->BPB_FATSz32 + (n - 2) * hdr->BPB_SecPerClus;
+  u32 byte_offset = data_sec * hdr->BPB_BytsPerSec;
+  return (void*) hdr + byte_offset;
+}
+
+u32 Addr_to_Cluster(void* addr) {
+  u32 byte_offset = (u32) (addr - (void*) hdr);
+  u32 data_sec = byte_offset / hdr->BPB_BytsPerSec;
+  u32 n = (data_sec - hdr->BPB_RsvdSecCnt - hdr->BPB_NumFATs * hdr->BPB_FATSz32) / hdr->BPB_SecPerClus + 2;
+  return n;
 }
 
 bool judge_if_dir(void* cluster) {
