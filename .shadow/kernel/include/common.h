@@ -6,7 +6,7 @@
 #include <klib.h>
 #include <klib-macros.h>
 
-typedef int spinlock_t;
+typedef int my_spinlock_t;
 
 #define SPIN_LOCK_INIT 0
 

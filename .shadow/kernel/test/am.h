@@ -13,7 +13,7 @@
 #define CPU_NUM 6
 
 typedef unsigned long uintptr_t;
-typedef int spinlock_t;
+typedef int my_spinlock_t;
 
 int cpu_count();
 
