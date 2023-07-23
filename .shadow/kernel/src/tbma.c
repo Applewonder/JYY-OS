@@ -12,7 +12,7 @@ Tree all_trees[MAX_TREE + 1];//tree index begin from 1
     mutex_t mutex_tree_locks[MAX_TREE + 1];
 #endif
 Tree_Index cpu_trees[MAX_CPU][MAX_TREE + 1];//for slab;
-spinlock_t tree_locks[MAX_TREE + 1];
+my_spinlock_t tree_locks[MAX_TREE + 1];
 static void* real_start_addr;
 static void* begin_alloc_addr;
 int tree_num = 0;
