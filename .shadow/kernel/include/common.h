@@ -9,6 +9,7 @@
 typedef int my_spinlock_t;
 
 #define SPIN_LOCK_INIT 0
+#define K_LOCK_NAME 128
 
 void spin_lock(int *lk);
 

@@ -5,7 +5,10 @@ struct task {
 };
 
 struct spinlock {
-  // TODO
+    my_spinlock_t lock;
+
+    char name[K_LOCK_NAME];        // Name of lock.
+    int cpu_num;       // The cpu holding the lock.
 };
 
 struct semaphore {
