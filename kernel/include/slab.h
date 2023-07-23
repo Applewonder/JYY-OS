@@ -30,7 +30,7 @@ enum SLAB_SIZE_{
 
 struct SLAB_STICK_{
 #ifndef TEST
-    spinlock_t slab_lock;
+    my_spinlock_t slab_lock;
 #else
     mutex_t slab_lock;
 #endif
