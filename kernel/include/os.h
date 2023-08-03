@@ -7,6 +7,7 @@ void pop_off();
 
 typedef struct i_cpu_ I_CPU;
 typedef struct cpu_tasks_ CPU_TASKS;
+typedef struct _irq IRQ;
 
 struct i_cpu_ {
   int noff;                   // Depth of push_off() nesting.
@@ -44,5 +45,14 @@ struct semaphore {
   spinlock_t lock;//Too slow remove volatile
   volatile task_t* task_list[K_MAX_TASK];
 };
+
+struct _irq {
+  // TODO
+  int seq;
+  int event;
+  handler_t handler;
+  IRQ* next;
+};
+
 
 #endif

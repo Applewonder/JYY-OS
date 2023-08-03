@@ -1,5 +1,8 @@
 #include <alloca.h>
 #include <common.h>
+#include <os.h>
+
+static IRQ* irq_head = NULL;
 
 static void os_init() {
   pmm->init();
@@ -15,7 +18,37 @@ static void os_run() {
 }
 
 static void os_on_irq(int seq, int event, handler_t handler) {
+  IRQ* new_handler = pmm->alloc(sizeof(IRQ));
+  new_handler->seq = seq;
+  new_handler->event = event;
+  new_handler->handler = handler;
+  new_handler->next = NULL;
+  if (irq_head == NULL)
+  {
+    irq_head = new_handler;
+    return;
+  }
   
+  IRQ* cur = irq_head;
+  if (irq_head->seq >= seq)
+  {
+    new_handler->next = irq_head;
+    irq_head = new_handler;
+    return;
+  }
+
+  while (cur->next != NULL)
+  {
+    if (cur->next->seq >= seq)
+    {
+      new_handler->next = cur->next;
+      cur->next = new_handler;
+      return;
+    }
+    cur = cur->next;
+  }
+  
+  cur->next = new_handler;
 }
 
 static Context *os_trap(Event ev, Context *context) {
