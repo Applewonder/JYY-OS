@@ -47,13 +47,23 @@ static void os_on_irq(int seq, int event, handler_t handler) {
     }
     cur = cur->next;
   }
-  
+
   cur->next = new_handler;
 }
 
 static Context *os_trap(Event ev, Context *context) {
-  
-  return NULL;
+  Context *next = NULL;
+  IRQ* irq_ptr = irq_head;
+  while(irq_ptr != NULL) {
+    if (irq_ptr->event == EVENT_NULL || irq_ptr->event == ev.event) {
+      Context *r = irq_ptr->handler(ev, context);
+      panic_on(r && next, "returning multiple contexts");
+      if (r) next = r;
+    }
+  }
+  panic_on(!next, "returning NULL context");
+  // panic_on(sane_context(next), "returning to invalid context");
+  return next;
 }
 
 MODULE_DEF(os) = {
