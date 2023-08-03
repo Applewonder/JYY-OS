@@ -10,6 +10,7 @@ typedef int my_spinlock_t;
 
 #define SPIN_LOCK_INIT 0
 #define K_LOCK_NAME 128
+#define K_SEM_NAME 128
 #define K_MAX_TASK 8
 
 void spin_lock(int *lk);

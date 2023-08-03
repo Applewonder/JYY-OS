@@ -4,14 +4,21 @@ void push_off();
 void pop_off();
 
 typedef struct i_cpu_ I_CPU;
+typedef struct cpu_tasks_ CPU_TASKS;
 
 struct i_cpu_ {
   int noff;                   // Depth of push_off() nesting.
   int intena;                 // Were interrupts enabled before push_off()?
 };
 
+struct cpu_tasks_ {
+  I_CPU interrupt;
+  task_t* current_task;
+};
+
 union task {
   struct {
+    bool block;
     int status;
     const char *name;
     union task *next;
@@ -29,8 +36,9 @@ struct spinlock {
 
 struct semaphore {
   // TODO
-  int resource;
-  spinlock_t lock;
-  task_t* task_list[K_MAX_TASK];
-  int task_cnt;
+  char name[K_SEM_NAME];
+  volatile int resource;
+  volatile int task_cnt;
+  spinlock_t lock;//Too slow remove volatile
+  volatile task_t* task_list[K_MAX_TASK];
 };
