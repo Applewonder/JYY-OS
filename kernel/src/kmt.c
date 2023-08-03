@@ -109,9 +109,13 @@ void kmt_sem_init(sem_t *sem, const char *name, int value) {
     spin_unlock(&sem_init_lock);
 }
 
+int kmt_create(task_t *task, const char *name, void (*entry)(void *arg), void *arg) {
+    
+}
+
 MODULE_DEF(kmt) = {
     // .init  = kmt_init,
-    // .create = kcreate,
+    .create = kmt_create,
     // .teardown  = kteardown,
     .spin_init = kmt_spin_init,
     .spin_lock = kmt_spin_lock,

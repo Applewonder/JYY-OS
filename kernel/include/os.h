@@ -19,7 +19,7 @@ struct cpu_tasks_ {
   task_t* current_task;
 };
 
-union task {
+struct task {
   struct {
     bool block;
     int status;
