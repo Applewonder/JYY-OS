@@ -1,3 +1,5 @@
+#ifndef __OS_H__
+#define __OS_H__
 #include <common.h>
 
 void push_off();
@@ -25,7 +27,7 @@ union task {
     Context   *context;
   };
   uint8_t stack[4096];
-} Task;
+};
 
 struct spinlock {
     my_spinlock_t lock;
@@ -42,3 +44,5 @@ struct semaphore {
   spinlock_t lock;//Too slow remove volatile
   volatile task_t* task_list[K_MAX_TASK];
 };
+
+#endif
