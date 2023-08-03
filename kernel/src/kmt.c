@@ -2,8 +2,11 @@
 #include <os.h>
 
 CPU_TASKS cpu_list[MAX_CPU];
+task_t* task_list[MAX_TASK];
+int task_cnt;
 
-my_spinlock_t sem_init_lock = SPIN_LOCK_INIT;
+spinlock_t sem_init_lock;
+spinlock_t task_init_lock;
 
 int holding(spinlock_t *lk)
 {
@@ -99,24 +102,58 @@ void kmt_sem_init(sem_t *sem, const char *name, int value) {
     // for (int i = 0; i < K_MAX_TASK; i++) {
     //     sem->task_list[i] = NULL;
     // }
-    spin_lock(&sem_init_lock);
+    kmt_spin_lock(&sem_init_lock);
     memset(sem->name, '\0', strlen(name));
     strcpy(sem->name, name);
     sem->resource = value;
     sem->task_cnt = 0;
     kmt_spin_init(&sem->lock, "sem");
     memset(sem->task_list, '\0', sizeof(task_t *) * K_MAX_TASK);
-    spin_unlock(&sem_init_lock);
+    kmt_spin_unlock(&sem_init_lock);
 }
 
 int kmt_create(task_t *task, const char *name, void (*entry)(void *arg), void *arg) {
+    kmt_spin_lock(&task_init_lock);
     
+    memset(task->name, '\0', strlen(name));
+    strcpy(task->name, name);
+    memset(task->stack, '\0', sizeof(uint8_t) * STACK_SIZE);
+    task->context = kcontext((Area) {(void *) task->stack, (void *) (task->stack + STACK_SIZE)}, entry, arg);
+    kmt_spin_init(&task->status, name);
+
+    task->id = task_cnt;
+    task_list[task_cnt++] = task;
+    kmt_spin_unlock(&task_init_lock);
+    return 0;
 }
+
+void kmt_teardown(task_t *task) {
+    kmt_spin_lock(&task_init_lock);
+    int id = task->id;
+    task_list[id] = task_list[--task_cnt];
+    kmt_spin_unlock(&task_init_lock);
+}
+
+void kmt_init() {
+    task_cnt = 0;
+    kmt_spin_init(&sem_init_lock, "sem_init_lock");
+    kmt_spin_init(&task_init_lock, "task_init_lock");
+    for (int i = 0; i < cpu_count(); i++) {
+        cpu_list[i].current_task = NULL;
+        cpu_list[i].interrupt.noff = 0;
+        cpu_list[i].interrupt.intena = 0;
+    }
+    for (int i = 0; i < MAX_TASK; i++) {
+        task_list[i] = NULL;
+    }
+}
+
+
 
 MODULE_DEF(kmt) = {
     // .init  = kmt_init,
     .create = kmt_create,
-    // .teardown  = kteardown,
+    .teardown  = kmt_teardown,
     .spin_init = kmt_spin_init,
     .spin_lock = kmt_spin_lock,
     .spin_unlock = kmt_spin_unlock,

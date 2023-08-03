@@ -105,7 +105,7 @@ void kmt_sem_init(sem_t *sem, const char *name, int value) {
     sem->resource = value;
     sem->task_cnt = 0;
     kmt_spin_init(&sem->lock, "sem");
-    memset(sem->task_list, '\0', sizeof(task_t *) * K_MAX_TASK);
+    memset(sem->task_list, '\0', sizeof(task_t *) * MAX_TASK);
     spin_unlock(&sem_init_lock);
 }
 
