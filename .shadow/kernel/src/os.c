@@ -18,6 +18,7 @@ static void os_run() {
 }
 
 static void os_on_irq(int seq, int event, handler_t handler) {
+  putch('a');
   IRQ* new_handler = pmm->alloc(sizeof(IRQ));
   new_handler->seq = seq;
   new_handler->event = event;
