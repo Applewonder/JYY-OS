@@ -46,6 +46,9 @@ bool kmt_try_spin_lock(spinlock_t *lk) {
     TRACE_ENTRY;
     push_off();
     if (try_lock(&lk->lock)) {
+#ifdef TRACE_F
+        printf("get lock %s\n", lk->name);
+#endif
         lk->cpu_num = cpu_current();
         return true;
     }
@@ -59,20 +62,24 @@ void kmt_spin_lock(spinlock_t *lk) {
     TRACE_ENTRY;
     push_off();
     spin_lock(&lk->lock);
+#ifdef TRACE_F
+    printf("get lock %s\n", lk->name);
+#endif
     lk->cpu_num = cpu_current();
     TRACE_EXIT;
 }
 
 void kmt_spin_unlock(spinlock_t *lk) {
-    TRACE_ENTRY;
     if (!holding(lk)) {
         //TODO: print lock name
         panic("release");
     }
     lk->cpu_num = -1;
+#ifdef TRACE_F
+    printf("release lock %s\n", lk->name);
+#endif
     spin_unlock(&lk->lock);
     pop_off();
-    TRACE_EXIT;
 }
 
 void kmt_spin_init(spinlock_t *lk, const char *name) {
@@ -129,7 +136,7 @@ void kmt_sem_init(sem_t *sem, const char *name, int value) {
     strcpy(sem->name, name);
     sem->resource = value;
     sem->task_cnt = 0;
-    kmt_spin_init(&sem->lock, "sem");
+    kmt_spin_init(&sem->lock, name);
     memset(sem->task_list, '\0', sizeof(task_t *) * K_MAX_TASK);
     kmt_spin_unlock(&sem_init_lock);
 }
