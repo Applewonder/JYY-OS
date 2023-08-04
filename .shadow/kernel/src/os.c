@@ -51,7 +51,7 @@ static void os_run() {
   // }
   iset(true);
   while (1) {
-    assert(0);
+    panic("No user task!\n");
     putch('a');
     yield();
   }
