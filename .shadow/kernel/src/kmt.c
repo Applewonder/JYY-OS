@@ -67,7 +67,7 @@ void kmt_spin_lock(spinlock_t *lk) {
 }
 
 void kmt_spin_unlock(spinlock_t *lk) {
-    if (holding(lk)) {
+    if (!holding(lk)) {
         //TODO: print lock name
         panic("release");
     }
