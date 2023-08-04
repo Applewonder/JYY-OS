@@ -182,6 +182,7 @@ Context* kmt_schedule(Event ev, Context *c) {
             break;
         }
     }
+    panic_on(cpu_list[cpu_id].current_task == NULL, "No task to schedule");
     return cpu_list[cpu_id].current_task->context;
 }
 
