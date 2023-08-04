@@ -77,6 +77,7 @@ void kmt_spin_init(spinlock_t *lk, const char *name) {
 }
 
 void kmt_sem_wait(sem_t *sem) {
+    TRACE_ENTRY;
     // spin_lock(&sem->lock); // 获得自旋锁
     kmt_spin_lock(&sem->lock);
     sem->resource--; // 自旋锁保证原子性
@@ -92,9 +93,11 @@ void kmt_sem_wait(sem_t *sem) {
                 // (注意此时可能有线程执行 V 操作)
         yield(); // 引发一次上下文切换
     }
+    TRACE_EXIT;
 }
 
 void kmt_sem_signal(sem_t *sem) {
+    TRACE_ENTRY;
     // spin_lock(&sem->lock); // 获得自旋锁
     kmt_spin_lock(&sem->lock);
     sem->resource++; // 自旋锁保证原子性
@@ -104,6 +107,7 @@ void kmt_sem_signal(sem_t *sem) {
         sem->task_list[task_id] = sem->task_list[--sem->task_cnt];
     }
     kmt_spin_unlock(&sem->lock);
+    TRACE_EXIT;
 }
 
 void kmt_sem_init(sem_t *sem, const char *name, int value) {
@@ -173,7 +177,7 @@ Context* kmt_schedule(Event ev, Context *c) {
     if (cpu_list[cpu_id].current_task == NULL) {
         cpu_list[cpu_id].current_task = cpu_list[cpu_id].idle_task;
     }
-    
+
     for (int i = 0; i < task_cnt; i++) {
         int rand_id = rand() % task_cnt;
         if (task_list[rand_id]->block) {
