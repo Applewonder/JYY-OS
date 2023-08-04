@@ -2,18 +2,53 @@
 #include <common.h>
 #include <os.h>
 
+#ifdef DEBUG_DEV
+#include <devices.h>
+#endif
+
 static IRQ* irq_head = NULL;
+
+#ifdef DEBUG_DEV
+static void tty_reader(void *arg) {
+  device_t *tty = dev->lookup(arg);
+  char cmd[128], resp[128], ps[16];
+  snprintf(ps, 16, "(%s) $ ", arg);
+  while (1) {
+    tty->ops->write(tty, 0, ps, strlen(ps));
+    int nread = tty->ops->read(tty, 0, cmd, sizeof(cmd) - 1);
+    cmd[nread] = '\0';
+    sprintf(resp, "tty reader task: got %d character(s).\n", strlen(cmd));
+    tty->ops->write(tty, 0, resp, strlen(resp));
+  }
+}
+#endif
+
+#ifdef DEBUG_PRINT
+static void print_task(void *arg) {
+  while (1) {
+    printf("Hello from print_task!\n");
+  }
+}
+#endif
 
 static void os_init() {
   pmm->init();
   kmt->init();
+#ifdef DEBUG_PRINT
+  kmt->create(pmm->alloc(sizeof(task_t)), "print_task", print_task, NULL);
+#endif
+
+#ifdef DEBUG_DEV
   dev->init();
+  kmt->create(pmm->alloc(sizeof(task_t)), "tty_reader", tty_reader, "tty1");
+  kmt->create(pmm->alloc(sizeof(task_t)), "tty_reader", tty_reader, "tty2");
+#endif
 }
 
 static void os_run() {
-  for (const char *s = "Hello World from CPU #*\n"; *s; s++) {
-    // putch(*s == '*' ? '0' + cpu_current() : *s);
-  }
+  // for (const char *s = "Hello World from CPU #*\n"; *s; s++) {
+  //   // putch(*s == '*' ? '0' + cpu_current() : *s);
+  // }
   
   while (1);
 }

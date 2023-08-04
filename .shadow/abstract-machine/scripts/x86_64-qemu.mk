@@ -14,3 +14,10 @@ run: build-arg
 
 debug: build-arg
 	@qemu-system-x86_64 -s -S $(QEMU_FLAGS)
+
+testdev: build-arg
+    @qemu-system-x86_64 $(QEMU_FLAGS)
+
+testprint: build-arg
+    @qemu-system-x86_64 $(QEMU_FLAGS)
+
