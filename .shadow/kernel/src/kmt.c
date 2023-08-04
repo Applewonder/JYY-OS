@@ -177,7 +177,9 @@ Context* kmt_context_save(Event ev, Context *c){
     int cpu_id = cpu_current();
     cpu_list[cpu_id].current_task->context = c;
     if (cpu_list[cpu_id].save_task && cpu_list[cpu_id].save_task != cpu_list[cpu_id].current_task) {
-        kmt_spin_unlock(&cpu_list[cpu_id].save_task->status);
+        if (cpu_list[cpu_id].save_task->id >=0) {
+            kmt_spin_unlock(&cpu_list[cpu_id].save_task->status);
+        }
     }
     cpu_list[cpu_id].save_task = cpu_list[cpu_id].current_task;
     TRACE_EXIT;
