@@ -49,6 +49,7 @@ static void os_on_irq(int seq, int event, handler_t handler) {
   }
 
   cur->next = new_handler;
+  panic_on(irq_head == NULL, "irq_head is NULL");
 }
 
 static Context *os_trap(Event ev, Context *context) {
