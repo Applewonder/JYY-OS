@@ -108,6 +108,7 @@ static Context *os_trap(Event ev, Context *context) {
       panic_on(r && next, "returning multiple contexts");
       if (r) next = r;
     }
+    irq_ptr = irq_ptr->next;
   }
   panic_on(!next, "returning NULL context");
   // panic_on(sane_context(next), "returning to invalid context");
