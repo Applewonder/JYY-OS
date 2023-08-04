@@ -215,7 +215,7 @@ void kmt_init() {
 }
 
 MODULE_DEF(kmt) = {
-    // .init  = kmt_init,
+    .init  = kmt_init,
     .create = kmt_create,
     .teardown  = kmt_teardown,
     .spin_init = kmt_spin_init,
