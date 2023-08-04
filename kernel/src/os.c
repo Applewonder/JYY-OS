@@ -86,10 +86,11 @@ static void os_run() {
   // for (const char *s = "Hello World from CPU #*\n"; *s; s++) {
   //   // putch(*s == '*' ? '0' + cpu_current() : *s);
   // }
+  
   iset(true);
   while (1) {
-    panic("No user task!\n");
-    putch('a');
+    // panic("No user task!\n");
+    // putch('a');
     yield();
   }
 }
@@ -136,6 +137,7 @@ static void os_on_irq(int seq, int event, handler_t handler) {
 }
 
 static Context *os_trap(Event ev, Context *context) {
+  printf("cpu num: %d\n", cpu_count());
   Context *next = NULL;
   IRQ* irq_ptr = irq_head;
   panic_on(irq_ptr == NULL, "no irq handler");
