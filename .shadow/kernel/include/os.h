@@ -18,6 +18,7 @@ struct cpu_tasks_ {
   I_CPU interrupt;
   task_t* current_task;
   task_t* save_task;
+  task_t* idle_task;
 };
 
 struct spinlock {

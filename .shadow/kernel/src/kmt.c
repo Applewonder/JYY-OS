@@ -170,6 +170,7 @@ Context* kmt_context_save(Event ev, Context *c){
 
 Context* kmt_schedule(Event ev, Context *c) {
     int cpu_id = cpu_current();
+    cpu_list[cpu_id].current_task = cpu_list[cpu_id].idle_task;
     for (int i = 0; i < task_cnt; i++) {
         int rand_id = rand() % task_cnt;
         if (task_list[rand_id]->block) {
@@ -183,6 +184,15 @@ Context* kmt_schedule(Event ev, Context *c) {
     return cpu_list[cpu_id].current_task->context;
 }
 
+void initialize_idle_task(task_t* idle) {
+    memset(idle->name, '\0', strlen("idle"));
+    strcpy(idle->name, "idle");
+    memset(idle->stack, '\0', sizeof(uint8_t) * STACK_SIZE);
+    idle->context = kcontext((Area) {(void *) idle->stack, (void *) (idle->stack + STACK_SIZE)}, idle_thread, NULL);
+    kmt_spin_init(&idle->status, "idle");
+    idle->id = -1;
+}
+
 void kmt_init() {
 
     os->on_irq(MIN_SEQ, EVENT_NULL, kmt_context_save);   
@@ -192,13 +202,13 @@ void kmt_init() {
     kmt_spin_init(&sem_init_lock, "sem_init_lock");
     kmt_spin_init(&task_init_lock, "task_init_lock");
     for (int i = 0; i < cpu_count(); i++) {
+        initialize_idle_task(cpu_list[i].idle_task);
+        cpu_list[i].save_task = NULL;
         cpu_list[i].current_task = NULL;
         cpu_list[i].interrupt.noff = 0;
         cpu_list[i].interrupt.intena = 0;
     }
-    for (int i = 0; i < MAX_TASK; i++) {
-        task_list[i] = NULL;
-    }
+    memset(task_list, '\0', sizeof(task_t *) * K_MAX_TASK);
 }
 
 MODULE_DEF(kmt) = {
