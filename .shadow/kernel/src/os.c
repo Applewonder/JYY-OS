@@ -50,7 +50,9 @@ static void os_run() {
   //   // putch(*s == '*' ? '0' + cpu_current() : *s);
   // }
   iset(true);
-  while (1);
+  while (1) {
+    yield();
+  }
 }
 
 static void os_on_irq(int seq, int event, handler_t handler) {
