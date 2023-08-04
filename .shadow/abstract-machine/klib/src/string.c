@@ -68,6 +68,7 @@
 #if !defined(__ISA_NATIVE__) || defined(__NATIVE_USE_KLIB__)
 
 void *memset(void *v, int c, size_t n) {
+    assert(v != NULL);
     char *p = (char *) v;
     for (size_t i = 0; i < n; i++, p++) {
         *p = c;
@@ -76,6 +77,7 @@ void *memset(void *v, int c, size_t n) {
 }
 
 void *memcpy(void *dst, const void *src, size_t n) {
+    assert(dst != NULL && src != NULL);
     char *p_dst = (char *) dst;
     const char *p_src = (const char *) src;
     for (size_t i = 0; i < n; i++, p_dst++, p_src++) {
@@ -85,6 +87,7 @@ void *memcpy(void *dst, const void *src, size_t n) {
 }
 
 void *memmove(void *dst, const void *src, size_t n) {
+    assert(dst != NULL && src != NULL);
     char *p_dst = (char *) dst;
     const char *p_src = (const char *) src;
     if (dst > src) {
@@ -100,6 +103,7 @@ void *memmove(void *dst, const void *src, size_t n) {
 }
 
 int memcmp(const void *s1, const void *s2, size_t n) {
+    assert(s1 != NULL && s2 != NULL);
     const char *p_s1 = (const char *) s1;
     const char *p_s2 = (const char *) s2;
     for (size_t i = 0; i < n; i++, p_s1++, p_s2++) {
@@ -111,6 +115,7 @@ int memcmp(const void *s1, const void *s2, size_t n) {
 }
 
 size_t strlen(const char *s) {
+    assert(s != NULL);
     size_t len = 0;
     const char *p = s;
     for (; *p; p++, len++) {}
@@ -118,16 +123,19 @@ size_t strlen(const char *s) {
 }
 
 char *strcat(char *dst, const char *src) {
+    assert(dst != NULL && src != NULL);
     char *p_dst = dst + strlen(dst);
     strcpy(p_dst, src);
     return dst;
 }
 
 char *strcpy(char *dst, const char *src) {
+    assert(dst != NULL && src != NULL);
     return strncpy(dst, src, strlen(src));
 }
 
 char *strncpy(char *dst, const char *src, size_t n) {
+    assert(dst != NULL && src != NULL);
     char *p_dst = (char *) dst;
     const char *p_src = (const char *) src;
     for (size_t i = 0; i < n; i++, p_dst++, p_src++) {
@@ -138,6 +146,7 @@ char *strncpy(char *dst, const char *src, size_t n) {
 }
 
 int strcmp(const char *s1, const char *s2) {
+    assert(s1 != NULL && s2 != NULL);
     size_t len1 = strlen(s1);
     size_t len2 = strlen(s2);
     size_t n = len1 < len2 ? len1 : len2;
@@ -145,6 +154,7 @@ int strcmp(const char *s1, const char *s2) {
 }
 
 int strncmp(const char *s1, const char *s2, size_t n) {
+    assert(s1 != NULL && s2 != NULL);
     const char *p_s1 = s1;
     const char *p_s2 = s2;
     for (size_t i = 0; i < n; i++, p_s1++, p_s2++) {
