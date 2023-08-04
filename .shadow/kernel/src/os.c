@@ -7,6 +7,7 @@ static IRQ* irq_head = NULL;
 static void os_init() {
   pmm->init();
   kmt->init();
+  dev->init();
 }
 
 static void os_run() {
