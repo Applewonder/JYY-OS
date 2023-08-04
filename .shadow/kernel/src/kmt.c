@@ -43,23 +43,28 @@ void pop_off() {
 }
 
 bool kmt_try_spin_lock(spinlock_t *lk) {
+    TRACE_ENTRY;
     push_off();
     if (try_lock(&lk->lock)) {
         lk->cpu_num = cpu_current();
         return true;
     }
     pop_off();
+    TRACE_EXIT;
     return false;
 }
 
 
 void kmt_spin_lock(spinlock_t *lk) {
+    TRACE_ENTRY;
     push_off();
     spin_lock(&lk->lock);
     lk->cpu_num = cpu_current();
+    TRACE_EXIT;
 }
 
 void kmt_spin_unlock(spinlock_t *lk) {
+    TRACE_ENTRY;
     if (!holding(lk)) {
         //TODO: print lock name
         panic("release");
@@ -67,6 +72,7 @@ void kmt_spin_unlock(spinlock_t *lk) {
     lk->cpu_num = -1;
     spin_unlock(&lk->lock);
     pop_off();
+    TRACE_EXIT;
 }
 
 void kmt_spin_init(spinlock_t *lk, const char *name) {
