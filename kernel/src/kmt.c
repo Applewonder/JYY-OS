@@ -43,28 +43,42 @@ void pop_off() {
 }
 
 bool kmt_try_spin_lock(spinlock_t *lk) {
+    TRACE_ENTRY;
     push_off();
     if (try_lock(&lk->lock)) {
+#ifdef TRACE_F
+        printf("get lock %s\n", lk->name);
+#endif
         lk->cpu_num = cpu_current();
         return true;
     }
     pop_off();
+    TRACE_EXIT;
     return false;
 }
 
 
 void kmt_spin_lock(spinlock_t *lk) {
+    TRACE_ENTRY;
     push_off();
     spin_lock(&lk->lock);
+#ifdef TRACE_F
+    printf("get lock %s\n", lk->name);
+#endif
     lk->cpu_num = cpu_current();
+    TRACE_EXIT;
 }
 
 void kmt_spin_unlock(spinlock_t *lk) {
     if (!holding(lk)) {
         //TODO: print lock name
+        printf("cpu %d try to release lock %s\n", cpu_current(), lk->name);
         panic("release");
     }
     lk->cpu_num = -1;
+#ifdef TRACE_F
+    printf("release lock %s\n", lk->name);
+#endif
     spin_unlock(&lk->lock);
     pop_off();
 }
@@ -77,6 +91,7 @@ void kmt_spin_init(spinlock_t *lk, const char *name) {
 }
 
 void kmt_sem_wait(sem_t *sem) {
+    TRACE_ENTRY;
     // spin_lock(&sem->lock); // 获得自旋锁
     kmt_spin_lock(&sem->lock);
     sem->resource--; // 自旋锁保证原子性
@@ -92,9 +107,11 @@ void kmt_sem_wait(sem_t *sem) {
                 // (注意此时可能有线程执行 V 操作)
         yield(); // 引发一次上下文切换
     }
+    TRACE_EXIT;
 }
 
 void kmt_sem_signal(sem_t *sem) {
+    TRACE_ENTRY;
     // spin_lock(&sem->lock); // 获得自旋锁
     kmt_spin_lock(&sem->lock);
     sem->resource++; // 自旋锁保证原子性
@@ -104,6 +121,7 @@ void kmt_sem_signal(sem_t *sem) {
         sem->task_list[task_id] = sem->task_list[--sem->task_cnt];
     }
     kmt_spin_unlock(&sem->lock);
+    TRACE_EXIT;
 }
 
 void kmt_sem_init(sem_t *sem, const char *name, int value) {
@@ -119,7 +137,7 @@ void kmt_sem_init(sem_t *sem, const char *name, int value) {
     strcpy(sem->name, name);
     sem->resource = value;
     sem->task_cnt = 0;
-    kmt_spin_init(&sem->lock, "sem");
+    kmt_spin_init(&sem->lock, name);
     memset(sem->task_list, '\0', sizeof(task_t *) * K_MAX_TASK);
     kmt_spin_unlock(&sem_init_lock);
 }
@@ -173,7 +191,7 @@ Context* kmt_schedule(Event ev, Context *c) {
     if (cpu_list[cpu_id].current_task == NULL) {
         cpu_list[cpu_id].current_task = cpu_list[cpu_id].idle_task;
     }
-    
+    bool fine_task = false;
     for (int i = 0; i < task_cnt; i++) {
         int rand_id = rand() % task_cnt;
         if (task_list[rand_id]->block) {
@@ -181,11 +199,15 @@ Context* kmt_schedule(Event ev, Context *c) {
         }
         if (task_list[rand_id] == cpu_list[cpu_id].current_task || kmt_try_spin_lock(&task_list[rand_id]->status)) {
             cpu_list[cpu_id].current_task = task_list[rand_id];
+            fine_task = true;
             break;
         }
     }
     panic_on(cpu_list[cpu_id].current_task == NULL, "No task to schedule");
     TRACE_EXIT;
+    if(!fine_task) {
+        cpu_list[cpu_id].current_task = cpu_list[cpu_id].idle_task;
+    }
     return cpu_list[cpu_id].current_task->context;
 }
 
