@@ -18,6 +18,7 @@ static void os_run() {
 }
 
 static void os_on_irq(int seq, int event, handler_t handler) {
+  // putch('a');
   IRQ* new_handler = pmm->alloc(sizeof(IRQ));
   new_handler->seq = seq;
   new_handler->event = event;
@@ -49,11 +50,13 @@ static void os_on_irq(int seq, int event, handler_t handler) {
   }
 
   cur->next = new_handler;
+  panic_on(irq_head == NULL, "irq_head is NULL");
 }
 
 static Context *os_trap(Event ev, Context *context) {
   Context *next = NULL;
   IRQ* irq_ptr = irq_head;
+  panic_on(irq_ptr == NULL, "no irq handler");
   while(irq_ptr != NULL) {
     if (irq_ptr->event == EVENT_NULL || irq_ptr->event == ev.event) {
       Context *r = irq_ptr->handler(ev, context);

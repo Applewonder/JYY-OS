@@ -57,5 +57,3 @@ testcase6: test
 testcase7: test
 		@build/test 7
 
-debug: 
-	./debug.sh

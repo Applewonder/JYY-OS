@@ -1,5 +1,6 @@
 #include "am.h"
 #include "cbma.h"
+#include <klib.h>
 #include <os.h>
 
 #define MIN_SEQ 0
@@ -170,6 +171,7 @@ Context* kmt_context_save(Event ev, Context *c){
 
 Context* kmt_schedule(Event ev, Context *c) {
     int cpu_id = cpu_current();
+    cpu_list[cpu_id].current_task = cpu_list[cpu_id].idle_task;
     for (int i = 0; i < task_cnt; i++) {
         int rand_id = rand() % task_cnt;
         if (task_list[rand_id]->block) {
@@ -180,7 +182,18 @@ Context* kmt_schedule(Event ev, Context *c) {
             break;
         }
     }
+    panic_on(cpu_list[cpu_id].current_task == NULL, "No task to schedule");
     return cpu_list[cpu_id].current_task->context;
+}
+
+void initialize_idle_task(task_t* idle) {
+    memset(idle->name, '\0', strlen("idle"));
+    strcpy(idle->name, "idle");
+    memset(idle->stack, '\0', sizeof(uint8_t) * STACK_SIZE);
+    idle->context = kcontext((Area) {(void *) idle->stack, (void *) (idle->stack + STACK_SIZE)}, idle_thread, NULL);
+    assert(idle->context);
+    kmt_spin_init(&idle->status, "idle");
+    idle->id = -1;
 }
 
 void kmt_init() {
@@ -192,17 +205,18 @@ void kmt_init() {
     kmt_spin_init(&sem_init_lock, "sem_init_lock");
     kmt_spin_init(&task_init_lock, "task_init_lock");
     for (int i = 0; i < cpu_count(); i++) {
+        cpu_list[i].idle_task = pmm->alloc(sizeof(task_t));
+        initialize_idle_task(cpu_list[i].idle_task);
+        cpu_list[i].save_task = NULL;
         cpu_list[i].current_task = NULL;
         cpu_list[i].interrupt.noff = 0;
         cpu_list[i].interrupt.intena = 0;
     }
-    for (int i = 0; i < MAX_TASK; i++) {
-        task_list[i] = NULL;
-    }
+    memset(task_list, '\0', sizeof(task_t *) * K_MAX_TASK);
 }
 
 MODULE_DEF(kmt) = {
-    // .init  = kmt_init,
+    .init  = kmt_init,
     .create = kmt_create,
     .teardown  = kmt_teardown,
     .spin_init = kmt_spin_init,
