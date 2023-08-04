@@ -41,8 +41,20 @@ static void print_task(void *arg) {
 #endif
 
 #ifdef DEBUG_PV
-void Tproduce(void *arg) { while (1) { P(&empty); putch('('); V(&fill);  } }
-void Tconsume(void *arg) { while (1) { P(&fill);  putch(')'); V(&empty); } }
+void Tproduce(void *arg) { 
+  while (1) { 
+    P(&empty); 
+    putch('('); 
+    V(&fill); 
+  } 
+}
+void Tconsume(void *arg) { 
+  while (1) { 
+    P(&fill);  
+    putch(')'); 
+    V(&empty); 
+  } 
+}
 #endif
 
 static void os_init() {

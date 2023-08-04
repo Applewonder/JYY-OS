@@ -27,3 +27,6 @@ testpv: build-arg
 gdbprint: build-arg
 	@qemu-system-x86_64 -s -S $(QEMU_FLAGS)
 
+gdbpv: build-arg
+	@qemu-system-x86_64 -s -S $(QEMU_FLAGS)
+
