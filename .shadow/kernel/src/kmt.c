@@ -56,6 +56,7 @@ bool kmt_try_spin_lock(spinlock_t *lk) {
     return false;
 }
 
+
 void kmt_spin_lock(spinlock_t *lk) {
     push_off();
     if (holding(lk)) {
