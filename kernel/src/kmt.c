@@ -1,5 +1,9 @@
+#include "am.h"
 #include "cbma.h"
 #include <os.h>
+
+#define MIN_SEQ 0
+#define MAX_SEQ 10000
 
 CPU_TASKS cpu_list[MAX_CPU];
 task_t* task_list[MAX_TASK];
@@ -35,6 +39,20 @@ void pop_off() {
     if (cpu_list[cpu_current()].interrupt.noff == 0 && cpu_list[cpu_current()].interrupt.intena) {
         iset(true);
     }
+}
+
+bool kmt_try_spin_lock(spinlock_t *lk) {
+    push_off();
+    if (holding(lk)) {
+        //TODO: print lock name
+        panic("acquire");
+    }
+    if (try_lock(&lk->lock)) {
+        lk->cpu_num = cpu_current();
+        return true;
+    }
+    pop_off();
+    return false;
 }
 
 void kmt_spin_lock(spinlock_t *lk) {
@@ -134,7 +152,42 @@ void kmt_teardown(task_t *task) {
     kmt_spin_unlock(&task_init_lock);
 }
 
+void idle_thread(void *arg) {
+    while (1) {
+        yield();
+    }
+}
+
+Context* kmt_context_save(Event ev, Context *c){
+    int cpu_id = cpu_current();
+    cpu_list[cpu_id].current_task->context = c;
+    if (cpu_list[cpu_id].save_task && cpu_list[cpu_id].save_task != cpu_list[cpu_id].current_task) {
+        kmt_spin_unlock(&cpu_list[cpu_id].save_task->status);
+    }
+    cpu_list[cpu_id].save_task = cpu_list[cpu_id].current_task;
+    return NULL;
+}
+
+Context* kmt_schedule(Event ev, Context *c) {
+    int cpu_id = cpu_current();
+    for (int i = 0; i < task_cnt; i++) {
+        int rand_id = rand() % task_cnt;
+        if (task_list[rand_id]->block) {
+            continue;
+        }
+        if (task_list[rand_id] == cpu_list[cpu_id].current_task || kmt_try_spin_lock(&task_list[rand_id]->status)) {
+            cpu_list[cpu_id].current_task = task_list[rand_id];
+            break;
+        }
+    }
+    return cpu_list[cpu_id].current_task->context;
+}
+
 void kmt_init() {
+
+    os->on_irq(MIN_SEQ, EVENT_NULL, kmt_context_save);   
+    os->on_irq(MAX_SEQ, EVENT_NULL, kmt_schedule);       
+
     task_cnt = 0;
     kmt_spin_init(&sem_init_lock, "sem_init_lock");
     kmt_spin_init(&task_init_lock, "task_init_lock");
@@ -147,8 +200,6 @@ void kmt_init() {
         task_list[i] = NULL;
     }
 }
-
-
 
 MODULE_DEF(kmt) = {
     // .init  = kmt_init,
