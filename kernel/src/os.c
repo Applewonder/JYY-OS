@@ -8,12 +8,14 @@ static void os_init() {
   pmm->init();
   kmt->init();
   // dev->init();
+  // kmt->create(task_alloc(), "tty_reader", tty_reader, "tty1");
+  // kmt->create(task_alloc(), "tty_reader", tty_reader, "tty2");
 }
 
 static void os_run() {
-  for (const char *s = "Hello World from CPU #*\n"; *s; s++) {
-    // putch(*s == '*' ? '0' + cpu_current() : *s);
-  }
+  // for (const char *s = "Hello World from CPU #*\n"; *s; s++) {
+  //   // putch(*s == '*' ? '0' + cpu_current() : *s);
+  // }
   
   while (1);
 }
