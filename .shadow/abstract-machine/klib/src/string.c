@@ -63,27 +63,24 @@
 
 // #endif
 
-#include "klib.h"
-
 #if !defined(__ISA_NATIVE__) || defined(__NATIVE_USE_KLIB__)
 
-void *memset(void *v, int c, size_t n) {
-    assert(v != NULL);
-    char *p = (char *) v;
-    for (size_t i = 0; i < n; i++, p++) {
-        *p = c;
+void *memset(void *s, int c, size_t n) {
+    assert(s != NULL);
+    char *p = (char *) s;
+    for (size_t i = 0; i < n; *p = c, i++, p++) {
     }
-    return v;
+    return s;
 }
 
-void *memcpy(void *dst, const void *src, size_t n) {
-    assert(dst != NULL && src != NULL);
-    char *p_dst = (char *) dst;
-    const char *p_src = (const char *) src;
+void *memcpy(void *out, const void *in, size_t n) {
+    assert(out != NULL && in != NULL);
+    char *p_dst = (char *) out;
+    const char *p_src = (const char *) in;
     for (size_t i = 0; i < n; i++, p_dst++, p_src++) {
         *p_dst = *p_src;
     }
-    return dst;
+    return out;
 }
 
 void *memmove(void *dst, const void *src, size_t n) {
@@ -165,21 +162,20 @@ int strncmp(const char *s1, const char *s2, size_t n) {
     return 0;
 }
 
-// TODO
 char *strtok(char *s, const char *delim) {
-    return NULL;
+    panic("Not implemented");
 }
 
 char *strstr(const char *str1, const char *str2) {
-    return NULL;
+    panic("Not implemented");
 }
 
 char *strchr(const char *s, int c) {
-    return NULL;
+    panic("Not implemented");
 }
 
 char *strrchr(const char *s, int c) {
-    return NULL;
+    panic("Not implemented");
 }
 
 #endif
