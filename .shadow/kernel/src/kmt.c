@@ -177,7 +177,7 @@ Context* kmt_schedule(Event ev, Context *c) {
     if (cpu_list[cpu_id].current_task == NULL) {
         cpu_list[cpu_id].current_task = cpu_list[cpu_id].idle_task;
     }
-
+    bool fine_task = false;
     for (int i = 0; i < task_cnt; i++) {
         int rand_id = rand() % task_cnt;
         if (task_list[rand_id]->block) {
@@ -185,11 +185,15 @@ Context* kmt_schedule(Event ev, Context *c) {
         }
         if (task_list[rand_id] == cpu_list[cpu_id].current_task || kmt_try_spin_lock(&task_list[rand_id]->status)) {
             cpu_list[cpu_id].current_task = task_list[rand_id];
+            fine_task = true;
             break;
         }
     }
     panic_on(cpu_list[cpu_id].current_task == NULL, "No task to schedule");
     TRACE_EXIT;
+    if(!fine_task) {
+        cpu_list[cpu_id].current_task = cpu_list[cpu_id].idle_task;
+    }
     return cpu_list[cpu_id].current_task->context;
 }
 
