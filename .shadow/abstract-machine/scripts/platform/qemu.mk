@@ -1,8 +1,7 @@
 .PHONY: build-arg
 
 LDFLAGS    += -N -Ttext-segment=0x00100000
-QEMU_FLAGS += -s -S\
-			  -serial mon:stdio \
+QEMU_FLAGS += -serial mon:stdio \
               -machine accel=tcg \
               -smp "$(smp)" \
               -drive format=raw,file=$(IMAGE)
