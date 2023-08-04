@@ -91,7 +91,7 @@ endif
 ifeq ($(filter testpv gdbpv,$(MAKECMDGOALS)),)
 
 else
-	CFLAGS += -DDEBUG_PRINT -DTRACE_F
+	CFLAGS += -DDEBUG_PV -DTRACE_F
 endif
 
 CFLAGS   += -O2 -MMD -Wall -Werror $(INCFLAGS) \
