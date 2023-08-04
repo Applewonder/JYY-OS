@@ -19,6 +19,4 @@ testdev: build-arg
     @qemu-system-x86_64 $(QEMU_FLAGS)
 
 testprint: build-arg
-	echo "testprint"
-	@qemu-system-x86_64 $(QEMU_FLAGS)
 
