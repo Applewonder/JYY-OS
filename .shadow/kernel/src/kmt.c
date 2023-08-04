@@ -225,7 +225,6 @@ void initialize_idle_task(task_t* idle) {
 
 void kmt_init() {
     TRACE_ENTRY;
-    printf("cpu num: %d\n", cpu_count());
     os->on_irq(MIN_SEQ, EVENT_NULL, kmt_context_save);   
     os->on_irq(MAX_SEQ, EVENT_NULL, kmt_schedule);       
 
