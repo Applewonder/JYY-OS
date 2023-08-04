@@ -170,7 +170,10 @@ Context* kmt_schedule(Event ev, Context *c) {
     TRACE_ENTRY;
     int cpu_id = cpu_current();
     
-    cpu_list[cpu_id].current_task = cpu_list[cpu_id].idle_task;
+    if (cpu_list[cpu_id].current_task == NULL) {
+        cpu_list[cpu_id].current_task = cpu_list[cpu_id].idle_task;
+    }
+    
     for (int i = 0; i < task_cnt; i++) {
         int rand_id = rand() % task_cnt;
         if (task_list[rand_id]->block) {
