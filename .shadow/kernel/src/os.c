@@ -51,6 +51,7 @@ static void os_run() {
   // }
   iset(true);
   while (1) {
+    putch('a');
     yield();
   }
 }
