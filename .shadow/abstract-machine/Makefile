@@ -82,7 +82,9 @@ ifeq ($(MAKECMDGOALS), testdev)
     CFLAGS += -DDEBUG_DEV
 endif
 
-ifeq ($(MAKECMDGOALS), testprint)
+ifeq ($(filter testprint gdbprint,$(MAKECMDGOALS)),)
+
+else
 	CFLAGS += -DDEBUG_PRINT
 endif
 
