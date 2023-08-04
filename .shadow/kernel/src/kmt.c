@@ -44,10 +44,6 @@ void pop_off() {
 
 bool kmt_try_spin_lock(spinlock_t *lk) {
     push_off();
-    if (holding(lk)) {
-        //TODO: print lock name
-        panic("acquire");
-    }
     if (try_lock(&lk->lock)) {
         lk->cpu_num = cpu_current();
         return true;
@@ -59,10 +55,6 @@ bool kmt_try_spin_lock(spinlock_t *lk) {
 
 void kmt_spin_lock(spinlock_t *lk) {
     push_off();
-    if (holding(lk)) {
-        //TODO: print lock name
-        panic("acquire");
-    }
     spin_lock(&lk->lock);
     lk->cpu_num = cpu_current();
 }
