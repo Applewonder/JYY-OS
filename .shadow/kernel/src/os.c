@@ -1,5 +1,8 @@
 #include <alloca.h>
 #include <common.h>
+#include <os.h>
+
+static IRQ* irq_head = NULL;
 
 static void os_init() {
   pmm->init();
@@ -14,9 +17,60 @@ static void os_run() {
   while (1);
 }
 
+static void os_on_irq(int seq, int event, handler_t handler) {
+  IRQ* new_handler = pmm->alloc(sizeof(IRQ));
+  new_handler->seq = seq;
+  new_handler->event = event;
+  new_handler->handler = handler;
+  new_handler->next = NULL;
+  if (irq_head == NULL)
+  {
+    irq_head = new_handler;
+    return;
+  }
+  
+  IRQ* cur = irq_head;
+  if (irq_head->seq >= seq)
+  {
+    new_handler->next = irq_head;
+    irq_head = new_handler;
+    return;
+  }
+
+  while (cur->next != NULL)
+  {
+    if (cur->next->seq >= seq)
+    {
+      new_handler->next = cur->next;
+      cur->next = new_handler;
+      return;
+    }
+    cur = cur->next;
+  }
+
+  cur->next = new_handler;
+}
+
+static Context *os_trap(Event ev, Context *context) {
+  Context *next = NULL;
+  IRQ* irq_ptr = irq_head;
+  while(irq_ptr != NULL) {
+    if (irq_ptr->event == EVENT_NULL || irq_ptr->event == ev.event) {
+      Context *r = irq_ptr->handler(ev, context);
+      panic_on(r && next, "returning multiple contexts");
+      if (r) next = r;
+    }
+  }
+  panic_on(!next, "returning NULL context");
+  // panic_on(sane_context(next), "returning to invalid context");
+  return next;
+}
+
 MODULE_DEF(os) = {
   .init = os_init,
   .run  = os_run,
+  .on_irq = os_on_irq,
+  .trap = os_trap,
 };
 
 

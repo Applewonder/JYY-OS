@@ -1,9 +1,16 @@
+#include "am.h"
 #include "cbma.h"
 #include <os.h>
 
-CPU_TASKS cpu_list[MAX_CPU];
+#define MIN_SEQ 0
+#define MAX_SEQ 10000
 
-my_spinlock_t sem_init_lock = SPIN_LOCK_INIT;
+CPU_TASKS cpu_list[MAX_CPU];
+task_t* task_list[MAX_TASK];
+int task_cnt;
+
+spinlock_t sem_init_lock;
+spinlock_t task_init_lock;
 
 int holding(spinlock_t *lk)
 {
@@ -32,6 +39,20 @@ void pop_off() {
     if (cpu_list[cpu_current()].interrupt.noff == 0 && cpu_list[cpu_current()].interrupt.intena) {
         iset(true);
     }
+}
+
+bool kmt_try_spin_lock(spinlock_t *lk) {
+    push_off();
+    if (holding(lk)) {
+        //TODO: print lock name
+        panic("acquire");
+    }
+    if (try_lock(&lk->lock)) {
+        lk->cpu_num = cpu_current();
+        return true;
+    }
+    pop_off();
+    return false;
 }
 
 void kmt_spin_lock(spinlock_t *lk) {
@@ -99,20 +120,91 @@ void kmt_sem_init(sem_t *sem, const char *name, int value) {
     // for (int i = 0; i < K_MAX_TASK; i++) {
     //     sem->task_list[i] = NULL;
     // }
-    spin_lock(&sem_init_lock);
+    kmt_spin_lock(&sem_init_lock);
     memset(sem->name, '\0', strlen(name));
     strcpy(sem->name, name);
     sem->resource = value;
     sem->task_cnt = 0;
     kmt_spin_init(&sem->lock, "sem");
-    memset(sem->task_list, '\0', sizeof(task_t *) * MAX_TASK);
-    spin_unlock(&sem_init_lock);
+    memset(sem->task_list, '\0', sizeof(task_t *) * K_MAX_TASK);
+    kmt_spin_unlock(&sem_init_lock);
+}
+
+int kmt_create(task_t *task, const char *name, void (*entry)(void *arg), void *arg) {
+    kmt_spin_lock(&task_init_lock);
+    
+    memset(task->name, '\0', strlen(name));
+    strcpy(task->name, name);
+    memset(task->stack, '\0', sizeof(uint8_t) * STACK_SIZE);
+    task->context = kcontext((Area) {(void *) task->stack, (void *) (task->stack + STACK_SIZE)}, entry, arg);
+    kmt_spin_init(&task->status, name);
+
+    task->id = task_cnt;
+    task_list[task_cnt++] = task;
+    kmt_spin_unlock(&task_init_lock);
+    return 0;
+}
+
+void kmt_teardown(task_t *task) {
+    kmt_spin_lock(&task_init_lock);
+    int id = task->id;
+    task_list[id] = task_list[--task_cnt];
+    kmt_spin_unlock(&task_init_lock);
+}
+
+void idle_thread(void *arg) {
+    while (1) {
+        yield();
+    }
+}
+
+Context* kmt_context_save(Event ev, Context *c){
+    int cpu_id = cpu_current();
+    cpu_list[cpu_id].current_task->context = c;
+    if (cpu_list[cpu_id].save_task && cpu_list[cpu_id].save_task != cpu_list[cpu_id].current_task) {
+        kmt_spin_unlock(&cpu_list[cpu_id].save_task->status);
+    }
+    cpu_list[cpu_id].save_task = cpu_list[cpu_id].current_task;
+    return NULL;
+}
+
+Context* kmt_schedule(Event ev, Context *c) {
+    int cpu_id = cpu_current();
+    for (int i = 0; i < task_cnt; i++) {
+        int rand_id = rand() % task_cnt;
+        if (task_list[rand_id]->block) {
+            continue;
+        }
+        if (task_list[rand_id] == cpu_list[cpu_id].current_task || kmt_try_spin_lock(&task_list[rand_id]->status)) {
+            cpu_list[cpu_id].current_task = task_list[rand_id];
+            break;
+        }
+    }
+    return cpu_list[cpu_id].current_task->context;
+}
+
+void kmt_init() {
+
+    os->on_irq(MIN_SEQ, EVENT_NULL, kmt_context_save);   
+    os->on_irq(MAX_SEQ, EVENT_NULL, kmt_schedule);       
+
+    task_cnt = 0;
+    kmt_spin_init(&sem_init_lock, "sem_init_lock");
+    kmt_spin_init(&task_init_lock, "task_init_lock");
+    for (int i = 0; i < cpu_count(); i++) {
+        cpu_list[i].current_task = NULL;
+        cpu_list[i].interrupt.noff = 0;
+        cpu_list[i].interrupt.intena = 0;
+    }
+    for (int i = 0; i < MAX_TASK; i++) {
+        task_list[i] = NULL;
+    }
 }
 
 MODULE_DEF(kmt) = {
     // .init  = kmt_init,
-    // .create = kcreate,
-    // .teardown  = kteardown,
+    .create = kmt_create,
+    .teardown  = kmt_teardown,
     .spin_init = kmt_spin_init,
     .spin_lock = kmt_spin_lock,
     .spin_unlock = kmt_spin_unlock,
