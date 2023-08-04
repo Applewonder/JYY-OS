@@ -23,7 +23,10 @@ char *strcpy(char *dst, const char *src) {
 }
 
 char *strncpy(char *dst, const char *src, size_t n) {
-  panic("Not implemented");
+  assert(dst != NULL && src != NULL);
+  char *temp = dst;
+  while (n--) *dst++ = *src++;
+  return temp;
 }
 
 char *strcat(char *dst, const char *src) {
