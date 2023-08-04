@@ -1,11 +1,18 @@
 #include <klib.h>
 #include <klib-macros.h>
 #include <stdint.h>
+// #include <string.h>
 
 #if !defined(__ISA_NATIVE__) || defined(__NATIVE_USE_KLIB__)
 
 size_t strlen(const char *s) {
-  panic("Not implemented");
+  size_t count = 0;
+  while(*s!='\0')
+  {
+      count++;
+      s++;
+  }
+  return count;
 }
 
 char *strcpy(char *dst, const char *src) {
