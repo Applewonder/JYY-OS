@@ -2,26 +2,64 @@
 #include <common.h>
 #include <os.h>
 
+#ifdef DEBUG_DEV
+#include <devices.h>
+#endif
+
 static IRQ* irq_head = NULL;
+
+#ifdef DEBUG_DEV
+static void tty_reader(void *arg) {
+  device_t *tty = dev->lookup(arg);
+  char cmd[128], resp[128], ps[16];
+  snprintf(ps, 16, "(%s) $ ", arg);
+  while (1) {
+    tty->ops->write(tty, 0, ps, strlen(ps));
+    int nread = tty->ops->read(tty, 0, cmd, sizeof(cmd) - 1);
+    cmd[nread] = '\0';
+    sprintf(resp, "tty reader task: got %d character(s).\n", strlen(cmd));
+    tty->ops->write(tty, 0, resp, strlen(resp));
+  }
+}
+#endif
+
+#ifdef DEBUG_PRINT
+static void print_task(void *arg) {
+  while (1) {
+    printf("Hello from print_task!\n");
+  }
+}
+#endif
 
 static void os_init() {
   pmm->init();
   kmt->init();
-  // dev->init();
-  // kmt->create(task_alloc(), "tty_reader", tty_reader, "tty1");
-  // kmt->create(task_alloc(), "tty_reader", tty_reader, "tty2");
+#ifdef DEBUG_PRINT
+  kmt->create(pmm->alloc(sizeof(task_t)), "print_task", print_task, NULL);
+#endif
+
+#ifdef DEBUG_DEV
+  dev->init();
+  kmt->create(pmm->alloc(sizeof(task_t)), "tty_reader", tty_reader, "tty1");
+  kmt->create(pmm->alloc(sizeof(task_t)), "tty_reader", tty_reader, "tty2");
+#endif
 }
 
 static void os_run() {
   // for (const char *s = "Hello World from CPU #*\n"; *s; s++) {
   //   // putch(*s == '*' ? '0' + cpu_current() : *s);
   // }
-  
-  while (1);
+  iset(true);
+  while (1) {
+    panic("No user task!\n");
+    putch('a');
+    yield();
+  }
 }
 
 static void os_on_irq(int seq, int event, handler_t handler) {
   // putch('a');
+  TRACE_ENTRY;
   IRQ* new_handler = pmm->alloc(sizeof(IRQ));
   new_handler->seq = seq;
   new_handler->event = event;
@@ -30,6 +68,7 @@ static void os_on_irq(int seq, int event, handler_t handler) {
   if (irq_head == NULL)
   {
     irq_head = new_handler;
+    TRACE_EXIT;
     return;
   }
   
@@ -38,6 +77,7 @@ static void os_on_irq(int seq, int event, handler_t handler) {
   {
     new_handler->next = irq_head;
     irq_head = new_handler;
+    TRACE_EXIT;
     return;
   }
 
@@ -47,6 +87,7 @@ static void os_on_irq(int seq, int event, handler_t handler) {
     {
       new_handler->next = cur->next;
       cur->next = new_handler;
+      TRACE_EXIT;
       return;
     }
     cur = cur->next;
@@ -54,6 +95,7 @@ static void os_on_irq(int seq, int event, handler_t handler) {
 
   cur->next = new_handler;
   panic_on(irq_head == NULL, "irq_head is NULL");
+  TRACE_EXIT;
 }
 
 static Context *os_trap(Event ev, Context *context) {
@@ -66,6 +108,7 @@ static Context *os_trap(Event ev, Context *context) {
       panic_on(r && next, "returning multiple contexts");
       if (r) next = r;
     }
+    irq_ptr = irq_ptr->next;
   }
   panic_on(!next, "returning NULL context");
   // panic_on(sane_context(next), "returning to invalid context");

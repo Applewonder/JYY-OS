@@ -6,7 +6,13 @@
 #include <klib.h>
 #include <klib-macros.h>
 
-typedef int my_spinlock_t;
+#ifdef TRACE_F
+  #define TRACE_ENTRY printf("[trace] %s:entry\n", __func__)
+  #define TRACE_EXIT printf("[trace] %s:exit\n", __func__)
+#else
+  #define TRACE_ENTRY ((void)0)
+  #define TRACE_EXIT ((void)0)
+#endif
 
 #define SPIN_LOCK_INIT 0
 #define K_LOCK_NAME 128
@@ -15,6 +21,8 @@ typedef int my_spinlock_t;
 #define K_MAX_TASK 1024
 #define MAX_TASK 1024
 #define STACK_SIZE 8000
+
+typedef int my_spinlock_t;
 
 void spin_lock(int *lk);
 

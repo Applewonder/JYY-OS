@@ -44,10 +44,6 @@ void pop_off() {
 
 bool kmt_try_spin_lock(spinlock_t *lk) {
     push_off();
-    if (holding(lk)) {
-        //TODO: print lock name
-        panic("acquire");
-    }
     if (try_lock(&lk->lock)) {
         lk->cpu_num = cpu_current();
         return true;
@@ -56,12 +52,9 @@ bool kmt_try_spin_lock(spinlock_t *lk) {
     return false;
 }
 
+
 void kmt_spin_lock(spinlock_t *lk) {
     push_off();
-    if (holding(lk)) {
-        //TODO: print lock name
-        panic("acquire");
-    }
     spin_lock(&lk->lock);
     lk->cpu_num = cpu_current();
 }
@@ -132,6 +125,7 @@ void kmt_sem_init(sem_t *sem, const char *name, int value) {
 }
 
 int kmt_create(task_t *task, const char *name, void (*entry)(void *arg), void *arg) {
+    TRACE_ENTRY;
     kmt_spin_lock(&task_init_lock);
     
     memset(task->name, '\0', strlen(name));
@@ -143,6 +137,7 @@ int kmt_create(task_t *task, const char *name, void (*entry)(void *arg), void *a
     task->id = task_cnt;
     task_list[task_cnt++] = task;
     kmt_spin_unlock(&task_init_lock);
+    TRACE_EXIT;
     return 0;
 }
 
@@ -160,17 +155,21 @@ void idle_thread(void *arg) {
 }
 
 Context* kmt_context_save(Event ev, Context *c){
+    TRACE_ENTRY;
     int cpu_id = cpu_current();
     cpu_list[cpu_id].current_task->context = c;
     if (cpu_list[cpu_id].save_task && cpu_list[cpu_id].save_task != cpu_list[cpu_id].current_task) {
         kmt_spin_unlock(&cpu_list[cpu_id].save_task->status);
     }
     cpu_list[cpu_id].save_task = cpu_list[cpu_id].current_task;
+    TRACE_EXIT;
     return NULL;
 }
 
 Context* kmt_schedule(Event ev, Context *c) {
+    TRACE_ENTRY;
     int cpu_id = cpu_current();
+    
     cpu_list[cpu_id].current_task = cpu_list[cpu_id].idle_task;
     for (int i = 0; i < task_cnt; i++) {
         int rand_id = rand() % task_cnt;
@@ -183,6 +182,7 @@ Context* kmt_schedule(Event ev, Context *c) {
         }
     }
     panic_on(cpu_list[cpu_id].current_task == NULL, "No task to schedule");
+    TRACE_EXIT;
     return cpu_list[cpu_id].current_task->context;
 }
 
@@ -197,7 +197,7 @@ void initialize_idle_task(task_t* idle) {
 }
 
 void kmt_init() {
-
+    TRACE_ENTRY;
     os->on_irq(MIN_SEQ, EVENT_NULL, kmt_context_save);   
     os->on_irq(MAX_SEQ, EVENT_NULL, kmt_schedule);       
 
@@ -213,6 +213,7 @@ void kmt_init() {
         cpu_list[i].interrupt.intena = 0;
     }
     memset(task_list, '\0', sizeof(task_t *) * K_MAX_TASK);
+    TRACE_EXIT;
 }
 
 MODULE_DEF(kmt) = {
