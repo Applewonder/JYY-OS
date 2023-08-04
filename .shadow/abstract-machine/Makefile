@@ -79,13 +79,13 @@ INC_PATH += $(WORK_DIR)/include $(addsuffix /include/, $(addprefix $(AM_HOME)/, 
 INCFLAGS += $(addprefix -I, $(INC_PATH))
 
 ifeq ($(MAKECMDGOALS), testdev)
-    CFLAGS += -DDEBUG_DEV
+    CFLAGS += -DDEBUG_DEV -DTRACE_F
 endif
 
 ifeq ($(filter testprint gdbprint,$(MAKECMDGOALS)),)
 
 else
-	CFLAGS += -DDEBUG_PRINT
+	CFLAGS += -DDEBUG_PRINT -DTRACE_F
 endif
 
 CFLAGS   += -O2 -MMD -Wall -Werror $(INCFLAGS) \

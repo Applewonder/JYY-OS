@@ -59,6 +59,7 @@ static void os_run() {
 
 static void os_on_irq(int seq, int event, handler_t handler) {
   // putch('a');
+  TRACE_ENTRY;
   IRQ* new_handler = pmm->alloc(sizeof(IRQ));
   new_handler->seq = seq;
   new_handler->event = event;
@@ -67,6 +68,7 @@ static void os_on_irq(int seq, int event, handler_t handler) {
   if (irq_head == NULL)
   {
     irq_head = new_handler;
+    TRACE_EXIT;
     return;
   }
   
@@ -75,6 +77,7 @@ static void os_on_irq(int seq, int event, handler_t handler) {
   {
     new_handler->next = irq_head;
     irq_head = new_handler;
+    TRACE_EXIT;
     return;
   }
 
@@ -84,6 +87,7 @@ static void os_on_irq(int seq, int event, handler_t handler) {
     {
       new_handler->next = cur->next;
       cur->next = new_handler;
+      TRACE_EXIT;
       return;
     }
     cur = cur->next;
@@ -91,6 +95,7 @@ static void os_on_irq(int seq, int event, handler_t handler) {
 
   cur->next = new_handler;
   panic_on(irq_head == NULL, "irq_head is NULL");
+  TRACE_EXIT;
 }
 
 static Context *os_trap(Event ev, Context *context) {
