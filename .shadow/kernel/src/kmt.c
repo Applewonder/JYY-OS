@@ -1,5 +1,6 @@
 #include "am.h"
 #include "cbma.h"
+#include <klib.h>
 #include <os.h>
 
 #define MIN_SEQ 0
@@ -189,6 +190,7 @@ void initialize_idle_task(task_t* idle) {
     strcpy(idle->name, "idle");
     memset(idle->stack, '\0', sizeof(uint8_t) * STACK_SIZE);
     idle->context = kcontext((Area) {(void *) idle->stack, (void *) (idle->stack + STACK_SIZE)}, idle_thread, NULL);
+    assert(idle->context);
     kmt_spin_init(&idle->status, "idle");
     idle->id = -1;
 }
