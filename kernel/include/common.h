@@ -12,8 +12,8 @@ typedef int my_spinlock_t;
 #define K_LOCK_NAME 128
 #define K_SEM_NAME 128
 #define K_TASK_NAME 128
-#define K_MAX_TASK 16
-#define MAX_TASK 16
+#define K_MAX_TASK 1024
+#define MAX_TASK 1024
 #define STACK_SIZE 4096
 
 void spin_lock(int *lk);
