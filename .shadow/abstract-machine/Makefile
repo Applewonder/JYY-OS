@@ -88,6 +88,10 @@ else
 	CFLAGS += -DDEBUG_PRINT -DTRACE_F
 endif
 
+ifeq ($(MAKECMDGOALS), testpv)
+    CFLAGS += -DDEBUG_PV
+endif
+
 CFLAGS   += -O2 -MMD -Wall -Werror $(INCFLAGS) \
             -D__ISA__=\"$(ISA)\" -D__ISA_$(shell echo $(ISA) | tr a-z A-Z)__ \
             -D__ARCH__=$(ARCH) -D__ARCH_$(shell echo $(ARCH) | tr a-z A-Z | tr - _) \

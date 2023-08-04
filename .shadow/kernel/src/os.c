@@ -3,7 +3,16 @@
 #include <os.h>
 
 #ifdef DEBUG_DEV
-#include <devices.h>
+  #include <devices.h>
+#endif
+
+#ifdef DEBUG_PV
+  sem_t empty, fill;
+  #define P kmt->sem_wait
+  #define V kmt->sem_signal
+  #define N 1
+  #define NPROD 1
+  #define NCONS 1
 #endif
 
 static IRQ* irq_head = NULL;
@@ -31,6 +40,11 @@ static void print_task(void *arg) {
 }
 #endif
 
+#ifdef DEBUG_PV
+void Tproduce(void *arg) { while (1) { P(&empty); putch('('); V(&fill);  } }
+void Tconsume(void *arg) { while (1) { P(&fill);  putch(')'); V(&empty); } }
+#endif
+
 static void os_init() {
   pmm->init();
   kmt->init();
@@ -42,6 +56,17 @@ static void os_init() {
   dev->init();
   kmt->create(pmm->alloc(sizeof(task_t)), "tty_reader", tty_reader, "tty1");
   kmt->create(pmm->alloc(sizeof(task_t)), "tty_reader", tty_reader, "tty2");
+#endif
+
+#ifdef DEBUG_PV
+  kmt->sem_init(&empty, "empty", N);
+  kmt->sem_init(&fill,  "fill",  0);
+  for (int i = 0; i < NPROD; i++) {
+    kmt->create(pmm->alloc(sizeof(task_t)), "producer", Tproduce, NULL);
+  }
+  for (int i = 0; i < NCONS; i++) {
+    kmt->create(pmm->alloc(sizeof(task_t)), "consumer", Tconsume, NULL);
+  }
 #endif
 }
 
