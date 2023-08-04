@@ -205,6 +205,7 @@ void kmt_init() {
     kmt_spin_init(&sem_init_lock, "sem_init_lock");
     kmt_spin_init(&task_init_lock, "task_init_lock");
     for (int i = 0; i < cpu_count(); i++) {
+        cpu_list[i].idle_task = pmm->alloc(sizeof(task_t));
         initialize_idle_task(cpu_list[i].idle_task);
         cpu_list[i].save_task = NULL;
         cpu_list[i].current_task = NULL;
