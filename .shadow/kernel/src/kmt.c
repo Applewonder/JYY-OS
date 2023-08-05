@@ -194,14 +194,14 @@ Context* kmt_schedule(Event ev, Context *c) {
         cpu_list[cpu_id].current_task = cpu_list[cpu_id].idle_task;
     }
     bool fine_task = false;
-    for (int i = 0; i < task_cnt; i++) {
+    for (int i = 0; i < task_cnt * 10; i++) {
         int rand_id = rand() % task_cnt;
         if (task_list[rand_id]->block) {
             continue;
         }
         if (task_list[rand_id] == cpu_list[cpu_id].current_task || kmt_try_spin_lock(&task_list[rand_id]->status)) {
             cpu_list[cpu_id].current_task = task_list[rand_id];
-            fine_task = true;
+            // fine_task = true;
             break;
         }
     }
