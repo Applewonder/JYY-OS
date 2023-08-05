@@ -52,6 +52,7 @@ bool kmt_try_spin_lock(spinlock_t *lk) {
         lk->cpu_num = cpu_current();
         return true;
     }
+    printf("cpu %d pop off %s\n", cpu_current());
     pop_off();
     TRACE_EXIT;
     return false;
