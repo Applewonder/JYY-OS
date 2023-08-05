@@ -11,7 +11,7 @@
   volatile int judger=0;
   #define P kmt->sem_wait
   #define V kmt->sem_signal
-  #define N 2
+  #define N 1
   #define NPROD 6
   #define NCONS 6
 #endif
