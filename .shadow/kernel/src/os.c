@@ -161,9 +161,7 @@ static void mock_task(void *arg) {
   int thres = 1;
     while (1) {
         printf("Cpu %d interrupt %d\n", cpu_current(), ienabled());
-        if (!kmt->spin_try_lock(idlelock[*(int*)arg])) {
-            continue;
-        }
+        kmt->spin_lock(idlelock[*(int*)arg]);
         ++task_num[*(int*)arg];
         ++cnt_cpu[cpu_current()];
         ++cnt_cpu_task[cpu_current()][*(int*)arg];
