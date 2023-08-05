@@ -97,7 +97,7 @@ endif
 ifeq ($(filter testnormal gdbnormal,$(MAKECMDGOALS)),)
 
 else
-	CFLAGS += -DDEBUG_NORMAL -DTRACE_F
+	CFLAGS += -DDEBUG_NORMAL
 endif
 
 ifeq ($(filter teststarve gdbstarve,$(MAKECMDGOALS)),)
