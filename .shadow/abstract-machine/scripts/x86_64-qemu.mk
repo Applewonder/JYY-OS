@@ -39,3 +39,6 @@ gdbnormal: build-arg
 teststarve: build-arg
 	@qemu-system-x86_64 $(QEMU_FLAGS)
 
+gdbstarve: build-arg
+	@qemu-system-x86_64 -s -S $(QEMU_FLAGS)
+

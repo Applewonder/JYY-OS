@@ -190,14 +190,14 @@ static void os_init() {
   pmm->init();
   kmt->init();
 #ifdef DEBUG_NORMAL
-    for (size_t i = 0; i < 6; i++)
+    for (size_t i = 0; i < TASK_NUM; i++)
     {
       idlelock[i] = pmm->alloc(sizeof(spinlock_t));
       lock_id[i] = pmm->alloc(sizeof(int));
       kmt->spin_init(idlelock[i], idles_name[i]);
       *lock_id[i] = i;
     }
-    for (size_t i = 1; i < 6; i++)
+    for (size_t i = 1; i < TASK_NUM; i++)
     {
       kmt->spin_lock(idlelock[i]);
     }
