@@ -46,7 +46,7 @@ void Tproduce(void *arg) {
   while (1) { 
     P(&empty);
      
-    putch(N + ++judger); 
+    putch('0' + ++judger); 
     if (judger > N || judger < 0) {
       putch(' ');
     }
@@ -57,7 +57,7 @@ void Tproduce(void *arg) {
 void Tconsume(void *arg) { 
   while (1) { 
     P(&fill);  
-    putch(N + --judger); 
+    putch('0' + --judger); 
     if (judger > N || judger < 0) {
       putch(' ');
     }
