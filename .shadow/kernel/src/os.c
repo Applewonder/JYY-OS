@@ -166,7 +166,7 @@ static void mock_task(void *arg) {
         ++cnt_cpu[cpu_current()];
         ++cnt_cpu_task[cpu_current()][*(int*)arg];
         // putch("ABCDEF"[*(int*)arg]);
-        if (cpu_current() == 0 && cnt_cpu[*(int*)arg] >= thres) {
+        if (cpu_current() == 0 && cnt_cpu[cpu_current()] >= thres) {
             printf("Cpu : ");
             for (int i = 0; i < cpu_count(); ++i) printf("%d. ", cnt_cpu[i]);
             printf("\n");
