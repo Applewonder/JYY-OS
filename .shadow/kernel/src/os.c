@@ -100,7 +100,7 @@ void Tproduce(void *arg) {
             }
             printf("Cpu consumer:\n");
             for (int i = 0; i < cpu_count(); ++i) {
-                for (int j = 0; j < NPROD; ++j) {
+                for (int j = 0; j < NCONS; ++j) {
                     printf("%d. ", cnt_cpu_c[i][j]);
                 } printf("\n");
             }
