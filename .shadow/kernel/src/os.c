@@ -42,28 +42,106 @@ static void print_task(void *arg) {
 #endif
 
 #ifdef DEBUG_PV
-void Tproduce(void *arg) { 
-  while (1) { 
-    P(&empty);
+// void Tproduce(void *arg) { 
+//   while (1) { 
+//     P(&empty);
      
-    putch('0' + ++judger); 
-    if (judger > N || judger < 0) {
-      putch(' ');
+//     putch('0' + ++judger); 
+//     if (judger > N || judger < 0) {
+//       putch(' ');
+//     }
+//     // putch('(');
+//     V(&fill); 
+//   } 
+// }
+// void Tconsume(void *arg) { 
+//   while (1) { 
+//     P(&fill);  
+//     putch('0' + --judger); 
+//     if (judger > N || judger < 0) {
+//       putch(' ');
+//     }
+//     // putch(')');
+//     V(&empty); 
+//   } 
+// }
+
+int cnt_finish;
+int para_p[10000], para_c[10000];
+volatile int cnt_p[10000], cnt_c[10000];
+volatile int cnt_cpu_p[10][1000], cnt_cpu_c[10][1000];
+int cnt_cpu[10];
+void Tproduce(void *arg) { 
+    int me = *(int*)arg;
+    int cnt = 0;
+    int thres = 1;
+    while (cnt <= 100) {
+#ifdef TEST_SEM
+        P(&empty);
+#endif
+        // printf("%d", me);
+        // putch('(');
+        ++cnt_p[me];
+        ++cnt_cpu[cpu_current()];
+        ++cnt_cpu_p[cpu_current()][me];
+        if (me == 0 && cnt_p[me] >= thres) {
+            printf("Cpu : ");
+            for (int i = 0; i < cpu_count(); ++i) printf("%d ", cnt_cpu[i]);
+            printf("\n");
+            printf("%d Producer :", me);
+            for (int i = 0; i < NPROD; ++i) printf("%d ", cnt_p[i]);
+            printf("\n%d Consumer :", me);
+            for (int i = 0; i < NCONS; ++i) printf("%d ", cnt_c[i]);
+            printf("\nCpu producer:\n");
+            for (int i = 0; i < cpu_count(); ++i) {
+                for (int j = 0; j < NPROD; ++j) {
+                    printf("%d ", cnt_cpu_p[i][j]);
+                } printf("\n");
+            }
+            printf("Cpu consumer:\n");
+            for (int i = 0; i < cpu_count(); ++i) {
+                for (int j = 0; j < NPROD; ++j) {
+                    printf("%d ", cnt_cpu_c[i][j]);
+                } printf("\n");
+            }
+            printf("\n=============================\n");
+            thres <<= 1;
+        }
+#ifdef TEST_SEM
+        V(&fill);
+#endif
     }
-    // putch('(');
-    V(&fill); 
-  } 
+    while(1);
 }
-void Tconsume(void *arg) { 
-  while (1) { 
-    P(&fill);  
-    putch('0' + --judger); 
-    if (judger > N || judger < 0) {
-      putch(' ');
+void Tconsume(void *arg) {
+    int me = *(int*)arg;//, cpu = cpu_current();
+    int cnt = 0;
+    // int thres = 1;
+    while (cnt <= 100) {
+#ifdef TEST_SEM
+        P(&fill);
+#endif
+        // putch(')'); //?????????????
+        ++cnt_c[me];
+        ++cnt_cpu[cpu_current()];
+        ++cnt_cpu_c[cpu_current()][me];
+        // if (me == 0 && cnt_p[me] >= thres) {
+        //     printf("Cpu : ");
+        //     for (int i = 0; i < cpu_count(); ++i) printf("%d ", cnt_cpu[i]);
+        //     printf("\n");
+        //     printf("%d Producer :", me);
+        //     for (int i = 0; i < NPROD; ++i) printf("%d ", cnt_p[i]);
+        //     printf("\n%d Consumer :", me);
+        //     for (int i = 0; i < NCONS; ++i) printf("%d ", cnt_c[i]);
+        //     printf("\n=============================\n");
+        //     thres <<= 1;
+        // }
+        //++cnt_cpu[cpu_current()];
+#ifdef TEST_SEM
+        V(&empty);
+#endif
     }
-    // putch(')');
-    V(&empty); 
-  } 
+    while(1) ;
 }
 #endif
 
@@ -118,10 +196,10 @@ static void os_init() {
   kmt->sem_init(&empty, "empty", N);
   kmt->sem_init(&fill,  "fill",  0);
   for (int i = 0; i < NPROD; i++) {
-    kmt->create(pmm->alloc(sizeof(task_t)), "producer", Tproduce, NULL);
+    kmt->create(pmm->alloc(sizeof(task_t)), "producer", Tproduce, &para_p[i]);
   }
   for (int i = 0; i < NCONS; i++) {
-    kmt->create(pmm->alloc(sizeof(task_t)), "consumer", Tconsume, NULL);
+    kmt->create(pmm->alloc(sizeof(task_t)), "consumer", Tconsume, &para_c[i]);
   }
 #endif
 }
