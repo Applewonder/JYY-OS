@@ -30,3 +30,6 @@ gdbprint: build-arg
 gdbpv: build-arg
 	@qemu-system-x86_64 -s -S $(QEMU_FLAGS)
 
+testnormal: build-arg
+	@qemu-system-x86_64 $(QEMU_FLAGS)
+
