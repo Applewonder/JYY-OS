@@ -86,22 +86,22 @@ void Tproduce(void *arg) {
         ++cnt_cpu_p[cpu_current()][me];
         if (me == 0 && cnt_p[me] >= thres) {
             printf("Cpu : ");
-            for (int i = 0; i < cpu_count(); ++i) printf("%d ", cnt_cpu[i]);
+            for (int i = 0; i < cpu_count(); ++i) printf("%d. ", cnt_cpu[i]);
             printf("\n");
             printf("%d Producer :", me);
-            for (int i = 0; i < NPROD; ++i) printf("%d ", cnt_p[i]);
+            for (int i = 0; i < NPROD; ++i) printf("%d. ", cnt_p[i]);
             printf("\n%d Consumer :", me);
-            for (int i = 0; i < NCONS; ++i) printf("%d ", cnt_c[i]);
+            for (int i = 0; i < NCONS; ++i) printf("%d. ", cnt_c[i]);
             printf("\nCpu producer:\n");
             for (int i = 0; i < cpu_count(); ++i) {
                 for (int j = 0; j < NPROD; ++j) {
-                    printf("%d ", cnt_cpu_p[i][j]);
+                    printf("%d. ", cnt_cpu_p[i][j]);
                 } printf("\n");
             }
             printf("Cpu consumer:\n");
             for (int i = 0; i < cpu_count(); ++i) {
                 for (int j = 0; j < NPROD; ++j) {
-                    printf("%d ", cnt_cpu_c[i][j]);
+                    printf("%d. ", cnt_cpu_c[i][j]);
                 } printf("\n");
             }
             printf("\n=============================\n");
