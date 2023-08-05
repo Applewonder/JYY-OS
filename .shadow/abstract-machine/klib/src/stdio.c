@@ -6,119 +6,158 @@
 
 #if !defined(__ISA_NATIVE__) || defined(__NATIVE_USE_KLIB__)
 
-int print_int(int n) {
-  int count = 0;
+#define VBUF_MAX_SIZE 128
+#define PBUF_MAX_SIZE 1024
 
-  if (n < 0) {
-      putch('-');
-      n = -n;
-      count++;
-  }
+union arg {
+  int intarg;
+  char chararg;
+  char *pchararg;
+} uarg;
 
-  if (n / 10) {
-      count += print_int(n / 10);
-  }
+char vbuf[VBUF_MAX_SIZE];
+char pbuf[PBUF_MAX_SIZE];
 
-  putch('0' + n % 10);
-  count++;
-
-  return count;
-}
-
-
-int print_pointer(void *ptr) {
-    uintptr_t value = (uintptr_t)ptr;
-    int count = 0;
-
-    putch('0');
-    putch('x');
-    count += 2;
-
-    bool leading_zeros = true;
-
-    for (int shift = (sizeof(uintptr_t) << 3) - 4; shift >= 0; shift -= 4) {
-        char hex_digit = (value >> shift) & 0xF;
-
-        if (hex_digit || !leading_zeros || shift == 0) {
-            putch(hex_digit < 10 ? '0' + hex_digit : 'a' + hex_digit - 10);
-            count++;
-            leading_zeros = false;
-        }
+char *_itos(uint64_t val, char *end, int base, int length) {
+    static const char table[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
+    *end = 0;
+    while (val != 0 || length) {
+        if (val == 0 && length < 0) break;
+        --end;
+        *end = table[val % base];
+        val /= base;
+        --length;
     }
-
-    return count;
+    if (base == 16) {
+        --end;
+        *end = 'x';
+        --end;
+        *end = '0';
+    }
+    return end;
 }
 
+int lock_print = 0;
 
 int printf(const char *fmt, ...) {
-  va_list args;
-  va_start(args, fmt);
-
-  const char* format = fmt;
-  int count = 0;
-
-  while (*format != '\0') {
-      if (*format == '%') {
-          format++; // 跳过 '%'
-
-          // 根据格式说明符处理参数
-          switch (*format) {
-              case 'd': {
-                  int int_arg = va_arg(args, int);
-                  count += print_int(int_arg);
-                  break;
-              }
-              case 'c': {
-                  int char_arg = va_arg(args, int);
-                  putch(char_arg);
-                  count++;
-                  break;
-              }
-              case 's': {
-                  char *str_arg = va_arg(args, char*);
-                  while (*str_arg) {
-                      putch(*str_arg++);
-                      count++;
-                  }
-                  break;
-              }
-              case 'p': {
-                    void *ptr_arg = va_arg(args, void*);
-                    count += print_pointer(ptr_arg);
-                    break;
-              }
-              default:
-                  putch('%');
-                  count++;
-                  break;
-          }
-      } else {
-          putch(*format);
-          count++;
-      }
-
-      format++;
-  }
-
-  va_end(args);
-
-  return count;
+    // putstr(fmt);
+    //putch('w'); putch('\n');
+    char buffer[2048];
+    va_list args;
+    va_start(args, fmt);
+    vsprintf(buffer, fmt, args);
+    va_end(args);
+    int val = 1;
+    int itr = ienabled();
+    iset(false);
+    while (1) {
+        val = atomic_xchg(&lock_print, val);
+        if (val == 0) break;
+        // while (lock_print)
+        //     yield();
+        // putch('c');
+    }
+    putstr(buffer);
+    atomic_xchg(&lock_print, val);
+    iset(itr);
+    return 0;
 }
 
-int vsprintf(char *out, const char *fmt, va_list ap) {
-  panic("Not implemented");
+int vsprintf(char *out, const char *fmt, va_list arg) {
+    unsigned int i;
+    uintptr_t iptr;
+    int next = 0;
+    char s[50], *ps;
+    s[49] = 0;
+    // putch('e'); putch('\n');
+    for (const char *c = fmt; *c != '\0'; ++c) {
+        if (*c != '%') {
+            out[next++] = *c;
+            continue;
+        }
+        ++c;
+        switch (*c) {
+        case 'c':
+            i = va_arg(arg, int);
+            out[next++] = i;
+            break;
+        
+        case 'l':
+            ++c;
+        case 'd':
+        case 'u':
+        
+            i = va_arg(arg, int);
+            if (i == 0) {
+                out[next++] = '0';
+                break;
+            }
+            if (i < 0) {
+                i = -i;
+                out[next++] = '-';
+            }
+            ps = &s[49];
+            ps = _itos(i, ps, 10, -1);
+            for (const char *p = ps; *p; ++p) out[next++] = *p;
+            // putstr(ps);
+            break;
+        
+        case 's':
+            ps = va_arg(arg, char *);
+            for (const char *p = ps; *p; ++p) out[next++] = *p;
+            // putstr(ps);
+            break;
+
+        case 'p':
+            iptr = va_arg(arg, uintptr_t);
+            ps = &s[49];
+            ps = _itos(iptr, ps, 16, 8);
+            for (const char *p = ps; *p; ++p) out[next++] = *p;
+            // putstr(ps);
+            break;
+
+        default:
+            out[next++] = '?';
+            // putch('?'); // Fuck you!
+        }
+    }
+    // putch('r'); putch('\n');
+    out[next++] = 0;
+    return next;
 }
 
 int sprintf(char *out, const char *fmt, ...) {
-  panic("Not implemented");
+    int ret = 0;
+    va_list ap;
+
+    va_start(ap, fmt);
+    ret = vsprintf(out, fmt, ap);
+    va_end(ap);
+    return ret;
 }
 
 int snprintf(char *out, size_t n, const char *fmt, ...) {
-  panic("Not implemented");
+    int ret = 0;
+    va_list ap;
+
+    va_start(ap, fmt);
+    ret = vsprintf(pbuf, fmt, ap);
+    va_end(ap);
+
+    // move n bytes from pbuf to out
+    // if ret < n, move ret instead
+    if (ret > n) ret = n;
+    assert(ret < PBUF_MAX_SIZE);
+    strncpy(out, pbuf, ret);
+    out[ret] = '\0'; 
+
+    return ret;
 }
 
 int vsnprintf(char *out, size_t n, const char *fmt, va_list ap) {
   panic("Not implemented");
 }
+
+
 
 #endif
