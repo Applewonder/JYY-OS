@@ -147,8 +147,8 @@ void Tconsume(void *arg) {
 #endif
 
 #ifdef DEBUG_NORMAL
-#define TASK_NUM 4
-static spinlock_t *idlelock[TASK_NUM];
+#define TASK_NUM 2
+static my_spinlock_t *idlelock[TASK_NUM];
 static int* lock_id[TASK_NUM]; 
 static char *idles_name[] = {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J",
                              "K", "L"};
@@ -161,7 +161,7 @@ static void mock_task(void *arg) {
   int thres = 1;
     while (1) {
         printf("Cpu %d interrupt %d\n", cpu_current(), ienabled());
-        kmt->spin_lock(idlelock[*(int*)arg]);
+        spin_lock(idlelock[*(int*)arg]);
         ++task_num[*(int*)arg];
         ++cnt_cpu[cpu_current()];
         ++cnt_cpu_task[cpu_current()][*(int*)arg];
@@ -181,7 +181,7 @@ static void mock_task(void *arg) {
             printf("\n=============================\n");
             thres <<= 1;
         }
-        kmt->spin_unlock(idlelock[(*(int*)arg + 1 ) % TASK_NUM ]);
+        spin_unlock(idlelock[(*(int*)arg + 1 ) % TASK_NUM ]);
         yield();
 //        for (int volatile i = 0; i < 100000; i++);
     }
@@ -194,14 +194,14 @@ static void os_init() {
 #ifdef DEBUG_NORMAL
     for (size_t i = 0; i < TASK_NUM; i++)
     {
-      idlelock[i] = pmm->alloc(sizeof(spinlock_t));
+      idlelock[i] = pmm->alloc(sizeof(my_spinlock_t));
       lock_id[i] = pmm->alloc(sizeof(int));
-      kmt->spin_init(idlelock[i], idles_name[i]);
+      idlelock[i] = SPIN_LOCK_INIT;
       *lock_id[i] = i;
     }
     for (size_t i = 1; i < TASK_NUM; i++)
     {
-      kmt->spin_lock(idlelock[i]);
+      spin_lock(idlelock[i]);
     }
     for(int i = 0; i < TASK_NUM; i++) {
         kmt->create(pmm->alloc(sizeof(task_t)), idles_name[i], mock_task, lock_id[i]);
