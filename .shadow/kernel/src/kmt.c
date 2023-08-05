@@ -178,7 +178,11 @@ Context* kmt_context_save(Event ev, Context *c){
     cpu_list[cpu_id].current_task->context = c;
     if (cpu_list[cpu_id].save_task && cpu_list[cpu_id].save_task != cpu_list[cpu_id].current_task) {
         if (cpu_list[cpu_id].save_task->id >=0) {
+            putch(cpu_list[cpu_id].save_task->status.name[0]);
+            putch('A');
+            putch('\n');
             kmt_spin_unlock(&cpu_list[cpu_id].save_task->status);
+
         }
     }
     cpu_list[cpu_id].save_task = cpu_list[cpu_id].current_task;
@@ -200,11 +204,15 @@ Context* kmt_schedule(Event ev, Context *c) {
             continue;
         }
         if (task_list[rand_id] == cpu_list[cpu_id].current_task || kmt_try_spin_lock(&task_list[rand_id]->status)) {
+            putch(cpu_list[cpu_id].save_task->status.name[0]);
+            putch('B');
+            putch('\n');
             cpu_list[cpu_id].current_task = task_list[rand_id];
             fine_task = true;
             break;
         }
     }
+    putch('C');
     panic_on(cpu_list[cpu_id].current_task == NULL, "No task to schedule");
     TRACE_EXIT;
     if(!fine_task) {
