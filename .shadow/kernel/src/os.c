@@ -156,11 +156,11 @@ volatile int task_num[TASK_NUM];
 volatile int cnt_cpu_task[MAX_CPU][TASK_NUM];
 int cnt_cpu[MAX_CPU];
 static void mock_task(void *arg) {
-  printf("Hello from task %d\n", *(int*)arg);
+  // printf("Hello from task %d\n", *(int*)arg);
   // printf("Cpu %d interrupt %d\n", cpu_current(), ienabled());
   int thres = 1;
     while (1) {
-        printf("Cpu %d interrupt %d\n", cpu_current(), ienabled());
+        // printf("Cpu %d interrupt %d\n", cpu_current(), ienabled());
         spin_lock(idlelock[*(int*)arg]);
         ++task_num[*(int*)arg];
         ++cnt_cpu[cpu_current()];
