@@ -198,6 +198,9 @@ Context* kmt_schedule(Event ev, Context *c) {
     for (int i = 0; i < task_cnt * 10; i++) {
         int rand_id = rand() % task_cnt;
         if (task_list[rand_id] == cpu_list[cpu_id].current_task) {
+            if (task_list[rand_id]->block) {
+                continue;
+            }
             cpu_list[cpu_id].current_task = task_list[rand_id];
             fine_task = true;
             panic_on(cpu_list[cpu_id].current_task->block  && fine_task, "Current task is blocked");
