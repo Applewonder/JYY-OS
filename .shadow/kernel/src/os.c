@@ -6,7 +6,7 @@
   #include <devices.h>
 #endif
 
-#ifdef DEBUG_PV
+#ifdef DEBUG_STARVE
   sem_t empty, fill;
   volatile int judger=0;
   #define P kmt->sem_wait
@@ -41,7 +41,7 @@ static void print_task(void *arg) {
 }
 #endif
 
-#ifdef DEBUG_PV
+#ifdef DEBUG_STARVE
 // void Tproduce(void *arg) { 
 //   while (1) { 
 //     P(&empty);
@@ -76,7 +76,7 @@ void Tproduce(void *arg) {
     int cnt = 0;
     int thres = 1;
     while (cnt <= 100) {
-#ifdef TEST_SEM
+#ifdef DEBUG_PV
         P(&empty);
 #endif
         // printf("%d", me);
@@ -107,7 +107,7 @@ void Tproduce(void *arg) {
             printf("\n=============================\n");
             thres <<= 1;
         }
-#ifdef TEST_SEM
+#ifdef DEBUG_PV
         V(&fill);
 #endif
     }
@@ -118,7 +118,7 @@ void Tconsume(void *arg) {
     int cnt = 0;
     // int thres = 1;
     while (cnt <= 100) {
-#ifdef TEST_SEM
+#ifdef DEBUG_PV
         P(&fill);
 #endif
         // putch(')'); //?????????????
@@ -137,7 +137,7 @@ void Tconsume(void *arg) {
         //     thres <<= 1;
         // }
         //++cnt_cpu[cpu_current()];
-#ifdef TEST_SEM
+#ifdef DEBUG_PV
         V(&empty);
 #endif
     }
@@ -192,7 +192,7 @@ static void os_init() {
   kmt->create(pmm->alloc(sizeof(task_t)), "tty_reader", tty_reader, "tty2");
 #endif
 
-#ifdef DEBUG_PV
+#ifdef DEBUG_STARVE
   kmt->sem_init(&empty, "empty", N);
   kmt->sem_init(&fill,  "fill",  0);
   for (int i = 0; i < NPROD; i++) {
