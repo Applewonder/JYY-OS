@@ -89,6 +89,7 @@ static void os_init() {
     for (size_t i = 0; i < 6; i++)
     {
       idlelock[i] = pmm->alloc(sizeof(spinlock_t));
+      lock_id[i] = pmm->alloc(sizeof(int));
       kmt->spin_init(idlelock[i], idles_name[i]);
       *lock_id[i] = i;
     }
