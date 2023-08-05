@@ -196,7 +196,7 @@ static void os_init() {
     {
       idlelock[i] = pmm->alloc(sizeof(my_spinlock_t));
       lock_id[i] = pmm->alloc(sizeof(int));
-      idlelock[i] = SPIN_LOCK_INIT;
+      *idlelock[i] = SPIN_LOCK_INIT;
       *lock_id[i] = i;
     }
     for (size_t i = 1; i < TASK_NUM; i++)
