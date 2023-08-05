@@ -147,7 +147,7 @@ void Tconsume(void *arg) {
 #endif
 
 #ifdef DEBUG_NORMAL
-#define TASK_NUM 12
+#define TASK_NUM 4
 static spinlock_t *idlelock[TASK_NUM];
 static int* lock_id[TASK_NUM]; 
 static char *idles_name[] = {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J",
