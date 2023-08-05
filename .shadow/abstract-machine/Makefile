@@ -94,7 +94,7 @@ else
 	CFLAGS += -DDEBUG_PV
 endif
 
-ifeq ($(filter testnormal gdbpv,$(MAKECMDGOALS)),)
+ifeq ($(filter testnormal gdbnormal,$(MAKECMDGOALS)),)
 
 else
 	CFLAGS += -DDEBUG_NORMAL
