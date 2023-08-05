@@ -74,7 +74,7 @@ static char *idles_name[] = {"A", "B", "C", "D", "E", "F"};
 static void mock_task(void *arg) {
     while (1) {
         kmt->spin_lock(idlelock[*(int*)arg]);
-        printf("%s", arg);
+        putch("ABCDEF"[*(int*)arg]);
         kmt->spin_unlock(idlelock[(*(int*)arg + 1 ) % 6 ]);
         yield();
 //        for (int volatile i = 0; i < 100000; i++);
