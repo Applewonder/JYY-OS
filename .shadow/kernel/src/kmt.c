@@ -219,7 +219,7 @@ Context* kmt_schedule(Event ev, Context *c) {
     if(!fine_task) {
         cpu_list[cpu_id].current_task = cpu_list[cpu_id].idle_task;
     }
-    panic_on(cpu_list[cpu_id].current_task->block, "Current task is blocked");
+    panic_on(cpu_list[cpu_id].current_task->block && !fine_task, "Current task is blocked");
     return cpu_list[cpu_id].current_task->context;
 }
 
@@ -231,6 +231,7 @@ void initialize_idle_task(task_t* idle) {
     assert(idle->context);
     kmt_spin_init(&idle->status, "idle");
     idle->id = -1;
+    idle->block = false;
 }
 
 void kmt_init() {
