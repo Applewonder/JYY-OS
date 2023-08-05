@@ -12,8 +12,8 @@
   #define P kmt->sem_wait
   #define V kmt->sem_signal
   #define N 1
-  #define NPROD 3
-  #define NCONS 3
+  #define NPROD 5
+  #define NCONS 1
 #endif
 
 static IRQ* irq_head = NULL;
