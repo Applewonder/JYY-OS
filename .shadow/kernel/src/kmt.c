@@ -178,11 +178,7 @@ Context* kmt_context_save(Event ev, Context *c){
     cpu_list[cpu_id].current_task->context = c;
     if (cpu_list[cpu_id].save_task && cpu_list[cpu_id].save_task != cpu_list[cpu_id].current_task) {
         if (cpu_list[cpu_id].save_task->id >=0) {
-            putch(cpu_list[cpu_id].save_task->status.name[0]);
-            putch('A');
-            putch('\n');
             kmt_spin_unlock(&cpu_list[cpu_id].save_task->status);
-
         }
     }
     cpu_list[cpu_id].save_task = cpu_list[cpu_id].current_task;
@@ -200,19 +196,21 @@ Context* kmt_schedule(Event ev, Context *c) {
     bool fine_task = false;
     for (int i = 0; i < task_cnt * 10; i++) {
         int rand_id = rand() % task_cnt;
-        if (task_list[rand_id]->block) {
-            continue;
-        }
-        if (task_list[rand_id] == cpu_list[cpu_id].current_task || kmt_try_spin_lock(&task_list[rand_id]->status)) {
-            putch(cpu_list[cpu_id].save_task->status.name[0]);
-            putch('B');
-            putch('\n');
+        if (task_list[rand_id] == cpu_list[cpu_id].current_task) {
             cpu_list[cpu_id].current_task = task_list[rand_id];
             fine_task = true;
             break;
         }
+        if (!kmt_try_spin_lock(&task_list[rand_id]->status)) {
+            continue;
+        } 
+        if (!task_list[rand_id]->block) {
+            cpu_list[cpu_id].current_task = task_list[rand_id];
+            fine_task = true;
+            break;
+        }
+        kmt_spin_unlock(&task_list[rand_id]->status);
     }
-    putch('D');
     panic_on(cpu_list[cpu_id].current_task == NULL, "No task to schedule");
     TRACE_EXIT;
     if(!fine_task) {
