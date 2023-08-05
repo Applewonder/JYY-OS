@@ -35,6 +35,7 @@ struct task {
   Context   *context;
   int id;
   bool block;
+  bool is_running;
 };
 
 struct semaphore {

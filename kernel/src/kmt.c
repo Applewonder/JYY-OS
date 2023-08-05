@@ -52,6 +52,7 @@ bool kmt_try_spin_lock(spinlock_t *lk) {
         lk->cpu_num = cpu_current();
         return true;
     }
+    printf("cpu %d pop off %s\n", cpu_current());
     pop_off();
     TRACE_EXIT;
     return false;
@@ -70,6 +71,7 @@ void kmt_spin_lock(spinlock_t *lk) {
 }
 
 void kmt_spin_unlock(spinlock_t *lk) {
+
     if (!holding(lk)) {
         //TODO: print lock name
         printf("cpu %d try to release lock %s\n", cpu_current(), lk->name);
@@ -99,8 +101,9 @@ void kmt_sem_wait(sem_t *sem) {
         int cpu_id = cpu_current();
         if (cpu_list[cpu_id].current_task) {
             sem->task_list[sem->task_cnt++] = cpu_list[cpu_id].current_task;
+            kmt_spin_lock(&cpu_list[cpu_id].current_task->status);
             cpu_list[cpu_id].current_task->block = true;
-            panic_on(cpu_list[cpu_id].current_task->status.cpu_num != cpu_current(), "cpu num error");
+            kmt_spin_unlock(&cpu_list[cpu_id].current_task->status);
         }
     }
     kmt_spin_unlock(&sem->lock);
@@ -179,6 +182,8 @@ Context* kmt_context_save(Event ev, Context *c){
     cpu_list[cpu_id].current_task->context = c;
     if (cpu_list[cpu_id].save_task && cpu_list[cpu_id].save_task != cpu_list[cpu_id].current_task) {
         if (cpu_list[cpu_id].save_task->id >=0) {
+            kmt_spin_lock(&cpu_list[cpu_id].save_task->status);
+            cpu_list[cpu_id].save_task->is_running = false;
             kmt_spin_unlock(&cpu_list[cpu_id].save_task->status);
         }
     }
@@ -206,17 +211,20 @@ Context* kmt_schedule(Event ev, Context *c) {
             panic_on(cpu_list[cpu_id].current_task->block  && fine_task, "Current task is blocked");
             break;
         }
-        if (!kmt_try_spin_lock(&task_list[rand_id]->status)) {
+        kmt_spin_lock(&task_list[rand_id]->status);
+        if (task_list[rand_id]->is_running || task_list[rand_id]->block) {
+            kmt_spin_unlock(&task_list[rand_id]->status);
             continue;
-        } 
-        panic_on(task_list[rand_id]->status.cpu_num != cpu_current(), "cpu num error");
+        }
+        task_list[rand_id]->is_running = true;
+        kmt_spin_unlock(&task_list[rand_id]->status);
+        // panic_on(task_list[rand_id]->status.cpu_num != cpu_current(), "cpu num error");
         if (!task_list[rand_id]->block) {
             cpu_list[cpu_id].current_task = task_list[rand_id];
             fine_task = true;
             panic_on(cpu_list[cpu_id].current_task->block  && fine_task, "Current task is blocked");
             break;
         }
-        kmt_spin_unlock(&task_list[rand_id]->status);
     }
     panic_on(cpu_list[cpu_id].current_task->block  && fine_task, "Current task is blocked");
     panic_on(cpu_list[cpu_id].current_task == NULL, "No task to schedule");
@@ -237,6 +245,7 @@ void initialize_idle_task(task_t* idle) {
     kmt_spin_init(&idle->status, "idle");
     idle->id = -1;
     idle->block = false;
+    idle->is_running = false;
 }
 
 void kmt_init() {
@@ -265,6 +274,9 @@ MODULE_DEF(kmt) = {
     .teardown  = kmt_teardown,
     .spin_init = kmt_spin_init,
     .spin_lock = kmt_spin_lock,
+#ifdef DEBUG_NORMAL
+    .spin_try_lock = kmt_try_spin_lock,
+#endif
     .spin_unlock = kmt_spin_unlock,
     .sem_init = kmt_sem_init,
     .sem_wait = kmt_sem_wait,
