@@ -73,7 +73,9 @@ static int *lock_id[6];
 static char *idles_name[] = {"A", "B", "C", "D", "E", "F"};
 static void mock_task(void *arg) {
     while (1) {
-        kmt->spin_lock(idlelock[*(int*)arg]);
+        if (!kmt->spin_try_lock(idlelock[*(int*)arg])) {
+            continue;
+        }
         putch("ABCDEF"[*(int*)arg]);
         kmt->spin_unlock(idlelock[(*(int*)arg + 1 ) % 6 ]);
         yield();

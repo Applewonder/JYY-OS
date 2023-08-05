@@ -267,6 +267,7 @@ MODULE_DEF(kmt) = {
     .teardown  = kmt_teardown,
     .spin_init = kmt_spin_init,
     .spin_lock = kmt_spin_lock,
+    .spin_try_lock = kmt_try_spin_lock,
     .spin_unlock = kmt_spin_unlock,
     .sem_init = kmt_sem_init,
     .sem_wait = kmt_sem_wait,
