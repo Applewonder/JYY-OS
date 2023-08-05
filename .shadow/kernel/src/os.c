@@ -161,10 +161,11 @@ static void mock_task(void *arg) {
   int thres = 1;
     while (1) {
         // printf("Cpu %d interrupt %d\n", cpu_current(), ienabled());
-        spin_lock(idlelock[*(int*)arg]);
+        
         ++task_num[*(int*)arg];
         ++cnt_cpu[cpu_current()];
         ++cnt_cpu_task[cpu_current()][*(int*)arg];
+        spin_lock(idlelock[*(int*)arg]);
         // putch("ABCDEF"[*(int*)arg]);
         if (cpu_current() == 0 && cnt_cpu[cpu_current()] >= thres) {
             printf("Cpu : ");
