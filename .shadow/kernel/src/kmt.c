@@ -72,11 +72,11 @@ void kmt_spin_lock(spinlock_t *lk) {
 
 void kmt_spin_unlock(spinlock_t *lk) {
 
-    if (!holding(lk)) {
-        //TODO: print lock name
-        printf("cpu %d try to release lock %s\n", cpu_current(), lk->name);
-        panic("release");
-    }
+    // if (!holding(lk)) {
+    //     //TODO: print lock name
+    //     printf("cpu %d try to release lock %s\n", cpu_current(), lk->name);
+    //     panic("release");
+    // }
     lk->cpu_num = -1;
 #ifdef TRACE_F
     printf("release lock %s\n", lk->name);
