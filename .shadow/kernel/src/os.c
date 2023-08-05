@@ -171,7 +171,7 @@ static void mock_task(void *arg) {
             printf("\n");
             printf("Task :");
             for (int i = 0; i < TASK_NUM; ++i) printf("%d. ", task_num[i]);
-            printf("\nCpu producer:\n");
+            printf("\nCpu Task:\n");
             for (int i = 0; i < cpu_count(); ++i) {
                 for (int j = 0; j < TASK_NUM; ++j) {
                     printf("%d. ", cnt_cpu_task[i][j]);
