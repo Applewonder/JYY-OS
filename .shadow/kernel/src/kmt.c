@@ -182,6 +182,8 @@ Context* kmt_context_save(Event ev, Context *c){
     cpu_list[cpu_id].current_task->context = c;
     if (cpu_list[cpu_id].save_task && cpu_list[cpu_id].save_task != cpu_list[cpu_id].current_task) {
         if (cpu_list[cpu_id].save_task->id >=0) {
+            kmt_spin_lock(&cpu_list[cpu_id].save_task->status);
+            cpu_list[cpu_id].save_task->is_running = false;
             kmt_spin_unlock(&cpu_list[cpu_id].save_task->status);
         }
     }
@@ -209,9 +211,12 @@ Context* kmt_schedule(Event ev, Context *c) {
             panic_on(cpu_list[cpu_id].current_task->block  && fine_task, "Current task is blocked");
             break;
         }
-        if (!kmt_try_spin_lock(&task_list[rand_id]->status)) {
+        kmt_spin_lock(&task_list[rand_id]->status);
+        if (task_list[rand_id]->is_running) {
+            kmt_spin_unlock(&task_list[rand_id]->status);
             continue;
-        } 
+        }
+        kmt_spin_unlock(&task_list[rand_id]->status);
         panic_on(task_list[rand_id]->status.cpu_num != cpu_current(), "cpu num error");
         if (!task_list[rand_id]->block) {
             cpu_list[cpu_id].current_task = task_list[rand_id];
@@ -240,6 +245,7 @@ void initialize_idle_task(task_t* idle) {
     kmt_spin_init(&idle->status, "idle");
     idle->id = -1;
     idle->block = false;
+    idle->is_running = false;
 }
 
 void kmt_init() {
