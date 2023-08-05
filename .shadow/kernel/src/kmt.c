@@ -225,7 +225,6 @@ Context* kmt_schedule(Event ev, Context *c) {
             panic_on(cpu_list[cpu_id].current_task->block  && fine_task, "Current task is blocked");
             break;
         }
-        kmt_spin_unlock(&task_list[rand_id]->status);
     }
     panic_on(cpu_list[cpu_id].current_task->block  && fine_task, "Current task is blocked");
     panic_on(cpu_list[cpu_id].current_task == NULL, "No task to schedule");
