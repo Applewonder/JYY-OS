@@ -1,3 +1,4 @@
+#include "cbma.h"
 #include <alloca.h>
 #include <common.h>
 #include <os.h>
@@ -146,15 +147,38 @@ void Tconsume(void *arg) {
 #endif
 
 #ifdef DEBUG_NORMAL
-static spinlock_t *idlelock[6];
-static int *lock_id[6]; 
+#define TASK_NUM 6
+static spinlock_t *idlelock[TASK_NUM];
+static int *lock_id[TASK_NUM]; 
 static char *idles_name[] = {"A", "B", "C", "D", "E", "F"};
+volatile int task_num[TASK_NUM];
+volatile int cnt_cpu_task[MAX_CPU][TASK_NUM];
+int cnt_cpu[MAX_CPU];
 static void mock_task(void *arg) {
+  int thres = 1;
     while (1) {
         if (!kmt->spin_try_lock(idlelock[*(int*)arg])) {
             continue;
         }
-        putch("ABCDEF"[*(int*)arg]);
+        ++task_num[*(int*)arg];
+        ++cnt_cpu[cpu_current()];
+        ++cnt_cpu_task[cpu_current()][*(int*)arg];
+        // putch("ABCDEF"[*(int*)arg]);
+        if (cpu_current() == 0 && cnt_cpu[*(int*)arg] >= thres) {
+            printf("Cpu : ");
+            for (int i = 0; i < cpu_count(); ++i) printf("%d. ", cnt_cpu[i]);
+            printf("\n");
+            printf("Task :");
+            for (int i = 0; i < TASK_NUM; ++i) printf("%d. ", task_num[i]);
+            printf("\nCpu producer:\n");
+            for (int i = 0; i < cpu_count(); ++i) {
+                for (int j = 0; j < TASK_NUM; ++j) {
+                    printf("%d. ", cnt_cpu_task[i][j]);
+                } printf("\n");
+            }
+            printf("\n=============================\n");
+            thres <<= 1;
+        }
         kmt->spin_unlock(idlelock[(*(int*)arg + 1 ) % 6 ]);
         yield();
 //        for (int volatile i = 0; i < 100000; i++);
