@@ -69,6 +69,7 @@ void Tconsume(void *arg) {
 
 #ifdef DEBUG_NORMAL
 static spinlock_t *idlelock[6];
+static int *lock_id[6]; 
 static char *idles_name[] = {"A", "B", "C", "D", "E", "F"};
 static void mock_task(void *arg) {
     while (1) {
@@ -89,13 +90,14 @@ static void os_init() {
     {
       idlelock[i] = pmm->alloc(sizeof(spinlock_t));
       kmt->spin_init(idlelock[i], idles_name[i]);
+      *lock_id[i] = i;
     }
     for (size_t i = 1; i < 6; i++)
     {
       kmt->spin_lock(idlelock[i]);
     }
     for(int i = 0; i < 6; i++) {
-        kmt->create(pmm->alloc(sizeof(task_t)), idles_name[i], mock_task, idles_name[i]);
+        kmt->create(pmm->alloc(sizeof(task_t)), idles_name[i], mock_task, lock_id[i]);
     }
 #endif
 
