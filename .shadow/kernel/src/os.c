@@ -196,9 +196,11 @@ static void os_init() {
   kmt->sem_init(&empty, "empty", N);
   kmt->sem_init(&fill,  "fill",  0);
   for (int i = 0; i < NPROD; i++) {
+    para_p[i] = i;
     kmt->create(pmm->alloc(sizeof(task_t)), "producer", Tproduce, &para_p[i]);
   }
   for (int i = 0; i < NCONS; i++) {
+    para_c[i] = i;
     kmt->create(pmm->alloc(sizeof(task_t)), "consumer", Tconsume, &para_c[i]);
   }
 #endif
