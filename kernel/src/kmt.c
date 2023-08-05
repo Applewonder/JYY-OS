@@ -100,6 +100,7 @@ void kmt_sem_wait(sem_t *sem) {
         if (cpu_list[cpu_id].current_task) {
             sem->task_list[sem->task_cnt++] = cpu_list[cpu_id].current_task;
             cpu_list[cpu_id].current_task->block = true;
+            panic_on(cpu_list[cpu_id].current_task->status.cpu_num != cpu_current(), "cpu num error");
         }
     }
     kmt_spin_unlock(&sem->lock);
@@ -194,22 +195,36 @@ Context* kmt_schedule(Event ev, Context *c) {
         cpu_list[cpu_id].current_task = cpu_list[cpu_id].idle_task;
     }
     bool fine_task = false;
-    for (int i = 0; i < task_cnt; i++) {
+    for (int i = 0; i < task_cnt * 10; i++) {
         int rand_id = rand() % task_cnt;
-        if (task_list[rand_id]->block) {
-            continue;
-        }
-        if (task_list[rand_id] == cpu_list[cpu_id].current_task || kmt_try_spin_lock(&task_list[rand_id]->status)) {
+        if (task_list[rand_id] == cpu_list[cpu_id].current_task) {
+            if (task_list[rand_id]->block) {
+                continue;
+            }
             cpu_list[cpu_id].current_task = task_list[rand_id];
             fine_task = true;
+            panic_on(cpu_list[cpu_id].current_task->block  && fine_task, "Current task is blocked");
             break;
         }
+        if (!kmt_try_spin_lock(&task_list[rand_id]->status)) {
+            continue;
+        } 
+        panic_on(task_list[rand_id]->status.cpu_num != cpu_current(), "cpu num error");
+        if (!task_list[rand_id]->block) {
+            cpu_list[cpu_id].current_task = task_list[rand_id];
+            fine_task = true;
+            panic_on(cpu_list[cpu_id].current_task->block  && fine_task, "Current task is blocked");
+            break;
+        }
+        kmt_spin_unlock(&task_list[rand_id]->status);
     }
+    panic_on(cpu_list[cpu_id].current_task->block  && fine_task, "Current task is blocked");
     panic_on(cpu_list[cpu_id].current_task == NULL, "No task to schedule");
     TRACE_EXIT;
     if(!fine_task) {
         cpu_list[cpu_id].current_task = cpu_list[cpu_id].idle_task;
     }
+    panic_on(cpu_list[cpu_id].current_task->block, "Current task is blocked");
     return cpu_list[cpu_id].current_task->context;
 }
 
@@ -221,6 +236,7 @@ void initialize_idle_task(task_t* idle) {
     assert(idle->context);
     kmt_spin_init(&idle->status, "idle");
     idle->id = -1;
+    idle->block = false;
 }
 
 void kmt_init() {

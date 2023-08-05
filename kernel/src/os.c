@@ -8,6 +8,7 @@
 
 #ifdef DEBUG_PV
   sem_t empty, fill;
+  volatile int judger=0;
   #define P kmt->sem_wait
   #define V kmt->sem_signal
   #define N 1
@@ -43,15 +44,22 @@ static void print_task(void *arg) {
 #ifdef DEBUG_PV
 void Tproduce(void *arg) { 
   while (1) { 
-    P(&empty); 
-    putch('('); 
+    P(&empty);
+     
+    putch('1' + ++judger); 
+    if (judger > 1 || judger < 0) {
+      putch(' ');
+    }
     V(&fill); 
   } 
 }
 void Tconsume(void *arg) { 
   while (1) { 
     P(&fill);  
-    putch(')'); 
+    putch('1' + --judger); 
+    if (judger > 1 || judger < 0) {
+      putch(' ');
+    }
     V(&empty); 
   } 
 }
