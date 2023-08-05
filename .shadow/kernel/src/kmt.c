@@ -100,6 +100,7 @@ void kmt_sem_wait(sem_t *sem) {
         if (cpu_list[cpu_id].current_task) {
             sem->task_list[sem->task_cnt++] = cpu_list[cpu_id].current_task;
             cpu_list[cpu_id].current_task->block = true;
+            panic_on(cpu_list[cpu_id].current_task->status.cpu_num != cpu_current(), "cpu num error");
         }
     }
     kmt_spin_unlock(&sem->lock);
@@ -204,6 +205,7 @@ Context* kmt_schedule(Event ev, Context *c) {
         if (!kmt_try_spin_lock(&task_list[rand_id]->status)) {
             continue;
         } 
+        panic_on(cpu_list[cpu_id].current_task->status.cpu_num != cpu_current(), "cpu num error");
         if (!task_list[rand_id]->block) {
             cpu_list[cpu_id].current_task = task_list[rand_id];
             fine_task = true;
