@@ -212,7 +212,7 @@ Context* kmt_schedule(Event ev, Context *c) {
             break;
         }
     }
-    putch('C');
+    putch('D');
     panic_on(cpu_list[cpu_id].current_task == NULL, "No task to schedule");
     TRACE_EXIT;
     if(!fine_task) {
