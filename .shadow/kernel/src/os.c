@@ -147,10 +147,11 @@ void Tconsume(void *arg) {
 #endif
 
 #ifdef DEBUG_NORMAL
-#define TASK_NUM 6
+#define TASK_NUM 12
 static spinlock_t *idlelock[TASK_NUM];
 static int *lock_id[TASK_NUM]; 
-static char *idles_name[] = {"A", "B", "C", "D", "E", "F"};
+static char *idles_name[] = {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J",
+                             "K", "L"};
 volatile int task_num[TASK_NUM];
 volatile int cnt_cpu_task[MAX_CPU][TASK_NUM];
 int cnt_cpu[MAX_CPU];
@@ -179,7 +180,7 @@ static void mock_task(void *arg) {
             printf("\n=============================\n");
             thres <<= 1;
         }
-        kmt->spin_unlock(idlelock[(*(int*)arg + 1 ) % 6 ]);
+        kmt->spin_unlock(idlelock[(*(int*)arg + 1 ) % TASK_NUM ]);
         yield();
 //        for (int volatile i = 0; i < 100000; i++);
     }
