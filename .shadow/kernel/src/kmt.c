@@ -155,7 +155,8 @@ int kmt_create(task_t *task, const char *name, void (*entry)(void *arg), void *a
     memset(task->stack, '\0', sizeof(uint8_t) * STACK_SIZE);
     task->context = kcontext((Area) {(void *) task->stack, (void *) (task->stack + STACK_SIZE)}, entry, arg);
     kmt_spin_init(&task->status, name);
-
+    task->block = false;
+    task->is_running = false;
     task->id = task_cnt;
     task_list[task_cnt++] = task;
     kmt_spin_unlock(&task_init_lock);
