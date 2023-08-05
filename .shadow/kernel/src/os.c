@@ -68,13 +68,13 @@ void Tconsume(void *arg) {
 #endif
 
 #ifdef DEBUG_NORMAL
-static spinlock_t *idlelock;
+static spinlock_t *idlelock[12];
 static char *idles_name[] = {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L"};
 static void mock_task(void *arg) {
     while (1) {
-        kmt->spin_lock(idlelock);
+        kmt->spin_lock(idlelock[*(int*)arg]);
         printf("%s", arg);
-        kmt->spin_unlock(idlelock);
+        kmt->spin_unlock(idlelock[(*(int*)arg + 1 ) % 12 ]);
         yield();
 //        for (int volatile i = 0; i < 100000; i++);
     }
@@ -85,8 +85,15 @@ static void os_init() {
   pmm->init();
   kmt->init();
 #ifdef DEBUG_NORMAL
-    idlelock = pmm->alloc(sizeof(spinlock_t));
-    kmt->spin_init(idlelock, "idlelock");
+    for (size_t i = 0; i < 12; i++)
+    {
+      idlelock[i] = pmm->alloc(sizeof(spinlock_t));
+      kmt->spin_init(idlelock[i], idles_name[i]);
+    }
+    for (size_t i = 1; i < 12; i++)
+    {
+      kmt->spin_lock(idlelock[i]);
+    }
     for(int i = 0; i < 12; i++) {
         kmt->create(pmm->alloc(sizeof(task_t)), idles_name[i], mock_task, idles_name[i]);
     }
