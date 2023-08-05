@@ -156,7 +156,7 @@ volatile int task_num[TASK_NUM];
 volatile int cnt_cpu_task[MAX_CPU][TASK_NUM];
 int cnt_cpu[MAX_CPU];
 static void mock_task(void *arg) {
-  printf("Hello from task %d", *(int*)arg);
+  printf("Hello from task %d\n", *(int*)arg);
   int thres = 1;
     while (1) {
         if (!kmt->spin_try_lock(idlelock[*(int*)arg])) {
