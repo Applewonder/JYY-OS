@@ -202,7 +202,7 @@ static void os_init() {
     {
       kmt->spin_lock(idlelock[i]);
     }
-    for(int i = 0; i < 6; i++) {
+    for(int i = 0; i < TASK_NUM; i++) {
         kmt->create(pmm->alloc(sizeof(task_t)), idles_name[i], mock_task, lock_id[i]);
     }
 #endif
