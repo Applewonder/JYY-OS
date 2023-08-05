@@ -205,7 +205,7 @@ Context* kmt_schedule(Event ev, Context *c) {
         if (!kmt_try_spin_lock(&task_list[rand_id]->status)) {
             continue;
         } 
-        panic_on(cpu_list[cpu_id].current_task->status.cpu_num != cpu_current(), "cpu num error");
+        panic_on(task_list[rand_id]->status.cpu_num != cpu_current(), "cpu num error");
         if (!task_list[rand_id]->block) {
             cpu_list[cpu_id].current_task = task_list[rand_id];
             fine_task = true;
