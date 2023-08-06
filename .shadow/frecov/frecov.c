@@ -156,7 +156,7 @@ int main(int argc, char *argv[]) {
 
   u32 DataSec = hdr->BPB_RsvdSecCnt + hdr->BPB_NumFATs * hdr->BPB_FATSz32;
   u32 clu_cnt = (hdr->BPB_TotSec32 - DataSec) / hdr->BPB_SecPerClus;
-  Clu_Type* clu_table = malloc((clu_cnt - 2) * sizeof(Clu_Type));
+  Clu_Type* clu_table = malloc(clu_cnt * sizeof(Clu_Type));
 
   classify_the_cluster(clu_cnt, clu_table);
 
