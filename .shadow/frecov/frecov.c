@@ -255,6 +255,7 @@ bool get_pic_sha_num_and_print(u32 clu_num, Clu_Type* clu_table, wchar_t* file_n
   wchar_t* file_system_file_name = NULL;
   file_system_file_name = build_file_name_with_tmp(file_name);
   char* s_file_name = NULL;
+  s_file_name = malloc(sizeof(char) * 1201);
   bool is_success = store_pic_in_tmp(cluster, fsize, file_system_file_name, s_file_name);
   if (!is_success) {
     return is_success;
