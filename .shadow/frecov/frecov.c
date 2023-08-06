@@ -129,10 +129,10 @@ void initialize_dir_begin();
 void insert_dir_node(u32 clu_num);
 void classify_the_cluster(u32 clu_cnt, Clu_Type* clu_table);
 void recover_the_dir(void* cluster, Clu_Type* clu_table);
-void get_long_fill_name(LFN_ENTRY* entry, u32 entry_cnt, wchar_t* file_name);
-bool get_pic_sha_num_and_print(u32 clu_num, Clu_Type* clu_table, wchar_t* file_name);
-bool store_pic_in_tmp(void* start, u32 fsize, wchar_t* file_name, char* s_file_name);
-wchar_t* build_file_name_with_tmp(wchar_t* file_name);
+void get_long_fill_name(LFN_ENTRY* entry, u32 entry_cnt, char* file_name);
+bool get_pic_sha_num_and_print(u32 clu_num, Clu_Type* clu_table, char* file_name);
+bool store_pic_in_tmp(void* start, u32 fsize, char* file_name);
+char* build_file_name_with_tmp(char* file_name);
 bool calculate_sha1sum(char* file_name);
 void get_short_fill_name(Fat32Dent* entry, wchar_t* file_name);
 int recover_short_name_file(void* short_name_entry, Clu_Type* clu_table);
@@ -183,28 +183,25 @@ void recover_the_dir(void* cluster, Clu_Type* clu_table) {
   }
 }
 
-void get_long_fill_name(LFN_ENTRY* entry, u32 entry_cnt, wchar_t* file_name) {
+void get_long_fill_name(LFN_ENTRY* entry, u32 entry_cnt, char* file_name) {
   LFN_ENTRY* cur_dir = entry + entry_cnt - 1;
   int i = 0;
   int k = 0;
   for (int j = entry_cnt - 1; j >= 0; j--) {
     //TODO: judge if valid
     for (i = 0; i < 5; i++)
-        file_name[k++] = cur_dir->name1[i];
+        file_name[k++] = (char)cur_dir->name1[i];
     for (i = 0; i < 6; i++)
-        file_name[k++] = cur_dir->name2[i];
+        file_name[k++] = (char)cur_dir->name2[i];
     for (i = 0; i < 2; i++)
-        file_name[k++] = cur_dir->name3[i]; 
+        file_name[k++] = (char)cur_dir->name3[i]; 
     cur_dir = cur_dir - 1;
   }
-  file_name[k] = L'\0';
+  file_name[k] = '\0';
 }
 
-bool store_pic_in_tmp(void* start, u32 fsize, wchar_t* file_name, char* s_file_name) {
-  setlocale(LC_ALL, "");
-  s_file_name = malloc(sizeof(char) * 1201);
-  wcstombs(s_file_name, file_name, 1200);
-  FILE* file = fopen(s_file_name, "wb");
+bool store_pic_in_tmp(void* start, u32 fsize, char* file_name) {
+  FILE* file = fopen(file_name, "wb");
   if (file == NULL) {
       perror("Failed to open file");
       return false;
@@ -219,10 +216,10 @@ bool store_pic_in_tmp(void* start, u32 fsize, wchar_t* file_name, char* s_file_n
   return true;
 }
 
-wchar_t* build_file_name_with_tmp(wchar_t* file_name) {
-  wchar_t* file_name_head = malloc(sizeof(wchar_t) * 300);
-  wcscpy(file_name_head, L"/tmp/");
-  wcscat(file_name_head, file_name);
+char* build_file_name_with_tmp(char* file_name) {
+  char* file_name_head = malloc(sizeof(char) * 300);
+  strcpy(file_name_head, "/tmp/");
+  strcat(file_name_head, file_name);
   return file_name_head;
 }
 
@@ -245,26 +242,24 @@ bool calculate_sha1sum(char* file_name) {
   return true;
 }
 
-bool get_pic_sha_num_and_print(u32 clu_num, Clu_Type* clu_table, wchar_t* file_name) {
+bool get_pic_sha_num_and_print(u32 clu_num, Clu_Type* clu_table, char* file_name) {
   if (clu_table[clu_num] != BMP_F) {
     return false;
   }
   void* cluster = Cluster_to_Addr(clu_num);
   BMFileHdr* bfhdr = cluster;
   u32 fsize = bfhdr->size;
-  wchar_t* file_system_file_name = NULL;
+  char* file_system_file_name = NULL;
   file_system_file_name = build_file_name_with_tmp(file_name);
-  char* s_file_name = NULL;
-  s_file_name = malloc(sizeof(char) * 1201);
-  bool is_success = store_pic_in_tmp(cluster, fsize, file_system_file_name, s_file_name);
+  bool is_success = store_pic_in_tmp(cluster, fsize, file_system_file_name);
   if (!is_success) {
     return is_success;
   }
-  is_success = calculate_sha1sum(s_file_name);
+  is_success = calculate_sha1sum(file_system_file_name);
     if (!is_success) {
     return is_success;
   }
-  wprintf(L" %ls\n", file_name);
+  printf(" %s\n", file_name);
   return true;
 }
 
@@ -289,7 +284,7 @@ int recover_short_name_file(void* short_name_entry, Clu_Type* clu_table) {
 
 int recover_long_name_file(void* long_name_entry, Clu_Type* clu_table, u32 remain_dir) {
   LFN_ENTRY* entry = long_name_entry;
-  wchar_t* file_name = malloc(sizeof(wchar_t) * 256);
+  char* file_name = malloc(sizeof(char) * 256);
   if (entry->ord & 0x40) {
     u32 entry_cnt = entry->ord & 0x0f;
     if (remain_dir < (entry_cnt + 1) * 32) {//TODO: use the checksum to get the SFN
