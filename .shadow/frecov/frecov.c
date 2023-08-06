@@ -116,6 +116,7 @@ enum cluster_type {
 
 Fat32Hdr *hdr;
 Dir_Node* Dir_Begin;
+u32 clu_cnt = 0;
 
 void *map_disk(const char *fname);
 void* Cluster_to_Addr(u32 n);
@@ -156,7 +157,7 @@ int main(int argc, char *argv[]) {
   u32 RootDirSectors = ((hdr->BPB_RootEntCnt * 32) + (hdr->BPB_BytsPerSec - 1)) / hdr->BPB_BytsPerSec;
 
   u32 DataSec_cnt = hdr->BPB_TotSec32 - (hdr->BPB_RsvdSecCnt + (hdr->BPB_NumFATs * hdr->BPB_FATSz32) + RootDirSectors);
-  u32 clu_cnt = DataSec_cnt / hdr->BPB_SecPerClus; 
+  clu_cnt = DataSec_cnt / hdr->BPB_SecPerClus; 
   Clu_Type* clu_table = malloc(clu_cnt * sizeof(Clu_Type));
 
   classify_the_cluster(clu_cnt, clu_table);
@@ -242,6 +243,9 @@ bool calculate_sha1sum(char* file_name) {
 }
 
 bool get_pic_sha_num_and_print(u32 clu_num, Clu_Type* clu_table, char* file_name) {
+  if (clu_num >= clu_cnt || clu_num < 2) {
+    return false;
+  }
   if (clu_table[clu_num] != BMP_F) {
     return false;
   }
