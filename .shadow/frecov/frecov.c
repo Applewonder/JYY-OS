@@ -224,7 +224,7 @@ char* build_file_name_with_tmp(char* file_name) {
 }
 
 bool calculate_sha1sum(char* file_name) {
-  char command[50];
+  char command[256];
   snprintf(command, sizeof(command), "sha1sum %s", file_name);
 
   FILE* pipe = popen(command, "r");
@@ -233,7 +233,7 @@ bool calculate_sha1sum(char* file_name) {
       return false;
   }
 
-  char buffer[128];
+  char buffer[50];
   while (fgets(buffer, sizeof(buffer), pipe) != NULL) {
       printf("%s", buffer);
   }
