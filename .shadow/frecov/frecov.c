@@ -233,7 +233,7 @@ bool calculate_sha1sum(char* file_name) {
       return false;
   }
 
-  char buffer[45];
+  char buffer[43];
   fgets(buffer, sizeof(buffer), pipe);
   printf("%s", buffer);
 
