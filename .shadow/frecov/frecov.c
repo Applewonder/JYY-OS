@@ -367,12 +367,12 @@ Clu_Type decide_clu_type(void* cluster) {
 }
 
 void* Cluster_to_Addr(u32 n) {
-  void* first_cluster = (void *)hdr
+  u8* first_cluster = (u8 *)hdr
                         + ((hdr->BPB_RsvdSecCnt + (hdr->BPB_SecPerClus - 1)) / hdr->BPB_SecPerClus) * hdr->BPB_SecPerClus * hdr->BPB_BytsPerSec
                         + ((hdr->BPB_NumFATs * hdr->BPB_FATSz32 + (hdr->BPB_SecPerClus - 1)) / hdr->BPB_SecPerClus) * hdr->BPB_SecPerClus * hdr->BPB_BytsPerSec
   ;
 
-  void* data_sec = first_cluster + (n - 2) * hdr->BPB_SecPerClus * hdr->BPB_BytsPerSec;
+  void* data_sec = (void*)(first_cluster + (n - 2) * hdr->BPB_SecPerClus * hdr->BPB_BytsPerSec);
   return data_sec;
 }
 
@@ -388,10 +388,10 @@ bool judge_if_dir(void* cluster) {
   size_t bmp_cnt = 0;
   for (int i = 0; i < cluster_size - 2; i ++) {
         char* aim_str = cluster + i;
-        if (aim_str[0] != 'B') {
+        if (aim_str[0] != 'B' && aim_str[0] != 'b') {
           continue;
         }
-        if (aim_str[1] == 'M' && aim_str[2] == 'P') {
+        if ((aim_str[1] == 'M' && aim_str[2] == 'P') || (aim_str[1] == 'm' && aim_str[2] == 'p')) {
           bmp_cnt ++;
         }
   }
@@ -418,7 +418,7 @@ bool judge_if_unused(void* cluster) {
 
 bool judge_if_bmp_hdr(void* cluster) {
   BMFileHdr* file_hdr = cluster;
-  if (file_hdr->type != ('B' << 8 | 'M')) {
+  if (file_hdr->type != ('M' << 8 | 'B')) {
       return false;
   } 
   if (file_hdr->reserved1 != 0 || file_hdr->reserved2 != 0) {
