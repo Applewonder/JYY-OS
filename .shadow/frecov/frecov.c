@@ -175,9 +175,9 @@ void recover_the_dir(void* cluster, Clu_Type* clu_table) {
     } else if (entry->DIR_Name[0] == 0xE5) {
         continue;
     } else if (entry->DIR_Attr == 0x0F) {
-        i += recover_long_name_file(cluster, clu_table, (clu_size - i * 32));
+        i += recover_long_name_file(entry, clu_table, (clu_size - i * 32));
     } else {
-        i += recover_short_name_file(cluster, clu_table);
+        i += recover_short_name_file(entry, clu_table);
     }
   }
 }
