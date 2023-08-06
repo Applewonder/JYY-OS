@@ -7,8 +7,7 @@
 #include <unistd.h>
 #include <stdbool.h>
 #include <sys/mman.h>
-#include <wchar.h>
-#include <locale.h>
+// #include <locale.h>
 
 typedef uint8_t u8;
 typedef uint16_t u16;
@@ -134,7 +133,7 @@ bool get_pic_sha_num_and_print(u32 clu_num, Clu_Type* clu_table, char* file_name
 bool store_pic_in_tmp(void* start, u32 fsize, char* file_name);
 char* build_file_name_with_tmp(char* file_name);
 bool calculate_sha1sum(char* file_name);
-void get_short_fill_name(Fat32Dent* entry, wchar_t* file_name);
+void get_short_fill_name(Fat32Dent* entry, char* file_name);
 int recover_short_name_file(void* short_name_entry, Clu_Type* clu_table);
 int recover_long_name_file(void* long_name_entry, Clu_Type* clu_table, u32 remain_dir);
 void recovery(Clu_Type* clu_table);
@@ -263,19 +262,19 @@ bool get_pic_sha_num_and_print(u32 clu_num, Clu_Type* clu_table, char* file_name
   return true;
 }
 
-void get_short_fill_name(Fat32Dent* entry, wchar_t* file_name) {
+void get_short_fill_name(Fat32Dent* entry, char* file_name) {
   for (int i = 0; i < 8; i ++) {
-    file_name[i] = entry->DIR_Name[i];
+    file_name[i] = (char)entry->DIR_Name[i];
   }
-  file_name[8] = L'.';
+  file_name[8] = '.';
   for (int i = 8; i < 11; i ++) {
-    file_name[i + 1] = entry->DIR_Name[i];
+    file_name[i + 1] = (char)entry->DIR_Name[i];
   }
 }
 
 int recover_short_name_file(void* short_name_entry, Clu_Type* clu_table) {
   Fat32Dent* entry = short_name_entry;
-  wchar_t* file_name = malloc(sizeof(wchar_t) * 20);
+  char* file_name = malloc(sizeof(char) * 20);
   get_short_fill_name(entry, file_name);
   u32 pic_clu_num = (((u32)entry->DIR_FstClusHI) << 16) | entry->DIR_FstClusLO;
   bool is_success = get_pic_sha_num_and_print(pic_clu_num, clu_table, file_name);
