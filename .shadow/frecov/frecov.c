@@ -120,7 +120,7 @@ Dir_Node* Dir_Begin;
 
 void *map_disk(const char *fname);
 void* Cluster_to_Addr(u32 n);
-u32 Addr_to_Cluster(void* addr);
+// u32 Addr_to_Cluster(void* addr);
 bool judge_if_dir(void* cluster);
 bool judge_if_unused(void* cluster);
 bool judge_if_bmp_hdr(void* cluster);
@@ -154,8 +154,10 @@ int main(int argc, char *argv[]) {
   hdr = map_disk(argv[1]);
   initialize_dir_begin();
 
-  u32 DataSec = hdr->BPB_RsvdSecCnt + hdr->BPB_NumFATs * hdr->BPB_FATSz32;
-  u32 clu_cnt = (hdr->BPB_TotSec32 - DataSec) / hdr->BPB_SecPerClus;
+  u32 RootDirSectors = ((hdr->BPB_RootEntCnt * 32) + (hdr->BPB_BytsPerSec - 1)) / hdr->BPB_BytsPerSec;
+
+  u32 DataSec_cnt = hdr->BPB_TotSec32 - (hdr->BPB_RsvdSecCnt + (hdr->BPB_NumFATs * hdr->BPB_FATSz32) + RootDirSectors);
+  u32 clu_cnt = DataSec_cnt / hdr->BPB_SecPerClus; 
   Clu_Type* clu_table = malloc(clu_cnt * sizeof(Clu_Type));
 
   classify_the_cluster(clu_cnt, clu_table);
@@ -279,7 +281,7 @@ int recover_short_name_file(void* short_name_entry, Clu_Type* clu_table) {
   Fat32Dent* entry = short_name_entry;
   wchar_t* file_name = malloc(sizeof(wchar_t) * 20);
   get_short_fill_name(entry, file_name);
-  u32 pic_clu_num = entry->DIR_FstClusHI << 16 | entry->DIR_FstClusLO;
+  u32 pic_clu_num = (((u32)entry->DIR_FstClusHI) << 16) | entry->DIR_FstClusLO;
   bool is_success = get_pic_sha_num_and_print(pic_clu_num, clu_table, file_name);
   return 0;
 }
@@ -365,17 +367,21 @@ Clu_Type decide_clu_type(void* cluster) {
 }
 
 void* Cluster_to_Addr(u32 n) {
-  u32 data_sec = hdr->BPB_RsvdSecCnt + hdr->BPB_NumFATs * hdr->BPB_FATSz32 + (n - 2) * hdr->BPB_SecPerClus;
-  u32 byte_offset = data_sec * hdr->BPB_BytsPerSec;
-  return (void*) hdr + byte_offset;
+  void* first_cluster = (void *)hdr
+                        + ((hdr->BPB_RsvdSecCnt + (hdr->BPB_SecPerClus - 1)) / hdr->BPB_SecPerClus) * hdr->BPB_SecPerClus * hdr->BPB_BytsPerSec
+                        + ((hdr->BPB_NumFATs * hdr->BPB_FATSz32 + (hdr->BPB_SecPerClus - 1)) / hdr->BPB_SecPerClus) * hdr->BPB_SecPerClus * hdr->BPB_BytsPerSec
+  ;
+
+  void* data_sec = first_cluster + (n - 2) * hdr->BPB_SecPerClus * hdr->BPB_BytsPerSec;
+  return data_sec;
 }
 
-u32 Addr_to_Cluster(void* addr) {
-  u32 byte_offset = (u32) (addr - (void*) hdr);
-  u32 data_sec = byte_offset / hdr->BPB_BytsPerSec;
-  u32 n = (data_sec - hdr->BPB_RsvdSecCnt - hdr->BPB_NumFATs * hdr->BPB_FATSz32) / hdr->BPB_SecPerClus + 2;
-  return n;
-}
+// u32 Addr_to_Cluster(void* addr) {
+//   u32 byte_offset = (u32) (addr - (void*) hdr);
+//   u32 data_sec = byte_offset / hdr->BPB_BytsPerSec;
+//   u32 n = (data_sec - hdr->BPB_RsvdSecCnt - hdr->BPB_NumFATs * hdr->BPB_FATSz32) / hdr->BPB_SecPerClus + 2;
+//   return n;
+// }
 
 bool judge_if_dir(void* cluster) {
   size_t cluster_size = hdr->BPB_BytsPerSec * hdr->BPB_SecPerClus;
