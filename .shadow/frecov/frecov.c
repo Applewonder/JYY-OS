@@ -262,7 +262,7 @@ bool get_pic_sha_num_and_print(u32 clu_num, Clu_Type* clu_table, char* file_name
     if (!is_success) {
     return is_success;
   }
-  printf(" %s\n", file_name);
+  printf("%s\n", file_name);
   return true;
 }
 
