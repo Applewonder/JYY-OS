@@ -224,7 +224,7 @@ char* build_file_name_with_tmp(char* file_name) {
 
 bool calculate_sha1sum(char* file_name) {
   char command[256];
-  // snprintf(command, sizeof(command), "sha1sum %s", file_name);
+  snprintf(command, sizeof(command), "sha1sum %s", file_name);
 
   FILE* pipe = popen(command, "r");
   if (pipe == NULL) {
