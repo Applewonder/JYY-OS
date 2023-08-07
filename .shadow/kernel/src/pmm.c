@@ -86,7 +86,7 @@ static void pmm_init() {
 }
 #endif
 
-static void *kalloc_safe(size_t size) {
+static void *kalloc_safe(int size) {
   bool i = ienabled();
   iset(false);
   void *ret = kalloc(size);
