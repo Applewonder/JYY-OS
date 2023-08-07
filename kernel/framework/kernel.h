@@ -22,7 +22,7 @@ MODULE(os) {
 
 MODULE(pmm) {
   void  (*init)();
-  void *(*alloc)(size_t size);
+  void *(*alloc)(int size);
   void  (*free)(void *ptr);
 };
 
