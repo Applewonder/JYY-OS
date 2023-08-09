@@ -242,6 +242,8 @@ bool calculate_sha1sum(char* file_name) {
   return true;
 }
 
+#ifdef NEW_M
+
 bool try_cluster(u32 clu_num, Clu_Type* clu_table, u32 offset, u32 line_size, u32 padding_size) {
   if (clu_table[clu_num] != BMP_I) {
     return false;
@@ -333,6 +335,34 @@ bool get_pic_sha_num_and_print(u32 clu_num, Clu_Type* clu_table, char* file_name
   printf("%s\n", file_name);
   return true;
 }
+
+#else
+
+bool get_pic_sha_num_and_print(u32 clu_num, Clu_Type* clu_table, char* file_name) {
+  if (clu_num >= clu_cnt || clu_num < 2) {
+    return false;
+  }
+  if (clu_table[clu_num] != BMP_F) {
+    return false;
+  }
+  void* cluster = Cluster_to_Addr(clu_num);
+  BMFileHdr* bfhdr = cluster;
+  u32 fsize = bfhdr->size;
+  char* file_system_file_name = NULL;
+  file_system_file_name = build_file_name_with_tmp(file_name);
+  bool is_success = store_pic_in_tmp(cluster, fsize, file_system_file_name);
+  if (!is_success) {
+    return is_success;
+  }
+  is_success = calculate_sha1sum(file_system_file_name);
+    if (!is_success) {
+    return is_success;
+  }
+  printf("%s\n", file_name);
+  return true;
+}
+
+#endif
 
 void get_short_fill_name(Fat32Dent* entry, char* file_name) {
   for (int i = 0; i < 8; i ++) {
