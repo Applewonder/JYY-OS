@@ -242,15 +242,26 @@ bool calculate_sha1sum(char* file_name) {
   return true;
 }
 
-bool try_cluster(u32 clu_num, Clu_Type* clu_table, u32 offset, u32 line_size, u32 padding_size) {
+bool try_cluster(u32 clu_num, Clu_Type* clu_table, u32 offset, u32 line_size, u32 padding_size, void *last_line) {
 //  return true;
-  if (clu_table[clu_num] != BMP_I) {
+  void *cluster = Cluster_to_Addr(clu_num);
+  // if (clu_table[clu_num] != BMP_I) {
+  //   return false;
+  // }
+  if (memcmp(cluster + offset - padding_size, "\0\0\0\0", padding_size) != 0) {
     return false;
   }
-  if (memcmp(Cluster_to_Addr(clu_num) + offset - padding_size, "\0\0\0\0", padding_size) != 0) {
+  if (memcmp(cluster + offset + line_size, "\0\0\0\0", padding_size) != 0) {
     return false;
   }
-  if (memcmp(Cluster_to_Addr(clu_num) + offset + line_size, "\0\0\0\0", padding_size) != 0) {
+  u8 *clu_ptr = cluster;
+  u8 *last_ptr = last_line;
+  u32 dev = 0;
+  for (u32 i = 0; i < line_size + padding_size; ++i) {
+    u8 diff = *(clu_ptr++) - *(last_ptr++);
+    dev += diff * diff;
+  }
+  if (dev / (line_size + padding_size) > 16384) {
     return false;
   }
   return true;
@@ -304,10 +315,10 @@ bool get_pic_sha_num_and_print(u32 clu_num, Clu_Type* clu_table, char* file_name
     for (u32 i = 1; i < num_clus; ++i) {
       u32 offset = padded_line_size - (buf_ptr - img) % padded_line_size;
       img = buf_ptr + offset;
-      if (last_clu_num + 1 < clu_cnt && try_cluster(last_clu_num + 1, clu_table, offset, line_size, padding_size)) {
+      if (last_clu_num + 1 < clu_cnt && try_cluster(last_clu_num + 1, clu_table, offset, line_size, padding_size, buf_ptr - padded_line_size)) {
         memcpy(buf_ptr, Cluster_to_Addr(last_clu_num + 1), clu_size);
         buf_ptr += clu_size;
-        // clu_table[last_clu_num + 1] = -1;
+        clu_table[last_clu_num + 1] = -1;
         ++last_clu_num;
         continue;
       }
@@ -315,12 +326,12 @@ bool get_pic_sha_num_and_print(u32 clu_num, Clu_Type* clu_table, char* file_name
       // printf("Hi\n");
 
       for (u32 j = 2; j < clu_cnt; ++j) {
-        if (!try_cluster(j, clu_table, offset, line_size, padding_size)) {
+        if (!try_cluster(j, clu_table, offset, line_size, padding_size, buf_ptr - padded_line_size)) {
           continue;
         }
         memcpy(buf_ptr, Cluster_to_Addr(j), clu_size);
         buf_ptr += clu_size;
-        // clu_table[j] = -1;
+        clu_table[j] = -1;
         last_clu_num = j;
         break;
       }
