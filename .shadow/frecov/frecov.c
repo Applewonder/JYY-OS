@@ -288,11 +288,11 @@ bool get_pic_sha_num_and_print(u32 clu_num, Clu_Type* clu_table, char* file_name
     }
     u32 line_size = bi->bits * bi->width;
     u32 padding_size = (4 - (line_size % 4)) % 4;
-    // if (padding_size == 0) {
-    //   data = cluster;
-    //   printf("Hi, line 293\n");
-    //   break;
-    // }
+    if (padding_size == 0) {
+      data = cluster;
+      printf("Hi, line 293\n");
+      break;
+    }
     u32 padded_line_size = line_size + padding_size;
     void *img = buf + bf->offset;
     for (u32 i = 1; i < num_clus; ++i) {
