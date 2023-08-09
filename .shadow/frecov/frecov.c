@@ -305,7 +305,7 @@ bool get_pic_sha_num_and_print(u32 clu_num, Clu_Type* clu_table, char* file_name
         continue;
       }
 
-      printf("Hi\n");
+      // printf("Hi\n");
 
       for (u32 j = 2; j < clu_cnt; ++j) {
         if (!try_cluster(j, clu_table, offset, line_size, padding_size)) {
