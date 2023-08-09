@@ -251,12 +251,12 @@ bool try_cluster(u32 clu_num, Clu_Type* clu_table, u32 offset, u32 line_size, u3
   // if (clu_table[clu_num] != BMP_I) {
   //   return false;
   // }
-  if (memcmp(cluster + offset - padding_size, "\0\0\0\0", padding_size) != 0) {
-    return false;
-  }
-  if (memcmp(cluster + offset + line_size, "\0\0\0\0", padding_size) != 0) {
-    return false;
-  }
+  // if (memcmp(cluster + offset - padding_size, "\0\0\0\0", padding_size) != 0) {
+  //   return false;
+  // }
+  // if (memcmp(cluster + offset + line_size, "\0\0\0\0", padding_size) != 0) {
+  //   return false;
+  // }
   u8 *clu_ptr = cluster;
   u8 *last_ptr = last_line;
   u32 dev = 0;
