@@ -320,7 +320,7 @@ bool get_pic_sha_num_and_print(u32 clu_num, Clu_Type* clu_table, char* file_name
         }
         memcpy(buf_ptr, Cluster_to_Addr(j), clu_size);
         buf_ptr += clu_size;
-        clu_table[j] = -1;
+        // clu_table[j] = -1;
         last_clu_num = j;
         break;
       }
