@@ -264,9 +264,9 @@ bool try_cluster(u32 clu_num, Clu_Type* clu_table, u32 offset, u32 line_size, u3
     u8 diff = *(clu_ptr++) - *(last_ptr++);
     dev += diff * diff;
   }
-  // if (dev / (line_size + padding_size) > 16384) {
-  //   return false;
-  // }
+  if (dev / (line_size + padding_size) > 163840) {
+    return false;
+  }
   return true;
 }
 
