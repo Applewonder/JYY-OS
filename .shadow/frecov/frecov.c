@@ -242,6 +242,19 @@ bool calculate_sha1sum(char* file_name) {
   return true;
 }
 
+bool try_cluster(u32 clu_num, Clu_Type* clu_table, u32 offset, u32 line_size, u32 padding_size) {
+  if (clu_table[clu_num] != BMP_I) {
+    return false;
+  }
+  if (memcmp(Cluster_to_Addr(clu_num) + offset - padding_size, "\0\0\0\0", padding_size) != 0) {
+    return false;
+  }
+  if (memcmp(Cluster_to_Addr(clu_num) + offset + line_size, "\0\0\0\0", padding_size) != 0) {
+    return false;
+  }
+  return true;
+}
+
 bool get_pic_sha_num_and_print(u32 clu_num, Clu_Type* clu_table, char* file_name) {
   if (clu_num >= clu_cnt || clu_num < 2) {
     return false;
@@ -249,12 +262,63 @@ bool get_pic_sha_num_and_print(u32 clu_num, Clu_Type* clu_table, char* file_name
   if (clu_table[clu_num] != BMP_F) {
     return false;
   }
+  u32 clu_size = hdr->BPB_BytsPerSec * hdr->BPB_SecPerClus;
+  u32 clu_cnt = hdr->BPB_TotSec32 / hdr->BPB_SecPerClus;
   void* cluster = Cluster_to_Addr(clu_num);
   BMFileHdr* bfhdr = cluster;
   u32 fsize = bfhdr->size;
   char* file_system_file_name = NULL;
   file_system_file_name = build_file_name_with_tmp(file_name);
-  bool is_success = store_pic_in_tmp(cluster, fsize, file_system_file_name);
+
+
+  u32 num_clus = (fsize + clu_size - 1) / clu_size;
+  void *buf = malloc(clu_size * num_clus);
+  void *buf_ptr = buf;
+  void *data = buf;
+  memcpy(buf_ptr, cluster, clu_size);
+  buf_ptr += clu_size;
+  BMFileHdr *bf = buf;
+  BMInfoHdr *bi = buf + sizeof(BMFileHdr);
+
+  bool is_success = false;
+  do {
+    if (bi->compression != 0) {
+      data = cluster;
+      break;
+    }
+    u32 line_size = bi->bits * bi->width;
+    u32 padding_size = (4 - (line_size % 4)) % 4;
+    if (padding_size == 0) {
+      data = cluster;
+      break;
+    }
+    u32 padded_line_size = line_size + padding_size;
+    void *img = buf + bf->offset;
+    for (u32 i = 1; i < num_clus; ++i) {
+      u32 offset = padded_line_size - (buf_ptr - img) % padded_line_size;
+      img = buf_ptr + offset;
+      if (clu_num < clu_cnt - 1 && try_cluster(clu_num + 1, clu_table, offset, line_size, padding_size)) {
+        memcpy(buf_ptr, Cluster_to_Addr(clu_num + 1), clu_size);
+        buf_ptr += clu_size;
+        clu_table[clu_num + 1] = -1;
+        continue;
+      }
+      for (u32 j = 2; j < clu_cnt; ++j) {
+        if (!try_cluster(j, clu_table, offset, line_size, padding_size)) {
+          continue;
+        }
+        memcpy(buf_ptr, Cluster_to_Addr(j), clu_size);
+        buf_ptr += clu_size;
+        clu_table[j] = -1;
+        break;
+      }
+    }
+  } while (false);
+
+
+  is_success = store_pic_in_tmp(data, fsize, file_system_file_name);
+
+  free(buf);
   if (!is_success) {
     return is_success;
   }
