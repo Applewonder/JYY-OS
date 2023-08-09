@@ -307,7 +307,7 @@ bool get_pic_sha_num_and_print(u32 clu_num, Clu_Type* clu_table, char* file_name
       if (last_clu_num + 1 < clu_cnt && try_cluster(last_clu_num + 1, clu_table, offset, line_size, padding_size)) {
         memcpy(buf_ptr, Cluster_to_Addr(last_clu_num + 1), clu_size);
         buf_ptr += clu_size;
-        clu_table[last_clu_num + 1] = -1;
+        // clu_table[last_clu_num + 1] = -1;
         ++last_clu_num;
         continue;
       }
