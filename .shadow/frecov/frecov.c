@@ -244,6 +244,9 @@ bool calculate_sha1sum(char* file_name) {
 
 bool try_cluster(u32 clu_num, Clu_Type* clu_table, u32 offset, u32 line_size, u32 padding_size, void *last_line) {
 //  return true;
+  if (clu_num >= clu_cnt || clu_num < 2) {
+    return false;
+  }
   void *cluster = Cluster_to_Addr(clu_num);
   // if (clu_table[clu_num] != BMP_I) {
   //   return false;
