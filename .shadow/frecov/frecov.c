@@ -286,7 +286,7 @@ bool get_pic_sha_num_and_print(u32 clu_num, Clu_Type* clu_table, char* file_name
       data = cluster;
       break;
     }
-    u32 line_size = bi->bits * bi->width;
+    u32 line_size = ( bi->bits / 8 ) * bi->width;
     u32 padding_size = (4 - (line_size % 4)) % 4;
     if (padding_size == 0) {
       data = cluster;
