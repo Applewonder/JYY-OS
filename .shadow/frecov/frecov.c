@@ -264,9 +264,9 @@ bool try_cluster(u32 clu_num, Clu_Type* clu_table, u32 offset, u32 line_size, u3
     u8 diff = *(clu_ptr++) - *(last_ptr++);
     dev += diff * diff;
   }
-  if (dev / (line_size + padding_size) > 16384) {
-    return false;
-  }
+  // if (dev / (line_size + padding_size) > 16384) {
+  //   return false;
+  // }
   return true;
 }
 
@@ -278,7 +278,6 @@ bool get_pic_sha_num_and_print(u32 clu_num, Clu_Type* clu_table, char* file_name
     return false;
   }
   u32 clu_size = hdr->BPB_BytsPerSec * hdr->BPB_SecPerClus;
-  u32 clu_cnt = hdr->BPB_TotSec32 / hdr->BPB_SecPerClus;
   void* cluster = Cluster_to_Addr(clu_num);
   BMFileHdr* bfhdr = cluster;
   u32 fsize = bfhdr->size;
