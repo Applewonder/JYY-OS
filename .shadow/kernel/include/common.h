@@ -14,6 +14,7 @@
   #define TRACE_EXIT ((void)0)
 #endif
 
+#define MAX_CPU 8
 #define SPIN_LOCK_INIT 0
 #define K_LOCK_NAME 128
 #define K_SEM_NAME 128
