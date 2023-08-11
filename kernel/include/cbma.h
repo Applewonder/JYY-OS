@@ -2,7 +2,7 @@
 #define BBMA
 # include <common.h>
 
-#define MAX_CPU 8
+
 #define MAX_TREE 32
 #define BBMA_NUM 13
 #define FIND_ADDR_OFFSET 12

@@ -6,12 +6,12 @@
 #define MIN_SEQ 0
 #define MAX_SEQ 10000
 
-CPU_TASKS cpu_list[MAX_CPU];
-task_t* task_list[MAX_TASK];
-int task_cnt = 1;
+extern CPU_TASKS cpu_list[MAX_CPU];
+extern task_t* task_list[MAX_TASK];
+extern int task_cnt;
 
-spinlock_t sem_init_lock;
-spinlock_t task_init_lock;
+static spinlock_t sem_init_lock;
+static spinlock_t task_init_lock;
 
 int holding(spinlock_t *lk)
 {
@@ -157,7 +157,7 @@ int kmt_create(task_t *task, const char *name, void (*entry)(void *arg), void *a
     kmt_spin_init(&task->status, name);
     task->block = false;
     task->is_running = false;
-    task->id = task_cnt;
+    task->pid = task_cnt;
     task_list[task_cnt++] = task;
     kmt_spin_unlock(&task_init_lock);
     TRACE_EXIT;
@@ -166,8 +166,8 @@ int kmt_create(task_t *task, const char *name, void (*entry)(void *arg), void *a
 
 void kmt_teardown(task_t *task) {
     kmt_spin_lock(&task_init_lock);
-    int id = task->id;
-    task_list[id] = task_list[--task_cnt];
+    int pid = task->pid;
+    task_list[pid] = task_list[--task_cnt];
     kmt_spin_unlock(&task_init_lock);
 }
 
@@ -182,7 +182,7 @@ Context* kmt_context_save(Event ev, Context *c){
     int cpu_id = cpu_current();
     cpu_list[cpu_id].current_task->context = c;
     if (cpu_list[cpu_id].save_task && cpu_list[cpu_id].save_task != cpu_list[cpu_id].current_task) {
-        if (cpu_list[cpu_id].save_task->id >=0) {
+        if (cpu_list[cpu_id].save_task->pid >=0) {
             kmt_spin_lock(&cpu_list[cpu_id].save_task->status);
             cpu_list[cpu_id].save_task->is_running = false;
             kmt_spin_unlock(&cpu_list[cpu_id].save_task->status);
@@ -244,7 +244,7 @@ void initialize_idle_task(task_t* idle) {
     idle->context = kcontext((Area) {(void *) idle->stack, (void *) (idle->stack + STACK_SIZE)}, idle_thread, NULL);
     assert(idle->context);
     kmt_spin_init(&idle->status, "idle");
-    idle->id = -1;
+    idle->pid = -1;
     idle->block = false;
     idle->is_running = false;
 }
