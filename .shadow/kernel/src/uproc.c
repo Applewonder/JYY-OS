@@ -1,6 +1,8 @@
 #include <os.h>
 #include <syscall.h>
 
+extern struct mmu_config mmu;
+
 extern CPU_TASKS cpu_list[MAX_CPU];
 extern task_t* task_list[MAX_TASK];
 extern int task_cnt;
@@ -8,14 +10,16 @@ extern int task_cnt;
 // #include "initcode.inc"
 static spinlock_t task_init_lock;
 
-int uproc_create(task_t *task, const char *name, void (*entry)(void *arg), void *arg) {
+int uproc_create(task_t *task, const char *name, void *entry) {
+    
     TRACE_ENTRY;
     kmt->spin_lock(&task_init_lock);
     
     memset(task->name, '\0', strlen(name));
     strcpy(task->name, name);
     memset(task->stack, '\0', sizeof(uint8_t) * STACK_SIZE);
-    task->context = kcontext((Area) {(void *) task->stack, (void *) (task->stack + STACK_SIZE)}, entry, arg);
+    protect(task->as);
+    task->context = ucontext(task->as, (Area) {(void *) task->stack, (void *) (task->stack + STACK_SIZE)}, task->as->area.start);
     kmt->spin_init(&task->status, name);
     task->block = false;
     task->is_running = false;
@@ -49,7 +53,9 @@ int ksleep(task_t *task, int second) {
     return 0;
 }
 
-
+int64_t kuptime(task_t *task) {
+    return io_read(AM_TIMER_UPTIME).us / 1000;
+}
 
 
 
@@ -58,5 +64,6 @@ MODULE_DEF(uproc) = {
     .kputc = kputc,
     .getpid = kgetpid,
     .sleep = ksleep,
+    .uptime = kuptime,
     
 };

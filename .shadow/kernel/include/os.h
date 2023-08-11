@@ -33,7 +33,7 @@ struct task {
   char name[K_TASK_NAME];
   spinlock_t status;
   Context   *context;
-  AddrSpace as; //add in L3
+  AddrSpace* as; //add in L3
   int ppid;
   int pid;
   bool block;
