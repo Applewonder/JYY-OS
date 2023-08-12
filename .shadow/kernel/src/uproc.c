@@ -640,6 +640,10 @@ void uproc_init() {
     os->on_irq(0,EVENT_PAGEFAULT,page_fault);
 
     kmt->spin_init(&pid_lock, "pid_lock");
+
+    task_t *t=pmm->alloc(sizeof(task_t));
+    uproc_create(t, "init");
+    t->pid = get_pid();
 }
 
 MODULE_DEF(uproc) = {
