@@ -356,7 +356,8 @@ void fork_cow_mapping(task_t *task) {
             uintptr_t va = (uintptr_t) cur->va;
             uintptr_t pa = (uintptr_t) pmm->alloc(task->as->pgsize);
             VME_AREA* vma = find_vme_node(task, va, va + task->as->pgsize);
-            if (vma->vm_prot & PROT_WRITE) {
+
+            if ((vma->vm_prot & PROT_WRITE) && (vma->vm_flags & MAP_PRIVATE)) {
                 pgunmap(task, (void*) va);
                 int new_prot = vma->vm_prot & ~PROT_WRITE;
                 // divide_vme_node(task, vma, va, new_prot);
