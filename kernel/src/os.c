@@ -3,6 +3,8 @@
 #include <common.h>
 #include <os.h>
 
+extern CPU_TASKS cpu_list[MAX_CPU];
+
 #ifdef DEBUG_DEV
   #include <devices.h>
 #endif
@@ -289,6 +291,10 @@ static void os_on_irq(int seq, int event, handler_t handler) {
 
 static Context *os_trap(Event ev, Context *context) {
   // printf("cpu num: %d\n", cpu_count());
+  task_t* current = cpu_list[cpu_current()].current_task;
+  if (current->killed) {
+    uproc->exit(current, 0);
+  }
   Context *next = NULL;
   IRQ* irq_ptr = irq_head;
   panic_on(irq_ptr == NULL, "no irq handler");
