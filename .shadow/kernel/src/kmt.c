@@ -10,8 +10,8 @@ extern CPU_TASKS cpu_list[MAX_CPU];
 extern task_t* task_list[MAX_TASK];
 extern int task_cnt;
 
-static spinlock_t sem_init_lock;
-static spinlock_t task_init_lock;
+extern spinlock_t sem_init_lock;
+extern spinlock_t task_init_lock;
 
 int holding(spinlock_t *lk)
 {
