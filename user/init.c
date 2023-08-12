@@ -2,6 +2,10 @@
 
 int main() {
   // Example:
-  // printf("pid = %d\n", getpid());
+  kputc('H');
+  kputc('e');
+  kputc('l');
+  kputc('l');
+  kputc('o');
   return 0;
 }
