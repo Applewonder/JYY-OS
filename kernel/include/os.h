@@ -62,24 +62,8 @@ struct mapped_page {
     void* va;
 
     void* pa;
-
     /* The next page in the list */
     M_PAGE* next;
-};
-
-struct task {
-  uint8_t stack[STACK_SIZE];
-  char name[K_TASK_NAME];
-  spinlock_t status;
-  Context   *context;
-  AddrSpace* as; //add in L3
-  VME_AREA* vm_area_head; //add in L3
-  VME_AREA* vm_area_tail; //add in L3
-  M_PAGE* mapped_page_head; //add in L3
-  int ppid;
-  int pid;
-  bool block;
-  bool is_running;
 };
 
 struct semaphore {
@@ -104,5 +88,23 @@ struct pid_queue {
   PID_Q* next;
 };
 
-
+struct task {
+  uint8_t stack[STACK_SIZE];
+  char name[K_TASK_NAME];
+  spinlock_t status;
+  Context   *context;
+  AddrSpace* as; //add in L3
+  spinlock_t vme_lock; //add in L3
+  VME_AREA* vm_area_head; //add in L3
+  VME_AREA* vm_area_tail; //add in L3
+  M_PAGE* mapped_page_head; //add in L3
+  sem_t wait_sem; //add in L3
+  int ppid;
+  int pid;
+  int state;
+  int retstate;
+  bool block;
+  bool is_running;
+  bool killed;
+};
 #endif
