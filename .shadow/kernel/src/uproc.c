@@ -595,7 +595,7 @@ Context* page_fault(Event ev, Context *c) {
 
 Context *syscall(Event e,Context *c){
     panic_on(ienabled()==1,"cli");
-    // iset(true);
+    iset(true);
     task_t *current=cpu_list[cpu_current()].current_task;
     switch(c->GPRx){
         case SYS_kputc: {
@@ -629,7 +629,7 @@ Context *syscall(Event e,Context *c){
         default:assert(0);
     }
     panic_on(ienabled()==0,"cli");
-    // iset(false);
+    iset(false);
     return NULL;
 }
 
