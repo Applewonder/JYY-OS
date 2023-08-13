@@ -95,6 +95,7 @@ struct task {
   Context   *context[2];
   AddrSpace* as; //add in L3
   spinlock_t vme_lock; //add in L3
+  spinlock_t mp_lock; //add in L3
   VME_AREA* vm_area_head; //add in L3
   VME_AREA* vm_area_tail; //add in L3
   M_PAGE* mapped_page_head; //add in L3
