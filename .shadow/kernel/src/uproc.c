@@ -482,7 +482,7 @@ void fork_coppying_new_mapped_pages(task_t *task, task_t *new_task) {
 }
 
 int kfork(task_t *task) {
-    iset(false);
+    // iset(false);
     task_t* new_task = pmm->alloc(sizeof(task_t)); 
 
     // strcpy(new_task->name, task->name);
@@ -512,7 +512,7 @@ int kfork(task_t *task) {
     kmt->spin_lock(&task_init_lock);
     task_list[new_id] = new_task;
     kmt->spin_unlock(&task_init_lock);
-    iset(true);
+    // iset(true);
     return new_id;
 }
 
@@ -649,9 +649,11 @@ Context* page_fault(Event ev, Context *c) {
 }
 
 Context *syscall(Event e,Context *c){
+    task_t *current = cpu_list[cpu_current()].current_task;
+    current->nested_interrupt ++;
     panic_on(ienabled()==1,"cli");
     iset(true);
-    task_t *current=cpu_list[cpu_current()].current_task;
+    
     switch(c->GPRx){
         case SYS_kputc: {
             c->GPRx = kputc(current,c->GPR1); 
