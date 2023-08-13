@@ -238,7 +238,9 @@ Context* kmt_schedule(Event ev, Context *c) {
     }
     panic_on(cpu_list[cpu_id].current_task->block, "Current task is blocked");
     Context* ret = cpu_list[cpu_id].current_task->context[cpu_list[cpu_id].current_task->nested_interrupt];
-    panic_on(ret == NULL && !fine_task, "Context is NULL");
+    if (!fine_task) {
+        ret = cpu_list[cpu_id].idle_task->context[0];
+    }
     return ret;
 }
 
