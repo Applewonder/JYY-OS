@@ -307,6 +307,9 @@ static Context *os_trap(Event ev, Context *context) {
   while(irq_ptr != NULL) {
     if (irq_ptr->event == EVENT_NULL || irq_ptr->event == ev.event) {
       Context *r = irq_ptr->handler(ev, context);
+      if (ev.event == EVENT_SYSCALL) {
+        return context;
+      }
       panic_on(r && next, "returning multiple contexts");
       if (r) {
         next = r;
