@@ -78,7 +78,7 @@ int uproc_create(task_t *task, const char *name) {
     kmt->spin_init(&task->mp_lock, name);
     task->block = false;
     task->is_running = false;
-    task->pid = new_pid();
+    task->pid = 0;
     task->ppid = 0;
     task->vm_area_head = NULL;
     task->vm_area_tail = NULL;
@@ -87,7 +87,6 @@ int uproc_create(task_t *task, const char *name) {
     task->retstate = 0;
     task->killed = false;
     task->nested_interrupt = 0;
-    task_list[task->pid] = task;
     kmt->spin_unlock(&task_init_lock);
     TRACE_EXIT;
     return 0;
@@ -713,6 +712,8 @@ void uproc_init() {
 
     task_t *t=pmm->alloc(sizeof(task_t));
     uproc_create(t, "initi");
+    t->pid = new_pid();
+    task_list[t->pid] = t;
 }
 
 MODULE_DEF(uproc) = {
