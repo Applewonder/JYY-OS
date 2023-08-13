@@ -581,7 +581,12 @@ Context* page_fault(Event ev, Context *c) {
     M_PAGE* the_page = find_mapped_page(task, va);
     VME_AREA* vma = find_vme_node(task, (uintptr_t) va, (uintptr_t) va + as->pgsize);
     if (the_page == NULL) {
-        pgmap(task, va, pa, vma->vm_prot, 0);
+        if (vma == NULL) {
+            kmmap(task, va, as->pgsize, PROT_READ | PROT_WRITE, MAP_PRIVATE);
+            pgmap(task, va, pa, PROT_READ | PROT_WRITE, 0);
+        } else {
+            pgmap(task, va, pa, vma->vm_prot, 0);
+        }
     } else {
         memcpy(pa, the_page->pa, as->pgsize);
         pgunmap(task, va);
