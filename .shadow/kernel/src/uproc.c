@@ -651,7 +651,7 @@ void uproc_init() {
 
     kmt->spin_init(&pid_lock, "pid_lock");
 
-    uintptr_t pmsize = ((uintptr_t)heap.end - (uintptr_t)heap.start);
+    uintptr_t pmsize = (((uintptr_t)heap.end - (uintptr_t)heap.start)) >> 12;
 
     cow_table = (int*)pmm->alloc(pmsize * sizeof(int));
     memset(cow_table, 0, pmsize * sizeof(int));
