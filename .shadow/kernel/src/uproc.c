@@ -645,7 +645,7 @@ Context* page_fault(Event ev, Context *c) {
         }
         kmt->spin_unlock(&task->vme_lock);
     }
-    return NULL;
+    return c;
 }
 
 Context *syscall(Event e,Context *c){
