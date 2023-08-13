@@ -25,6 +25,7 @@ static PID_Q* p_tail;
 int get_pid() {
     kmt->spin_lock(&pid_lock);
     if (p_head == NULL) {
+        kmt->spin_unlock(&pid_lock);
         return 0;
     } else {
         int id = p_head->pid;
@@ -33,9 +34,9 @@ int get_pid() {
         if (p_head == NULL) {
             p_tail = NULL;
         }
+        kmt->spin_unlock(&pid_lock);
         return id;
     }
-    kmt->spin_unlock(&pid_lock);
 }
 
 void store_pid(int pid) {
