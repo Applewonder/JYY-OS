@@ -13,6 +13,7 @@ extern spinlock_t task_init_lock;
 
 
 static spinlock_t pid_lock;
+static spinlock_t cow_lock;
 
 static int* cow_table;
 // static int pgsize;
@@ -21,6 +22,47 @@ static PID_Q* p_tail;
 
 //Warning! Code is not debugged!
 
+int get_pid() {
+    kmt->spin_lock(&pid_lock);
+    if (p_head == NULL) {
+        kmt->spin_unlock(&pid_lock);
+        return 0;
+    } else {
+        int id = p_head->pid;
+        pmm->free(p_head);
+        p_head = p_head->next;
+        if (p_head == NULL) {
+            p_tail = NULL;
+        }
+        kmt->spin_unlock(&pid_lock);
+        return id;
+    }
+}
+
+void store_pid(int pid) {
+    kmt->spin_lock(&pid_lock);
+    PID_Q* new_node = pmm->alloc(sizeof(PID_Q));
+    new_node->pid = pid;
+    new_node->next = NULL;
+    if (p_head == NULL) {
+        panic_on(p_tail != NULL, "pid queue error");
+        p_head = new_node;
+        p_tail = new_node;
+    } else {
+        p_tail->next = new_node;
+        p_tail = new_node;
+    }
+    kmt->spin_unlock(&pid_lock);
+}
+
+int new_pid() {
+    if (task_cnt == 32768) {
+        return get_pid();
+    } else {
+       return task_cnt++;
+    }
+}
+
 int uproc_create(task_t *task, const char *name) {
     TRACE_ENTRY;
     kmt->spin_lock(&task_init_lock);
@@ -28,13 +70,15 @@ int uproc_create(task_t *task, const char *name) {
     memset(task->name, '\0', strlen(name));
     strcpy(task->name, name);
     memset(task->stack, '\0', sizeof(uint8_t) * STACK_SIZE);
+    task->as = pmm->alloc(sizeof(AddrSpace));
     protect(task->as);
     task->context[0] = ucontext(task->as, (Area) {(void *) task->stack, (void *) (task->stack + STACK_SIZE)}, task->as->area.start);
     kmt->spin_init(&task->status, name);
     kmt->spin_init(&task->vme_lock, name);
+    kmt->spin_init(&task->mp_lock, name);
     task->block = false;
     task->is_running = false;
-    task->pid = task_cnt;
+    task->pid = new_pid();
     task->ppid = 0;
     task->vm_area_head = NULL;
     task->vm_area_tail = NULL;
@@ -43,7 +87,7 @@ int uproc_create(task_t *task, const char *name) {
     task->retstate = 0;
     task->killed = false;
     task->nested_interrupt = 0;
-    task_list[task_cnt++] = task;
+    task_list[task->pid] = task;
     kmt->spin_unlock(&task_init_lock);
     TRACE_EXIT;
     return 0;
@@ -94,7 +138,7 @@ void* get_suitable_addr(task_t *task, void *start_addr, int length) {
             cur = cur->vm_next;
         }
     }
-    assert(end_addr < task->as->area.end);
+    assert(end_addr <= task->as->area.end);
     return addr;
 }
 
@@ -157,13 +201,20 @@ VME_AREA* find_vme_node(task_t *task, uintptr_t addr, uintptr_t end_addr) {
     VME_AREA* head = task->vm_area_head;
     VME_AREA* cur = head;
     while (cur != NULL) {
+        // printf("cur: %p\n", &cur);
+        // printf("cur->next: %p\n", cur->vm_next);
         if ((uintptr_t)cur->vm_start <= addr && (uintptr_t)cur->vm_end >= end_addr) {
+
             return cur;
         } else if ((uintptr_t)cur->vm_end <= addr) {
+            // printf("A ");
+            // printf("cur->next: %p\n", cur->vm_next);
             cur = cur->vm_next;
+            continue;
         }
         break;
     }
+    // assert(cur != NULL);
     return NULL;
 }
 
@@ -229,22 +280,31 @@ int convert_mmap_prot_to_vm_prot(int prot) {
 
 int get_cow_cnt(task_t* task, void* pa) {
     intptr_t index = ROUNDDOWN((intptr_t) pa, task->as->pgsize) / task->as->pgsize;
-    return cow_table[index];
+    kmt->spin_lock(&cow_lock);
+    int ret = cow_table[index];
+    kmt->spin_unlock(&cow_lock);
+    return ret;
 }
 
 void set_cow_cnt(task_t* task, void* pa, int cnt) {
     intptr_t index = ROUNDDOWN((intptr_t) pa, task->as->pgsize) / task->as->pgsize;
+    kmt->spin_lock(&cow_lock);
     cow_table[index] = cnt;
+    kmt->spin_unlock(&cow_lock);
 }
 
 void inc_cow_cnt(task_t* task, void* pa) {
-    int cnt = get_cow_cnt(task, pa);
-    set_cow_cnt(task, pa, cnt + 1);
+    intptr_t index = ROUNDDOWN((intptr_t) pa, task->as->pgsize) / task->as->pgsize;
+    kmt->spin_lock(&cow_lock);
+    cow_table[index]++;
+    kmt->spin_unlock(&cow_lock);
 }
 
 void dec_cow_cnt(task_t* task, void* pa) {
-    int cnt = get_cow_cnt(task, pa);
-    set_cow_cnt(task, pa, cnt - 1);
+    intptr_t index = ROUNDDOWN((intptr_t) pa, task->as->pgsize) / task->as->pgsize;
+    kmt->spin_lock(&cow_lock);
+    cow_table[index]--;
+    kmt->spin_unlock(&cow_lock);
 }
 
 void pgmap(task_t* task, void* va, void* pa, int prot, bool cow_cnt) {
@@ -263,7 +323,7 @@ void pgunmap(task_t* task, void* va) {
 }
 
 void delete_mapping(task_t *task, uintptr_t start_addr, uintptr_t end_addr) {
-    uintptr_t cur = start_addr;
+    uintptr_t cur = start_addr;  
     for(; cur < end_addr; cur += task->as->pgsize) {
         M_PAGE* pg = find_mapped_page(task, (void*) cur);
         if(pg != NULL) {
@@ -286,22 +346,27 @@ remove the mapping from the linked list, and free the physical memory.
 void *kmmap(task_t *task, void *addr, int length, int prot, int flags) {
     assert(task != NULL);
     assert(task->as != NULL);
-    assert(addr != NULL);
+    // assert(addr != NULL);
     assert(length > 0);
-    kmt->spin_lock(&task->vme_lock);
     if (flags == MAP_UNMAP) {
         assert(prot == PROT_NONE);
         uintptr_t start_addr = ROUNDDOWN((uintptr_t) addr, task->as->pgsize);
         uintptr_t end_addr = ROUNDUP((uintptr_t) addr + length, task->as->pgsize);
+        kmt->spin_lock(&task->vme_lock);
         VME_AREA* own_space = find_vme_node(task, start_addr, end_addr);
+        kmt->spin_unlock(&task->vme_lock);
         if (own_space != NULL) {
+            kmt->spin_lock(&task->mp_lock);
             delete_mapping(task, start_addr, end_addr);
+            kmt->spin_unlock(&task->mp_lock);
         }
+        return NULL;
     }
     
     VME_AREA* node = new_vme_node(task, addr, length, prot, flags);
+    kmt->spin_lock(&task->vme_lock);
     bool success = insert_vme_node(task, node);
-    panic_on(success, "mmap failed");
+    panic_on(!success, "mmap failed");
     kmt->spin_unlock(&task->vme_lock);
     return node->vm_start;
 }
@@ -350,14 +415,16 @@ divide the vma node;
 map the page with the new protect level;
 */
 void fork_cow_mapping(task_t *task) {
+    kmt->spin_lock(&task->mp_lock);
     M_PAGE* head = task->mapped_page_head;
     M_PAGE* cur = head;
     while (cur != NULL) {
         if (get_cow_cnt(task, cur->pa) == 0) {
             uintptr_t va = (uintptr_t) cur->va;
             uintptr_t pa = (uintptr_t) pmm->alloc(task->as->pgsize);
+            kmt->spin_lock(&task->vme_lock);
             VME_AREA* vma = find_vme_node(task, va, va + task->as->pgsize);
-
+            kmt->spin_unlock(&task->vme_lock);
             if ((vma->vm_prot & PROT_WRITE) && (vma->vm_flags & MAP_PRIVATE)) {
                 pgunmap(task, (void*) va);
                 int new_prot = vma->vm_prot & ~PROT_WRITE;
@@ -367,6 +434,7 @@ void fork_cow_mapping(task_t *task) {
         }
         cur = cur->next;
     }
+    kmt->spin_unlock(&task->mp_lock);
 }
 
 void fork_copying_vme_pages(task_t *task, task_t *new_task) {
@@ -379,7 +447,7 @@ void fork_copying_vme_pages(task_t *task, task_t *new_task) {
         new_task->vm_area_tail = NULL;
         return;
     }
-
+    kmt->spin_lock(&task->vme_lock);
     while (cur != NULL) {
         new_cur = new_vme_node(new_task, cur->vm_start, cur->vm_end - cur->vm_start, cur->vm_prot, cur->vm_flags);
         insert_vme_node(new_task, new_cur);
@@ -392,9 +460,11 @@ void fork_copying_vme_pages(task_t *task, task_t *new_task) {
         }
         cur = cur->vm_next;
     }
+    kmt->spin_unlock(&task->vme_lock);
 }
 
 void fork_coppying_new_mapped_pages(task_t *task, task_t *new_task) {
+    kmt->spin_lock(&task->mp_lock);
     M_PAGE* head = task->mapped_page_head;
     M_PAGE* cur = head;
     if(cur == NULL) {
@@ -403,56 +473,21 @@ void fork_coppying_new_mapped_pages(task_t *task, task_t *new_task) {
     }
 
     while (cur != NULL) {
+        kmt->spin_lock(&task->vme_lock);
         VME_AREA* vma = find_vme_node(task, (uintptr_t) cur->va, (uintptr_t) cur->va + task->as->pgsize);
         pgmap(new_task, cur->va, cur->pa, vma->vm_prot, 1);
+        kmt->spin_unlock(&task->vme_lock);
         cur = cur->next;
     }
-}
-
-int get_pid() {
-    kmt->spin_lock(&pid_lock);
-    if (p_head == NULL) {
-        return 0;
-    } else {
-        int id = p_head->pid;
-        pmm->free(p_head);
-        p_head = p_head->next;
-        if (p_head == NULL) {
-            p_tail = NULL;
-        }
-        return id;
-    }
-    kmt->spin_unlock(&pid_lock);
-}
-
-void store_pid(int pid) {
-    kmt->spin_lock(&pid_lock);
-    PID_Q* new_node = pmm->alloc(sizeof(PID_Q));
-    new_node->pid = pid;
-    new_node->next = NULL;
-    if (p_head == NULL) {
-        panic_on(p_tail != NULL, "pid queue error");
-        p_head = new_node;
-        p_tail = new_node;
-    } else {
-        p_tail->next = new_node;
-        p_tail = new_node;
-    }
-    kmt->spin_unlock(&pid_lock);
-}
-
-int new_pid() {
-    if (task_cnt == 32768) {
-        return get_pid();
-    } else {
-       return task_cnt++;
-    }
+    kmt->spin_unlock(&task->mp_lock);
 }
 
 int kfork(task_t *task) {
     task_t* new_task = pmm->alloc(sizeof(task_t)); 
+
+    strcpy(new_task->name, task->name);
     
-    uproc_create(new_task, strcat(task->name, "_fork"));
+    uproc_create(new_task, strcat(new_task->name, "_fork"));
 
     uintptr_t rsp0 = new_task->context[0]->rsp0;
     void* cr3 = new_task->context[0]->cr3;
@@ -462,13 +497,14 @@ int kfork(task_t *task) {
     new_task->context[0]->cr3 = cr3;
     new_task->context[0]->GPRx = 0;
 
-    kmt->spin_lock(&task->vme_lock);
+    // kmt->spin_lock(&task->vme_lock);
     fork_cow_mapping(task);
 
     fork_copying_vme_pages(task, new_task);
 
     fork_coppying_new_mapped_pages(task, new_task);
-    kmt->spin_unlock(&task->vme_lock);
+    // kmt->spin_unlock(&task->vme_lock);
+    memcpy(new_task->stack, task->stack, STACK_SIZE);
 
     new_task->ppid = task->pid;
     int new_id = new_pid();
@@ -581,17 +617,30 @@ Context* page_fault(Event ev, Context *c) {
     M_PAGE* the_page = find_mapped_page(task, va);
     VME_AREA* vma = find_vme_node(task, (uintptr_t) va, (uintptr_t) va + as->pgsize);
     if (the_page == NULL) {
-        pgmap(task, va, pa, vma->vm_prot, 0);
+        if (vma == NULL) {
+            kmt->spin_unlock(&task->vme_lock);
+            kmmap(task, va, as->pgsize, PROT_READ | PROT_WRITE, MAP_PRIVATE);
+            kmt->spin_lock(&task->mp_lock);
+            pgmap(task, va, pa, PROT_READ | PROT_WRITE, 0);
+            kmt->spin_unlock(&task->mp_lock);
+        } else {
+            kmt->spin_lock(&task->mp_lock);
+            pgmap(task, va, pa, vma->vm_prot, 0);
+            kmt->spin_unlock(&task->mp_lock);
+            kmt->spin_unlock(&task->vme_lock);
+        }
     } else {
+        kmt->spin_lock(&task->mp_lock);
         memcpy(pa, the_page->pa, as->pgsize);
         pgunmap(task, va);
         pgmap(task, va, pa, vma->vm_prot, 0);
+        kmt->spin_unlock(&task->mp_lock);
         dec_cow_cnt(task, the_page->pa);
         if (get_cow_cnt(task, the_page->pa) == 0) {       
             pmm->free(the_page->pa);            
         }
+        kmt->spin_unlock(&task->vme_lock);
     }
-    kmt->spin_unlock(&task->vme_lock);
     return NULL;
 }
 
@@ -650,15 +699,17 @@ void uproc_init() {
     os->on_irq(0,EVENT_PAGEFAULT,page_fault);
 
     kmt->spin_init(&pid_lock, "pid_lock");
+    kmt->spin_init(&cow_lock, "cow_lock");
 
-    uintptr_t pmsize = ((uintptr_t)heap.end - (uintptr_t)heap.start);
+    uintptr_t pmsize = (((uintptr_t)heap.end - (uintptr_t)heap.start)) >> 12;
 
     cow_table = (int*)pmm->alloc(pmsize * sizeof(int));
     memset(cow_table, 0, pmsize * sizeof(int));
 
-    // task_t *t=pmm->alloc(sizeof(task_t));
-    // uproc_create(t, "init");
-    // t->pid = get_pid();
+    task_cnt = 1;
+
+    task_t *t=pmm->alloc(sizeof(task_t));
+    uproc_create(t, "initi");
 }
 
 MODULE_DEF(uproc) = {

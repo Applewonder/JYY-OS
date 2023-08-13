@@ -194,6 +194,7 @@ static void mock_task(void *arg) {
 static void os_init() {
   pmm->init();
   kmt->init();
+  uproc->init();
 #ifdef DEBUG_NORMAL
     for (size_t i = 0; i < TASK_NUM; i++)
     {
@@ -295,6 +296,7 @@ static Context *os_trap(Event ev, Context *context) {
   if (current->killed) {
     uproc->exit(current, 0);
   }
+
   Context *next = NULL;
   IRQ* irq_ptr = irq_head;
   panic_on(irq_ptr == NULL, "no irq handler");
@@ -302,7 +304,9 @@ static Context *os_trap(Event ev, Context *context) {
     if (irq_ptr->event == EVENT_NULL || irq_ptr->event == ev.event) {
       Context *r = irq_ptr->handler(ev, context);
       panic_on(r && next, "returning multiple contexts");
-      if (r) next = r;
+      if (r) {
+        next = r;
+      }
     }
     irq_ptr = irq_ptr->next;
   }

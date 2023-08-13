@@ -167,8 +167,8 @@ int kmt_create(task_t *task, const char *name, void (*entry)(void *arg), void *a
 
 void kmt_teardown(task_t *task) {
     kmt_spin_lock(&task_init_lock);
-    int pid = task->pid;
-    task_list[pid] = task_list[--task_cnt];
+    // int pid = task->pid;
+    // task_list[pid] = task_list[--task_cnt];
     kmt_spin_unlock(&task_init_lock);
 }
 
@@ -182,12 +182,20 @@ Context* kmt_context_save(Event ev, Context *c){
     TRACE_ENTRY;
     int cpu_id = cpu_current();
     task_t* cur_task = cpu_list[cpu_id].current_task;
-    cur_task->context[cur_task->nested_interrupt++] = c;
+    if (cur_task->pid > 0) {
+        cur_task->context[cur_task->nested_interrupt++] = c;
+    } else {
+        cur_task->context[0] = c;
+    }
+    // cur_task->context[0] = c;
+    // printf("task %d\n", cpu_id, c);
+    // assert(cur_task->nested_interrupt < 3 && cur_task->nested_interrupt >= 0);
     if (cpu_list[cpu_id].save_task && cpu_list[cpu_id].save_task != cur_task) {
-        if (cpu_list[cpu_id].save_task->pid >=0) {
+        if (cpu_list[cpu_id].save_task->pid > 0) {
             kmt_spin_lock(&cpu_list[cpu_id].save_task->status);
             cpu_list[cpu_id].save_task->is_running = false;
             cpu_list[cpu_id].save_task->nested_interrupt --;
+            assert(cpu_list[cpu_id].save_task->nested_interrupt >= 0 && cpu_list[cpu_id].save_task->nested_interrupt < 3);
             kmt_spin_unlock(&cpu_list[cpu_id].save_task->status);
         }
     }
@@ -205,12 +213,13 @@ Context* kmt_schedule(Event ev, Context *c) {
     }
     bool fine_task = false;
     for (int i = 0; i < task_cnt * 10; i++) {
-        int rand_id = rand() % task_cnt;
+        int rand_id = (rand() % (task_cnt - 1)) + 1;
         if (task_list[rand_id] == cpu_list[cpu_id].current_task) {
             if (task_list[rand_id]->block) {
                 continue;
             }
             cpu_list[cpu_id].current_task = task_list[rand_id];
+            cpu_list[cpu_id].current_task->nested_interrupt --;
             fine_task = true;
             panic_on(cpu_list[cpu_id].current_task->block  && fine_task, "Current task is blocked");
             break;
@@ -237,7 +246,19 @@ Context* kmt_schedule(Event ev, Context *c) {
         cpu_list[cpu_id].current_task = cpu_list[cpu_id].idle_task;
     }
     panic_on(cpu_list[cpu_id].current_task->block, "Current task is blocked");
-    return cpu_list[cpu_id].current_task->context[cpu_list[cpu_id].current_task->nested_interrupt];
+    Context* ret = cpu_list[cpu_id].current_task->context[cpu_list[cpu_id].current_task->nested_interrupt];
+    // Context* ret = cpu_list[cpu_id].current_task->context[0];
+    if (!fine_task) {
+        ret = cpu_list[cpu_id].idle_task->context[0];
+    } else {
+        if (ret == NULL) {
+            printf("w");
+        }
+        printf("task %s, nest %d\n", cpu_list[cpu_id].current_task->name, cpu_list[cpu_id].current_task->nested_interrupt);
+        panic_on(ret == NULL, "No context to schedule");
+    }
+    // panic_on(ret == NULL && !fine_task, "No context to schedule");
+    return ret;
 }
 
 void initialize_idle_task(task_t* idle) {
@@ -247,10 +268,10 @@ void initialize_idle_task(task_t* idle) {
     idle->context[0] = kcontext((Area) {(void *) idle->stack, (void *) (idle->stack + STACK_SIZE)}, idle_thread, NULL);
     assert(idle->context);
     kmt_spin_init(&idle->status, "idle");
-    idle->pid = -1;
+    idle->pid = 0;
     idle->block = false;
     idle->is_running = false;
-    idle->nested_interrupt = false;
+    idle->nested_interrupt = 0;
 }
 
 void kmt_init() {
@@ -258,7 +279,7 @@ void kmt_init() {
     os->on_irq(MIN_SEQ, EVENT_NULL, kmt_context_save);   
     os->on_irq(MAX_SEQ, EVENT_NULL, kmt_schedule);       
 
-    task_cnt = 0;
+    task_cnt = 1;
     kmt_spin_init(&sem_init_lock, "sem_init_lock");
     kmt_spin_init(&task_init_lock, "task_init_lock");
     for (int i = 0; i < cpu_count(); i++) {

@@ -1,11 +1,30 @@
 #include "ulib.h"
 
+void hello_test();
+void dfs_test();
+
 int main() {
-  // Example:
   kputc('H');
-  kputc('e');
-  kputc('l');
-  kputc('l');
-  kputc('o');
-  return 0;
+  kputc('\n');
+  hello_test();
+  // dfs_test();
+  while (1);
+}
+
+void hello_test() {
+  int pid = fork();
+
+  char fmt;
+  if (pid) {
+    fmt = 'P';
+  } else {
+    sleep(1);
+    fmt = 'C';
+  }
+
+  while (1) {
+    kputc(fmt);
+    kputc('\n');
+    sleep(2);
+  }
 }

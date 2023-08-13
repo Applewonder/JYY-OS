@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include "../kernel/framework/syscall.h"
 #include "../kernel/framework/user.h"
+// #include "../abstract-machine/klib/include/klib.h"
 
 static inline long syscall(int num, long x1, long x2, long x3, long x4) {
   register long a0 asm ("rax") = num;
@@ -14,6 +15,8 @@ static inline long syscall(int num, long x1, long x2, long x3, long x4) {
     : "memory");
   return a0;
 }
+
+size_t strlen(const char *s);
 
 static inline int kputc(char ch) {
   return syscall(SYS_kputc, ch, 0, 0, 0);
