@@ -248,10 +248,12 @@ Context* kmt_schedule(Event ev, Context *c) {
     Context* ret = cpu_list[cpu_id].current_task->context[cpu_list[cpu_id].current_task->nested_interrupt];
     // Context* ret = cpu_list[cpu_id].current_task->context[0];
     if (!fine_task) {
-
         ret = cpu_list[cpu_id].idle_task->context[0];
+    } else {
+        printf("task %s\n", cpu_list[cpu_id].current_task->name);
+        panic_on(ret == NULL, "No context to schedule");
     }
-    panic_on(ret == NULL && !fine_task, "No context to schedule");
+    // panic_on(ret == NULL && !fine_task, "No context to schedule");
     return ret;
 }
 
