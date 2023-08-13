@@ -645,7 +645,7 @@ Context* page_fault(Event ev, Context *c) {
         }
         kmt->spin_unlock(&task->vme_lock);
     }
-    return c;
+    return NULL;
 }
 
 Context *syscall(Event e,Context *c){
@@ -696,7 +696,7 @@ Context *syscall(Event e,Context *c){
     panic_on(ienabled()==0,"cli");
     iset(false);
     current->nested_interrupt --;
-    return c;
+    return NULL;
 }
 
 void uproc_init() {
