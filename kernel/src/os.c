@@ -292,10 +292,10 @@ static void os_on_irq(int seq, int event, handler_t handler) {
 
 static Context *os_trap(Event ev, Context *context) {
   // printf("cpu num: %d\n", cpu_count());
-  if(ev.event == EVENT_ERROR) {
-    printf("error code: %d\n", ev.cause);
-    panic("error");
-  }
+  // if(ev.event == EVENT_ERROR) {
+  //   printf("error code: %d\n", ev.cause);
+  //   panic("error");
+  // }
   task_t* current = cpu_list[cpu_current()].current_task;
   if (current->killed) {
     uproc->exit(current, 0);
@@ -307,6 +307,9 @@ static Context *os_trap(Event ev, Context *context) {
   while(irq_ptr != NULL) {
     if (irq_ptr->event == EVENT_NULL || irq_ptr->event == ev.event) {
       Context *r = irq_ptr->handler(ev, context);
+      if (ev.event == EVENT_SYSCALL) {
+        return context;
+      }
       panic_on(r && next, "returning multiple contexts");
       if (r) {
         next = r;
