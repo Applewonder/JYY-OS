@@ -92,7 +92,7 @@ struct task {
   uint8_t stack[STACK_SIZE];
   char name[K_TASK_NAME];
   spinlock_t status;
-  Context   *context;
+  Context   *context[2];
   AddrSpace* as; //add in L3
   spinlock_t vme_lock; //add in L3
   VME_AREA* vm_area_head; //add in L3
@@ -103,6 +103,7 @@ struct task {
   int pid;
   int state;
   int retstate;
+  int nested_interrupt;
   bool block;
   bool is_running;
   bool killed;
