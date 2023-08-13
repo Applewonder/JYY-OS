@@ -656,9 +656,9 @@ void uproc_init() {
     cow_table = (int*)pmm->alloc(pmsize * sizeof(int));
     memset(cow_table, 0, pmsize * sizeof(int));
 
-    // task_t *t=pmm->alloc(sizeof(task_t));
-    // uproc_create(t, "init");
-    // t->pid = get_pid();
+    task_t *t=pmm->alloc(sizeof(task_t));
+    uproc_create(t, "init");
+    t->pid = get_pid();
 }
 
 MODULE_DEF(uproc) = {
