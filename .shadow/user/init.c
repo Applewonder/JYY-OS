@@ -14,16 +14,13 @@ int main() {
 void hello_test() {
   int pid = fork();
 
-  char fmt;
   if (pid) {
-    fmt = 'P';
   } else {
     sleep(1);
-    fmt = 'C';
   }
 
   while (1) {
-    kputc(fmt);
+    kputc('P');
     kputc('\n');
     sleep(2);
   }
