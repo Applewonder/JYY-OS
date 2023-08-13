@@ -292,8 +292,10 @@ static void os_on_irq(int seq, int event, handler_t handler) {
 
 static Context *os_trap(Event ev, Context *context) {
   // printf("cpu num: %d\n", cpu_count());
-
-  
+  if(ev.event == EVENT_ERROR) {
+    printf("error code: %d\n", ev.cause);
+    panic("error");
+  }
   task_t* current = cpu_list[cpu_current()].current_task;
   if (current->killed) {
     uproc->exit(current, 0);
@@ -302,57 +304,16 @@ static Context *os_trap(Event ev, Context *context) {
   Context *next = NULL;
   IRQ* irq_ptr = irq_head;
   panic_on(irq_ptr == NULL, "no irq handler");
-
-  switch (ev.event) 
-  {
-    case EVENT_ERROR: {
-      printf("error code: %d\n", ev.cause);
-      panic("error");
-      break;
-    }
-
-    case EVENT_PAGEFAULT: {
-      while(irq_ptr != NULL) {
-        if (irq_ptr->event == EVENT_PAGEFAULT) {
-          Context *r = irq_ptr->handler(ev, context);
-          panic_on(r && next, "returning multiple contexts");
-          if (r) {
-            next = r;
-          }
-        }
-        irq_ptr = irq_ptr->next;
-      }
-      break;
-    }
-
-    case EVENT_SYSCALL: {
-      while(irq_ptr != NULL) {
-        if (irq_ptr->event == EVENT_SYSCALL) {
-          Context *r = irq_ptr->handler(ev, context);
-          panic_on(r && next, "returning multiple contexts");
-          if (r) {
-            next = r;
-          }
-        }
-        irq_ptr = irq_ptr->next;
-      }
-      break;
-    }
-    
-    default: {
-      while(irq_ptr != NULL) {
-        if (irq_ptr->event == EVENT_NULL || irq_ptr->event == ev.event) {
-          Context *r = irq_ptr->handler(ev, context);
-          panic_on(r && next, "returning multiple contexts");
-          if (r) {
-            next = r;
-          }
-        }
-        irq_ptr = irq_ptr->next;
+  while(irq_ptr != NULL) {
+    if (irq_ptr->event == EVENT_NULL || irq_ptr->event == ev.event) {
+      Context *r = irq_ptr->handler(ev, context);
+      panic_on(r && next, "returning multiple contexts");
+      if (r) {
+        next = r;
       }
     }
+    irq_ptr = irq_ptr->next;
   }
-
   panic_on(!next, "returning NULL context");
   // panic_on(sane_context(next), "returning to invalid context");
   return next;
