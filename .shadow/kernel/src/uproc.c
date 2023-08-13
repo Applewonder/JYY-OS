@@ -695,7 +695,8 @@ Context *syscall(Event e,Context *c){
     }
     panic_on(ienabled()==0,"cli");
     iset(false);
-    return NULL;
+    current->nested_interrupt --;
+    return c;
 }
 
 void uproc_init() {
