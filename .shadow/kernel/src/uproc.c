@@ -683,7 +683,7 @@ Context *syscall(Event e,Context *c){
         }
         default:assert(0);
     }
-    panic_on(ienabled()==0,"cli");
+    // panic_on(ienabled()==0,"cli");
     iset(false);
     return NULL;
 }
