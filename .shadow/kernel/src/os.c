@@ -296,6 +296,7 @@ static Context *os_trap(Event ev, Context *context) {
   if (current->killed) {
     uproc->exit(current, 0);
   }
+
   Context *next = NULL;
   IRQ* irq_ptr = irq_head;
   panic_on(irq_ptr == NULL, "no irq handler");

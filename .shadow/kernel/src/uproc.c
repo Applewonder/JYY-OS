@@ -646,8 +646,8 @@ Context *syscall(Event e,Context *c){
 void uproc_init() {
     vme_init(pmm->alloc, pmm->free);
 
-    os->on_irq(2,EVENT_SYSCALL,syscall);
-    os->on_irq(3,EVENT_PAGEFAULT,page_fault);
+    os->on_irq(0,EVENT_SYSCALL,syscall);
+    os->on_irq(0,EVENT_PAGEFAULT,page_fault);
 
     kmt->spin_init(&pid_lock, "pid_lock");
 
