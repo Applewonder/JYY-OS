@@ -194,6 +194,7 @@ static void mock_task(void *arg) {
 static void os_init() {
   pmm->init();
   kmt->init();
+  uproc->init();
 #ifdef DEBUG_NORMAL
     for (size_t i = 0; i < TASK_NUM; i++)
     {
