@@ -213,7 +213,7 @@ Context* kmt_schedule(Event ev, Context *c) {
     }
     bool fine_task = false;
     for (int i = 0; i < task_cnt * 10; i++) {
-        int rand_id = (rand() % task_cnt) + 1;
+        int rand_id = (rand() % (task_cnt - 1)) + 1;
         if (task_list[rand_id] == cpu_list[cpu_id].current_task) {
             if (task_list[rand_id]->block) {
                 continue;
