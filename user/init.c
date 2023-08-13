@@ -5,6 +5,16 @@ void dfs_test();
 
 int main() {
   kputc('H');
+  kputc('e');
+  kputc('l');
+  kputc('l');
+  kputc('o');
+  kputc(' ');
+  kputc('W');
+  kputc('o');
+  kputc('r');
+  kputc('l');
+  kputc('d');
   kputc('\n');
   hello_test();
   // dfs_test();
