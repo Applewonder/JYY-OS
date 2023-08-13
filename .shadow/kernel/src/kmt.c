@@ -182,7 +182,8 @@ Context* kmt_context_save(Event ev, Context *c){
     TRACE_ENTRY;
     int cpu_id = cpu_current();
     task_t* cur_task = cpu_list[cpu_id].current_task;
-    cur_task->context[cur_task->nested_interrupt++] = c;
+    // cur_task->context[cur_task->nested_interrupt++] = c;
+    cur_task->context[0] = c;
     if (cpu_list[cpu_id].save_task && cpu_list[cpu_id].save_task != cur_task) {
         if (cpu_list[cpu_id].save_task->pid >=0) {
             kmt_spin_lock(&cpu_list[cpu_id].save_task->status);
@@ -237,7 +238,8 @@ Context* kmt_schedule(Event ev, Context *c) {
         cpu_list[cpu_id].current_task = cpu_list[cpu_id].idle_task;
     }
     panic_on(cpu_list[cpu_id].current_task->block, "Current task is blocked");
-    Context* ret = cpu_list[cpu_id].current_task->context[cpu_list[cpu_id].current_task->nested_interrupt];
+    // Context* ret = cpu_list[cpu_id].current_task->context[cpu_list[cpu_id].current_task->nested_interrupt];
+    Context* ret = cpu_list[cpu_id].current_task->context[0];
     if (!fine_task) {
         ret = cpu_list[cpu_id].idle_task->context[0];
     }
