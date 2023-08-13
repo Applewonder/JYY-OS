@@ -258,7 +258,7 @@ void initialize_idle_task(task_t* idle) {
     idle->pid = -1;
     idle->block = false;
     idle->is_running = false;
-    idle->nested_interrupt = false;
+    idle->nested_interrupt = 0;
 }
 
 void kmt_init() {
