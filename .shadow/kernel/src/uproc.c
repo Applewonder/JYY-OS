@@ -482,6 +482,7 @@ void fork_coppying_new_mapped_pages(task_t *task, task_t *new_task) {
 }
 
 int kfork(task_t *task) {
+    iset(false);
     task_t* new_task = pmm->alloc(sizeof(task_t)); 
 
     // strcpy(new_task->name, task->name);
@@ -511,6 +512,7 @@ int kfork(task_t *task) {
     kmt->spin_lock(&task_init_lock);
     task_list[new_id] = new_task;
     kmt->spin_unlock(&task_init_lock);
+    iset(true);
     return new_id;
 }
 
