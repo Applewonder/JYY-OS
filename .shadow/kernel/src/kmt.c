@@ -219,7 +219,7 @@ Context* kmt_schedule(Event ev, Context *c) {
                 continue;
             }
             cpu_list[cpu_id].current_task = task_list[rand_id];
-            cpu_list[cpu_id].current_task->nested_interrupt --;
+            // cpu_list[cpu_id].current_task->nested_interrupt --;
             fine_task = true;
             panic_on(cpu_list[cpu_id].current_task->block  && fine_task, "Current task is blocked");
             break;
