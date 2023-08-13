@@ -485,9 +485,9 @@ void fork_coppying_new_mapped_pages(task_t *task, task_t *new_task) {
 int kfork(task_t *task) {
     task_t* new_task = pmm->alloc(sizeof(task_t)); 
 
-    strcpy(new_task->name, task->name);
+    // strcpy(new_task->name, task->name);
     
-    uproc_create(new_task, strcat(new_task->name, "_fork"));
+    uproc_create(new_task, "_fork");
 
     uintptr_t rsp0 = new_task->context[0]->rsp0;
     void* cr3 = new_task->context[0]->cr3;
