@@ -504,7 +504,7 @@ int kfork(task_t *task) {
 
     fork_coppying_new_mapped_pages(task, new_task);
     // kmt->spin_unlock(&task->vme_lock);
-    memcpy(new_task->stack, task->stack, STACK_SIZE);
+    // memcpy(new_task->stack, task->stack, STACK_SIZE);
 
     new_task->ppid = task->pid;
     int new_id = new_pid();
