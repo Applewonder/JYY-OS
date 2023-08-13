@@ -650,7 +650,7 @@ Context* page_fault(Event ev, Context *c) {
 
 Context *syscall(Event e,Context *c){
     task_t *current = cpu_list[cpu_current()].current_task;
-    // current->nested_interrupt ++;
+    current->nested_interrupt ++;
     panic_on(ienabled()==1,"cli");
     iset(true);
     
@@ -695,7 +695,7 @@ Context *syscall(Event e,Context *c){
     }
     panic_on(ienabled()==0,"cli");
     iset(false);
-    // current->nested_interrupt --;
+    current->nested_interrupt --;
     return c;
 }
 
