@@ -153,11 +153,12 @@ int kmt_create(task_t *task, const char *name, void (*entry)(void *arg), void *a
     memset(task->name, '\0', strlen(name));
     strcpy(task->name, name);
     memset(task->stack, '\0', sizeof(uint8_t) * STACK_SIZE);
-    task->context = kcontext((Area) {(void *) task->stack, (void *) (task->stack + STACK_SIZE)}, entry, arg);
+    task->context[0] = kcontext((Area) {(void *) task->stack, (void *) (task->stack + STACK_SIZE)}, entry, arg);
     kmt_spin_init(&task->status, name);
     task->block = false;
     task->is_running = false;
     task->pid = task_cnt;
+    task->nested_interrupt = 0;
     task_list[task_cnt++] = task;
     kmt_spin_unlock(&task_init_lock);
     TRACE_EXIT;
@@ -180,15 +181,17 @@ void idle_thread(void *arg) {
 Context* kmt_context_save(Event ev, Context *c){
     TRACE_ENTRY;
     int cpu_id = cpu_current();
-    cpu_list[cpu_id].current_task->context = c;
-    if (cpu_list[cpu_id].save_task && cpu_list[cpu_id].save_task != cpu_list[cpu_id].current_task) {
+    task_t* cur_task = cpu_list[cpu_id].current_task;
+    cur_task->context[cur_task->nested_interrupt++] = c;
+    if (cpu_list[cpu_id].save_task && cpu_list[cpu_id].save_task != cur_task) {
         if (cpu_list[cpu_id].save_task->pid >=0) {
             kmt_spin_lock(&cpu_list[cpu_id].save_task->status);
             cpu_list[cpu_id].save_task->is_running = false;
+            cpu_list[cpu_id].save_task->nested_interrupt --;
             kmt_spin_unlock(&cpu_list[cpu_id].save_task->status);
         }
     }
-    cpu_list[cpu_id].save_task = cpu_list[cpu_id].current_task;
+    cpu_list[cpu_id].save_task = cur_task;
     TRACE_EXIT;
     return NULL;
 }
@@ -234,19 +237,20 @@ Context* kmt_schedule(Event ev, Context *c) {
         cpu_list[cpu_id].current_task = cpu_list[cpu_id].idle_task;
     }
     panic_on(cpu_list[cpu_id].current_task->block, "Current task is blocked");
-    return cpu_list[cpu_id].current_task->context;
+    return cpu_list[cpu_id].current_task->context[cpu_list[cpu_id].current_task->nested_interrupt];
 }
 
 void initialize_idle_task(task_t* idle) {
     memset(idle->name, '\0', strlen("idle"));
     strcpy(idle->name, "idle");
     memset(idle->stack, '\0', sizeof(uint8_t) * STACK_SIZE);
-    idle->context = kcontext((Area) {(void *) idle->stack, (void *) (idle->stack + STACK_SIZE)}, idle_thread, NULL);
+    idle->context[0] = kcontext((Area) {(void *) idle->stack, (void *) (idle->stack + STACK_SIZE)}, idle_thread, NULL);
     assert(idle->context);
     kmt_spin_init(&idle->status, "idle");
     idle->pid = -1;
     idle->block = false;
     idle->is_running = false;
+    idle->nested_interrupt = false;
 }
 
 void kmt_init() {

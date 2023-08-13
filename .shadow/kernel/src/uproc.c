@@ -19,7 +19,7 @@ static int* cow_table;
 static PID_Q* p_head;
 static PID_Q* p_tail;
 
-//TODO enable syscall interrupt;
+//Warning! Code is not debugged!
 
 int uproc_create(task_t *task, const char *name) {
     TRACE_ENTRY;
@@ -29,7 +29,7 @@ int uproc_create(task_t *task, const char *name) {
     strcpy(task->name, name);
     memset(task->stack, '\0', sizeof(uint8_t) * STACK_SIZE);
     protect(task->as);
-    task->context = ucontext(task->as, (Area) {(void *) task->stack, (void *) (task->stack + STACK_SIZE)}, task->as->area.start);
+    task->context[0] = ucontext(task->as, (Area) {(void *) task->stack, (void *) (task->stack + STACK_SIZE)}, task->as->area.start);
     kmt->spin_init(&task->status, name);
     kmt->spin_init(&task->vme_lock, name);
     task->block = false;
@@ -42,6 +42,7 @@ int uproc_create(task_t *task, const char *name) {
     task->state = 0;
     task->retstate = 0;
     task->killed = false;
+    task->nested_interrupt = 0;
     task_list[task_cnt++] = task;
     kmt->spin_unlock(&task_init_lock);
     TRACE_EXIT;
@@ -453,13 +454,13 @@ int kfork(task_t *task) {
     
     uproc_create(new_task, strcat(task->name, "_fork"));
 
-    uintptr_t rsp0 = new_task->context->rsp0;
-    void* cr3 = new_task->context->cr3;
+    uintptr_t rsp0 = new_task->context[0]->rsp0;
+    void* cr3 = new_task->context[0]->cr3;
 
-    new_task->context = task->context;
-    new_task->context->rsp0 = rsp0;
-    new_task->context->cr3 = cr3;
-    new_task->context->GPRx = 0;
+    new_task->context[0] = task->context[0];
+    new_task->context[0]->rsp0 = rsp0;
+    new_task->context[0]->cr3 = cr3;
+    new_task->context[0]->GPRx = 0;
 
     kmt->spin_lock(&task->vme_lock);
     fork_cow_mapping(task);
@@ -625,6 +626,14 @@ Context *syscall(Event e,Context *c){
         }
         case SYS_wait: {
             c->GPRx = kwait(current,(int*)c->GPR1);
+            break;
+        }
+        case SYS_kill: {
+            c->GPRx = kkill(current, c->GPR1);
+            break;
+        }
+        case SYS_mmap: {
+            c->GPRx = (uint64_t)kmmap(current, (void*)c->GPR1, (size_t)c->GPR2, (int)c->GPR3, (int)c->GPR4);
             break;
         }
         default:assert(0);
