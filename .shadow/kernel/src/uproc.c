@@ -346,7 +346,7 @@ remove the mapping from the linked list, and free the physical memory.
 void *kmmap(task_t *task, void *addr, int length, int prot, int flags) {
     assert(task != NULL);
     assert(task->as != NULL);
-    assert(addr != NULL);
+    // assert(addr != NULL);
     assert(length > 0);
     if (flags == MAP_UNMAP) {
         assert(prot == PROT_NONE);
@@ -503,7 +503,7 @@ int kfork(task_t *task) {
     fork_coppying_new_mapped_pages(task, new_task);
     // kmt->spin_unlock(&task->vme_lock);
     memcpy(new_task->stack, task->stack, STACK_SIZE);
-    
+
     new_task->ppid = task->pid;
     int new_id = new_pid();
     new_task->pid = new_id;
