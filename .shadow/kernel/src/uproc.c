@@ -492,7 +492,7 @@ int kfork(task_t *task) {
     uintptr_t rsp0 = new_task->context[0]->rsp0;
     void* cr3 = new_task->context[0]->cr3;
 
-    new_task->context[0] = task->context[0];
+    *new_task->context[0] = *task->context[0];
     new_task->context[0]->rsp0 = rsp0;
     new_task->context[0]->cr3 = cr3;
     new_task->context[0]->GPRx = 0;
