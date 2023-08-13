@@ -318,7 +318,7 @@ void *kmmap(task_t *task, void *addr, int length, int prot, int flags) {
     VME_AREA* node = new_vme_node(task, addr, length, prot, flags);
     kmt->spin_lock(&task->vme_lock);
     bool success = insert_vme_node(task, node);
-    panic_on(success, "mmap failed");
+    panic_on(!success, "mmap failed");
     kmt->spin_unlock(&task->vme_lock);
     return node->vm_start;
 }
