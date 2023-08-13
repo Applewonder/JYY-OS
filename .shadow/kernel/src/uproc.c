@@ -710,7 +710,6 @@ void uproc_init() {
 
     task_t *t=pmm->alloc(sizeof(task_t));
     uproc_create(t, "initi");
-    t->pid = get_pid();
 }
 
 MODULE_DEF(uproc) = {
