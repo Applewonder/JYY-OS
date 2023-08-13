@@ -19,7 +19,7 @@ static int* cow_table;
 static PID_Q* p_head;
 static PID_Q* p_tail;
 
-//TODO enable syscall interrupt;
+//Warning! Code is not debugged!
 
 int uproc_create(task_t *task, const char *name) {
     TRACE_ENTRY;
