@@ -200,7 +200,9 @@ VME_AREA* find_vme_node(task_t *task, uintptr_t addr, uintptr_t end_addr) {
     VME_AREA* head = task->vm_area_head;
     VME_AREA* cur = head;
     while (cur != NULL) {
+        printf("cur: %p\n", cur);
         if ((uintptr_t)cur->vm_start <= addr && (uintptr_t)cur->vm_end >= end_addr) {
+
             return cur;
         } else if ((uintptr_t)cur->vm_end <= addr) {
             printf("A");
