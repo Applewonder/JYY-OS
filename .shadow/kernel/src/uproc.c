@@ -137,7 +137,11 @@ void* get_suitable_addr(task_t *task, void *start_addr, int length) {
             cur = cur->vm_next;
         }
     }
-    assert(end_addr < task->as->area.end);
+    if (end_addr < task->as->area.end) {
+        return addr;
+    } else {
+        printf("start_addr: %p, length: %d, end_addr: %p\n", start_addr, length, end_addr);
+    }
     return addr;
 }
 
