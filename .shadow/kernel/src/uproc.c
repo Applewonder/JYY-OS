@@ -22,6 +22,46 @@ static PID_Q* p_tail;
 
 //Warning! Code is not debugged!
 
+int get_pid() {
+    kmt->spin_lock(&pid_lock);
+    if (p_head == NULL) {
+        return 0;
+    } else {
+        int id = p_head->pid;
+        pmm->free(p_head);
+        p_head = p_head->next;
+        if (p_head == NULL) {
+            p_tail = NULL;
+        }
+        return id;
+    }
+    kmt->spin_unlock(&pid_lock);
+}
+
+void store_pid(int pid) {
+    kmt->spin_lock(&pid_lock);
+    PID_Q* new_node = pmm->alloc(sizeof(PID_Q));
+    new_node->pid = pid;
+    new_node->next = NULL;
+    if (p_head == NULL) {
+        panic_on(p_tail != NULL, "pid queue error");
+        p_head = new_node;
+        p_tail = new_node;
+    } else {
+        p_tail->next = new_node;
+        p_tail = new_node;
+    }
+    kmt->spin_unlock(&pid_lock);
+}
+
+int new_pid() {
+    if (task_cnt == 32768) {
+        return get_pid();
+    } else {
+       return task_cnt++;
+    }
+}
+
 int uproc_create(task_t *task, const char *name) {
     TRACE_ENTRY;
     kmt->spin_lock(&task_init_lock);
@@ -37,7 +77,7 @@ int uproc_create(task_t *task, const char *name) {
     kmt->spin_init(&task->mp_lock, name);
     task->block = false;
     task->is_running = false;
-    task->pid = task_cnt;
+    task->pid = new_pid();
     task->ppid = 0;
     task->vm_area_head = NULL;
     task->vm_area_tail = NULL;
@@ -46,7 +86,7 @@ int uproc_create(task_t *task, const char *name) {
     task->retstate = 0;
     task->killed = false;
     task->nested_interrupt = 0;
-    task_list[task_cnt++] = task;
+    task_list[task->pid] = task;
     kmt->spin_unlock(&task_init_lock);
     TRACE_EXIT;
     return 0;
@@ -434,46 +474,6 @@ void fork_coppying_new_mapped_pages(task_t *task, task_t *new_task) {
     kmt->spin_unlock(&task->mp_lock);
 }
 
-int get_pid() {
-    kmt->spin_lock(&pid_lock);
-    if (p_head == NULL) {
-        return 0;
-    } else {
-        int id = p_head->pid;
-        pmm->free(p_head);
-        p_head = p_head->next;
-        if (p_head == NULL) {
-            p_tail = NULL;
-        }
-        return id;
-    }
-    kmt->spin_unlock(&pid_lock);
-}
-
-void store_pid(int pid) {
-    kmt->spin_lock(&pid_lock);
-    PID_Q* new_node = pmm->alloc(sizeof(PID_Q));
-    new_node->pid = pid;
-    new_node->next = NULL;
-    if (p_head == NULL) {
-        panic_on(p_tail != NULL, "pid queue error");
-        p_head = new_node;
-        p_tail = new_node;
-    } else {
-        p_tail->next = new_node;
-        p_tail = new_node;
-    }
-    kmt->spin_unlock(&pid_lock);
-}
-
-int new_pid() {
-    if (task_cnt == 32768) {
-        return get_pid();
-    } else {
-       return task_cnt++;
-    }
-}
-
 int kfork(task_t *task) {
     task_t* new_task = pmm->alloc(sizeof(task_t)); 
     
@@ -694,6 +694,8 @@ void uproc_init() {
 
     cow_table = (int*)pmm->alloc(pmsize * sizeof(int));
     memset(cow_table, 0, pmsize * sizeof(int));
+
+    task_cnt = 1;
 
     task_t *t=pmm->alloc(sizeof(task_t));
     uproc_create(t, "initi");
