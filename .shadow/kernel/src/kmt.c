@@ -167,8 +167,8 @@ int kmt_create(task_t *task, const char *name, void (*entry)(void *arg), void *a
 
 void kmt_teardown(task_t *task) {
     kmt_spin_lock(&task_init_lock);
-    int pid = task->pid;
-    task_list[pid] = task_list[--task_cnt];
+    // int pid = task->pid;
+    // task_list[pid] = task_list[--task_cnt];
     kmt_spin_unlock(&task_init_lock);
 }
 
