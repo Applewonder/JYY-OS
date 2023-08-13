@@ -250,7 +250,7 @@ Context* kmt_schedule(Event ev, Context *c) {
     if (!fine_task) {
         ret = cpu_list[cpu_id].idle_task->context[0];
     }
-    // panic_on(ret == NULL && !fine_task, "No context to schedule");
+    panic_on(ret == NULL && !fine_task, "No context to schedule");
     return ret;
 }
 
