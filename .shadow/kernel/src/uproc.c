@@ -73,6 +73,7 @@ int uproc_create(task_t *task, const char *name) {
     task->as = pmm->alloc(sizeof(AddrSpace));
     protect(task->as);
     task->context[0] = ucontext(task->as, (Area) {(void *) task->stack, (void *) (task->stack + STACK_SIZE)}, task->as->area.start);
+    task->context[1] = pmm->alloc(sizeof(Context));
     kmt->spin_init(&task->status, name);
     kmt->spin_init(&task->vme_lock, name);
     kmt->spin_init(&task->mp_lock, name);
