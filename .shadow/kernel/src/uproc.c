@@ -212,6 +212,7 @@ VME_AREA* find_vme_node(task_t *task, uintptr_t addr, uintptr_t end_addr) {
         }
         break;
     }
+    assert(cur != NULL);
     return NULL;
 }
 
