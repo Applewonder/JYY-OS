@@ -78,7 +78,7 @@ int uproc_create(task_t *task, const char *name) {
     kmt->spin_init(&task->mp_lock, name);
     task->block = false;
     task->is_running = false;
-    task->pid = new_pid();
+    task->pid = 0;
     task->ppid = 0;
     task->vm_area_head = NULL;
     task->vm_area_tail = NULL;
@@ -87,7 +87,6 @@ int uproc_create(task_t *task, const char *name) {
     task->retstate = 0;
     task->killed = false;
     task->nested_interrupt = 0;
-    task_list[task->pid] = task;
     kmt->spin_unlock(&task_init_lock);
     TRACE_EXIT;
     return 0;
@@ -483,16 +482,17 @@ void fork_coppying_new_mapped_pages(task_t *task, task_t *new_task) {
 }
 
 int kfork(task_t *task) {
+    // iset(false);
     task_t* new_task = pmm->alloc(sizeof(task_t)); 
 
-    strcpy(new_task->name, task->name);
+    // strcpy(new_task->name, task->name);
     
-    uproc_create(new_task, strcat(new_task->name, "_fork"));
+    uproc_create(new_task, "_fork");
 
     uintptr_t rsp0 = new_task->context[0]->rsp0;
     void* cr3 = new_task->context[0]->cr3;
 
-    new_task->context[0] = task->context[0];
+    *new_task->context[0] = *task->context[0];
     new_task->context[0]->rsp0 = rsp0;
     new_task->context[0]->cr3 = cr3;
     new_task->context[0]->GPRx = 0;
@@ -504,7 +504,7 @@ int kfork(task_t *task) {
 
     fork_coppying_new_mapped_pages(task, new_task);
     // kmt->spin_unlock(&task->vme_lock);
-    memcpy(new_task->stack, task->stack, STACK_SIZE);
+    // memcpy(new_task->stack, task->stack, STACK_SIZE);
 
     new_task->ppid = task->pid;
     int new_id = new_pid();
@@ -512,6 +512,7 @@ int kfork(task_t *task) {
     kmt->spin_lock(&task_init_lock);
     task_list[new_id] = new_task;
     kmt->spin_unlock(&task_init_lock);
+    // iset(true);
     return new_id;
 }
 
@@ -609,6 +610,9 @@ Context* page_fault(Event ev, Context *c) {
     AddrSpace *as = task->as;
     void *pa=pmm->alloc(as->pgsize);
     void *va=(void *)(ev.ref & ~(as->pgsize-1L));
+    if (!IN_RANGE(va, as->area)) {
+        return NULL;
+    }
     if(va==as->area.start){
         //TODO: copy the code from the init process
         memcpy(pa,_init,_init_len);
@@ -641,13 +645,15 @@ Context* page_fault(Event ev, Context *c) {
         }
         kmt->spin_unlock(&task->vme_lock);
     }
-    return NULL;
+    return c;
 }
 
 Context *syscall(Event e,Context *c){
+    task_t *current = cpu_list[cpu_current()].current_task;
+    current->nested_interrupt ++;
     panic_on(ienabled()==1,"cli");
     iset(true);
-    task_t *current=cpu_list[cpu_current()].current_task;
+    
     switch(c->GPRx){
         case SYS_kputc: {
             c->GPRx = kputc(current,c->GPR1); 
@@ -689,7 +695,8 @@ Context *syscall(Event e,Context *c){
     }
     panic_on(ienabled()==0,"cli");
     iset(false);
-    return NULL;
+    current->nested_interrupt --;
+    return c;
 }
 
 void uproc_init() {
@@ -710,6 +717,8 @@ void uproc_init() {
 
     task_t *t=pmm->alloc(sizeof(task_t));
     uproc_create(t, "initi");
+    t->pid = new_pid();
+    task_list[t->pid] = t;
 }
 
 MODULE_DEF(uproc) = {
