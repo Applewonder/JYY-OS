@@ -609,6 +609,9 @@ Context* page_fault(Event ev, Context *c) {
     AddrSpace *as = task->as;
     void *pa=pmm->alloc(as->pgsize);
     void *va=(void *)(ev.ref & ~(as->pgsize-1L));
+    if (!IN_RANGE(va, as->area)) {
+        return NULL;
+    }
     if(va==as->area.start){
         //TODO: copy the code from the init process
         memcpy(pa,_init,_init_len);
