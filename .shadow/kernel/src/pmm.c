@@ -57,8 +57,8 @@ static void kfree(void *ptr) {
 #ifndef TEST
 // 框架代码中的 pmm_init (在 AbstractMachine 中运行)
 static void pmm_init() {
-  // uintptr_t pmsize = ((uintptr_t)heap.end - (uintptr_t)heap.start);
-  // printf("Got %d MiB heap: [%p, %p)\n", pmsize >> 20, heap.start, heap.end);
+  uintptr_t pmsize = ((uintptr_t)heap.end - (uintptr_t)heap.start);
+  printf("Got %d MiB heap: [%p, %p)\n", pmsize >> 20, heap.start, heap.end);
   void* align_begin_address = (void*)align_to((uintptr_t)heap.start, 24);
   bbma_init(align_begin_address, heap.end);
   slab_init();
